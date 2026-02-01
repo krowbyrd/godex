@@ -6,8 +6,8 @@
 // @match        *://chat.openai.com/*
 // @match        *://chatgpt.com/*
 // @match        file://*/*
-// @downloadURL  https://krowbyrd.github.io/ykltG/assets/sigil_variant_curves_audio_clamped.user.js
-// @updateURL    https://krowbyrd.github.io/ykltG/assets/sigil_variant_curves_audio_clamped.user.js
+// @downloadURL  https://krowbyrd.github.io/godex/assets/sigil_variant_curves_audio_clamped.user.js
+// @updateURL    https://krowbyrd.github.io/godex/assets/sigil_variant_curves_audio_clamped.user.js
 // @run-at       document-end
 // @grant        none
 // ==/UserScript==
