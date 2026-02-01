@@ -698,6 +698,55 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
 }
 </style>
 
+
+<style>
+/* Site Sigil (in-page overlay, no userscript needed) */
+#paperSiteSigil{
+  position: fixed;
+  right: 24px;
+  bottom: 82px;
+  width: 96px;
+  height: auto;
+  opacity: 0.92;
+  pointer-events: none;
+  z-index: 9996;
+  transform-origin: 50% 50%;
+  will-change: transform, filter, opacity;
+}
+#paperSigilDock{
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 9999;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(16,18,16,0.72);
+  border: 1px solid rgba(127,191,154,0.22);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 26px rgba(0,0,0,0.35);
+  font-family: system-ui, Segoe UI, sans-serif;
+  color: rgba(231,239,233,0.95);
+}
+#paperSigilDock .dock-handle{ cursor: grab; user-select:none; }
+#paperSigilDock .dock-handle:active{ cursor: grabbing; }
+#paperSigilDock button{
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.04);
+  color:rgba(231,239,233,0.95);
+  padding:6px 10px;
+  border-radius:10px;
+  font-size:12px;
+}
+#paperSigilDock input{
+  width: 160px;
+  font-size: 12px;
+}
+</style>
+
 </head>
 <body>
 
@@ -1867,6 +1916,179 @@ Continuity ensures:
 })();
 </script>
 
+
+<img id="paperSiteSigil" alt="Paper Sigil" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAAElBMVEUAAAB/f3+hoaGZmZmjo6O3t7dV7p+4AAAAAXRSTlMAQObYZgAAADlJREFUGJVjYIACJiYm+VmJgUQgQ0AiGhmZWSkAVAxCyoKEQBUnMYGBkYGRcAMVYMkDFhkBQAAnbgNEbGsyyoAAAAASUVORK5CYII=" />
+<div id="paperSigilDock" class="dock-draggable" aria-label="Site sigil controls">
+  <div class="dock-handle">
+    <div style="font-weight:650; letter-spacing:.2px;">Site Sigil</div>
+    <div style="opacity:.8; font-size:11px; margin-top:2px;">variant + shelf reactive</div>
+  </div>
+  <button id="paperSiteSigilToggle">Sigil: On</button>
+  <input type="file" id="paperSiteSigilUpload" accept="image/*" />
+</div>
+
+
+<script>
+(function(){
+  const SIGIL_KEY = "paperSiteSigilImage";
+  const SIGIL_POS_KEY = "dockPos_siteSigilDock";
+  const onKey = "paperSiteSigilOn";
+  const img = () => document.getElementById("paperSiteSigil");
+  const btn = () => document.getElementById("paperSiteSigilToggle");
+  const up  = () => document.getElementById("paperSiteSigilUpload");
+  const dock= () => document.getElementById("paperSigilDock");
+
+  const VARIANT_RGB = {
+    big:"159,211,255", editor:"127,191,154", tiny:"230,209,138",
+    archivist:"191,167,201", executor:"255,159,127", auditor:"255,111,111", translator:"127,209,209"
+  };
+  const SHELF_TINT = { live:"127,191,154", stable:"191,191,191", archive:"107,90,69" };
+  const CURVE = {
+    big:{p:5200,a:0.030}, editor:{p:4300,a:0.022}, tiny:{p:3200,a:0.016},
+    archivist:{p:5600,a:0.018}, executor:{p:1900,a:0.028}, auditor:{p:2400,a:0.024}, translator:{p:3600,a:0.020}
+  };
+
+  function rgba(rgb,a){ return `rgba(${rgb},${a})`; }
+  function getVariant(){ return (document.documentElement.dataset.paperVariant||"editor").toLowerCase(); }
+  function getShelf(){ return (document.documentElement.dataset.paperShelf||"live").toLowerCase(); }
+
+  let enabled = (localStorage.getItem(onKey) ?? "1") === "1";
+  function setEnabled(v){
+    enabled = v;
+    localStorage.setItem(onKey, v ? "1" : "0");
+    const i = img();
+    if (i) i.style.display = enabled ? "block" : "none";
+    const b = btn();
+    if (b) b.textContent = enabled ? "Sigil: On" : "Sigil: Off";
+    applyStyle();
+  }
+
+  function applyStyle(){
+    const v = getVariant();
+    const s = getShelf();
+    const rgbV = VARIANT_RGB[v] || VARIANT_RGB.editor;
+    const rgbS = SHELF_TINT[s] || SHELF_TINT.live;
+    const i = img();
+    if (!i) return;
+    i.style.filter = `drop-shadow(0 0 12px ${rgba(rgbV,0.55)}) drop-shadow(0 0 22px ${rgba(rgbS,0.14)})`;
+    const b = btn();
+    if (b){
+      b.style.borderColor = enabled ? rgba(rgbV,0.45) : "rgba(255,255,255,0.12)";
+      b.style.boxShadow = enabled ? `0 0 16px ${rgba(rgbV,0.18)}` : "none";
+    }
+  }
+
+  function hookUpload(){
+    const u = up();
+    if (!u) return;
+    u.addEventListener("change",(e)=>{
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = (ev)=>{
+        const dataUrl = ev.target && ev.target.result;
+        if (typeof dataUrl === "string"){
+          localStorage.setItem(SIGIL_KEY, dataUrl);
+          const i = img(); if (i) i.src = dataUrl;
+          applyStyle();
+        }
+      };
+      r.readAsDataURL(f);
+    });
+  }
+
+  function restore(){
+    const stored = localStorage.getItem(SIGIL_KEY);
+    const i = img();
+    if (i && stored) i.src = stored;
+  }
+
+  const t0 = performance.now();
+  function tick(now){
+    const v = getVariant();
+    const c = CURVE[v] || CURVE.editor;
+    const phase = ((now - t0) % c.p) / c.p;
+    const breath = Math.sin(phase * Math.PI * 2) * 0.5 + 0.5;
+    const scale = 1.0 + (breath * 2 - 1) * c.a;
+    const i = img();
+    if (i && enabled){
+      i.style.transform = `scale(${scale.toFixed(4)})`;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function hookToggle(){
+    const b = btn();
+    if (!b) return;
+    b.addEventListener("click", ()=> setEnabled(!enabled));
+  }
+
+  const obs = new MutationObserver(applyStyle);
+  obs.observe(document.documentElement, {attributes:true, attributeFilter:["data-paper-variant","data-paper-shelf"]});
+
+  function makeDockDraggable(){
+    const el = dock(); if (!el) return;
+    const handle = el.querySelector(".dock-handle") || el;
+
+    try{
+      const saved = JSON.parse(localStorage.getItem(SIGIL_POS_KEY) || "null");
+      if (saved && typeof saved.x==="number" && typeof saved.y==="number"){
+        el.style.left = saved.x + "px";
+        el.style.top = saved.y + "px";
+        el.style.right = "auto";
+        el.style.bottom = "auto";
+      }
+    }catch(e){}
+
+    let dragging=false, sx=0, sy=0, sl=0, st=0;
+    function down(e){
+      if (e.button !== undefined && e.button !== 0) return;
+      dragging=true;
+      const r = el.getBoundingClientRect();
+      sl=r.left; st=r.top;
+      sx=(e.touches?e.touches[0].clientX:e.clientX);
+      sy=(e.touches?e.touches[0].clientY:e.clientY);
+      el.style.left=sl+"px"; el.style.top=st+"px";
+      el.style.right="auto"; el.style.bottom="auto";
+      e.preventDefault();
+    }
+    function move(e){
+      if(!dragging) return;
+      const x=(e.touches?e.touches[0].clientX:e.clientX);
+      const y=(e.touches?e.touches[0].clientY:e.clientY);
+      let nx=sl+(x-sx), ny=st+(y-sy);
+      const maxX=Math.max(8, window.innerWidth - el.offsetWidth - 8);
+      const maxY=Math.max(8, window.innerHeight - el.offsetHeight - 8);
+      nx=Math.min(maxX, Math.max(8,nx));
+      ny=Math.min(maxY, Math.max(8,ny));
+      el.style.left=nx+"px"; el.style.top=ny+"px";
+      localStorage.setItem(SIGIL_POS_KEY, JSON.stringify({x:nx,y:ny}));
+      e.preventDefault();
+    }
+    function up(){ dragging=false; }
+    handle.addEventListener("mousedown", down, {passive:false});
+    window.addEventListener("mousemove", move, {passive:false});
+    window.addEventListener("mouseup", up);
+    handle.addEventListener("touchstart", down, {passive:false});
+    window.addEventListener("touchmove", move, {passive:false});
+    window.addEventListener("touchend", up);
+  }
+
+  function init(){
+    restore();
+    setEnabled(enabled);
+    hookUpload();
+    hookToggle();
+    makeDockDraggable();
+    applyStyle();
+    requestAnimationFrame(tick);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+</script>
+
 </body>
 </html>
 ```
@@ -2567,6 +2789,55 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
 .shelfBtn.active{
   background:rgba(255,255,255,0.08);
   border-color:rgba(255,255,255,0.18);
+}
+</style>
+
+
+<style>
+/* Site Sigil (in-page overlay, no userscript needed) */
+#paperSiteSigil{
+  position: fixed;
+  right: 24px;
+  bottom: 82px;
+  width: 96px;
+  height: auto;
+  opacity: 0.92;
+  pointer-events: none;
+  z-index: 9996;
+  transform-origin: 50% 50%;
+  will-change: transform, filter, opacity;
+}
+#paperSigilDock{
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 9999;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(16,18,16,0.72);
+  border: 1px solid rgba(127,191,154,0.22);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 26px rgba(0,0,0,0.35);
+  font-family: system-ui, Segoe UI, sans-serif;
+  color: rgba(231,239,233,0.95);
+}
+#paperSigilDock .dock-handle{ cursor: grab; user-select:none; }
+#paperSigilDock .dock-handle:active{ cursor: grabbing; }
+#paperSigilDock button{
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.04);
+  color:rgba(231,239,233,0.95);
+  padding:6px 10px;
+  border-radius:10px;
+  font-size:12px;
+}
+#paperSigilDock input{
+  width: 160px;
+  font-size: 12px;
 }
 </style>
 
@@ -3647,6 +3918,179 @@ Continuity ensures:
     detectShelf();
     window.addEventListener("scroll", ()=> detectShelf(), {passive:true});
     window.addEventListener("resize", ()=> detectShelf(), {passive:true});
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
+  else init();
+})();
+</script>
+
+
+<img id="paperSiteSigil" alt="Paper Sigil" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAAElBMVEUAAAB/f3+hoaGZmZmjo6O3t7dV7p+4AAAAAXRSTlMAQObYZgAAADlJREFUGJVjYIACJiYm+VmJgUQgQ0AiGhmZWSkAVAxCyoKEQBUnMYGBkYGRcAMVYMkDFhkBQAAnbgNEbGsyyoAAAAASUVORK5CYII=" />
+<div id="paperSigilDock" class="dock-draggable" aria-label="Site sigil controls">
+  <div class="dock-handle">
+    <div style="font-weight:650; letter-spacing:.2px;">Site Sigil</div>
+    <div style="opacity:.8; font-size:11px; margin-top:2px;">variant + shelf reactive</div>
+  </div>
+  <button id="paperSiteSigilToggle">Sigil: On</button>
+  <input type="file" id="paperSiteSigilUpload" accept="image/*" />
+</div>
+
+
+<script>
+(function(){
+  const SIGIL_KEY = "paperSiteSigilImage";
+  const SIGIL_POS_KEY = "dockPos_siteSigilDock";
+  const onKey = "paperSiteSigilOn";
+  const img = () => document.getElementById("paperSiteSigil");
+  const btn = () => document.getElementById("paperSiteSigilToggle");
+  const up  = () => document.getElementById("paperSiteSigilUpload");
+  const dock= () => document.getElementById("paperSigilDock");
+
+  const VARIANT_RGB = {
+    big:"159,211,255", editor:"127,191,154", tiny:"230,209,138",
+    archivist:"191,167,201", executor:"255,159,127", auditor:"255,111,111", translator:"127,209,209"
+  };
+  const SHELF_TINT = { live:"127,191,154", stable:"191,191,191", archive:"107,90,69" };
+  const CURVE = {
+    big:{p:5200,a:0.030}, editor:{p:4300,a:0.022}, tiny:{p:3200,a:0.016},
+    archivist:{p:5600,a:0.018}, executor:{p:1900,a:0.028}, auditor:{p:2400,a:0.024}, translator:{p:3600,a:0.020}
+  };
+
+  function rgba(rgb,a){ return `rgba(${rgb},${a})`; }
+  function getVariant(){ return (document.documentElement.dataset.paperVariant||"editor").toLowerCase(); }
+  function getShelf(){ return (document.documentElement.dataset.paperShelf||"live").toLowerCase(); }
+
+  let enabled = (localStorage.getItem(onKey) ?? "1") === "1";
+  function setEnabled(v){
+    enabled = v;
+    localStorage.setItem(onKey, v ? "1" : "0");
+    const i = img();
+    if (i) i.style.display = enabled ? "block" : "none";
+    const b = btn();
+    if (b) b.textContent = enabled ? "Sigil: On" : "Sigil: Off";
+    applyStyle();
+  }
+
+  function applyStyle(){
+    const v = getVariant();
+    const s = getShelf();
+    const rgbV = VARIANT_RGB[v] || VARIANT_RGB.editor;
+    const rgbS = SHELF_TINT[s] || SHELF_TINT.live;
+    const i = img();
+    if (!i) return;
+    i.style.filter = `drop-shadow(0 0 12px ${rgba(rgbV,0.55)}) drop-shadow(0 0 22px ${rgba(rgbS,0.14)})`;
+    const b = btn();
+    if (b){
+      b.style.borderColor = enabled ? rgba(rgbV,0.45) : "rgba(255,255,255,0.12)";
+      b.style.boxShadow = enabled ? `0 0 16px ${rgba(rgbV,0.18)}` : "none";
+    }
+  }
+
+  function hookUpload(){
+    const u = up();
+    if (!u) return;
+    u.addEventListener("change",(e)=>{
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = (ev)=>{
+        const dataUrl = ev.target && ev.target.result;
+        if (typeof dataUrl === "string"){
+          localStorage.setItem(SIGIL_KEY, dataUrl);
+          const i = img(); if (i) i.src = dataUrl;
+          applyStyle();
+        }
+      };
+      r.readAsDataURL(f);
+    });
+  }
+
+  function restore(){
+    const stored = localStorage.getItem(SIGIL_KEY);
+    const i = img();
+    if (i && stored) i.src = stored;
+  }
+
+  const t0 = performance.now();
+  function tick(now){
+    const v = getVariant();
+    const c = CURVE[v] || CURVE.editor;
+    const phase = ((now - t0) % c.p) / c.p;
+    const breath = Math.sin(phase * Math.PI * 2) * 0.5 + 0.5;
+    const scale = 1.0 + (breath * 2 - 1) * c.a;
+    const i = img();
+    if (i && enabled){
+      i.style.transform = `scale(${scale.toFixed(4)})`;
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function hookToggle(){
+    const b = btn();
+    if (!b) return;
+    b.addEventListener("click", ()=> setEnabled(!enabled));
+  }
+
+  const obs = new MutationObserver(applyStyle);
+  obs.observe(document.documentElement, {attributes:true, attributeFilter:["data-paper-variant","data-paper-shelf"]});
+
+  function makeDockDraggable(){
+    const el = dock(); if (!el) return;
+    const handle = el.querySelector(".dock-handle") || el;
+
+    try{
+      const saved = JSON.parse(localStorage.getItem(SIGIL_POS_KEY) || "null");
+      if (saved && typeof saved.x==="number" && typeof saved.y==="number"){
+        el.style.left = saved.x + "px";
+        el.style.top = saved.y + "px";
+        el.style.right = "auto";
+        el.style.bottom = "auto";
+      }
+    }catch(e){}
+
+    let dragging=false, sx=0, sy=0, sl=0, st=0;
+    function down(e){
+      if (e.button !== undefined && e.button !== 0) return;
+      dragging=true;
+      const r = el.getBoundingClientRect();
+      sl=r.left; st=r.top;
+      sx=(e.touches?e.touches[0].clientX:e.clientX);
+      sy=(e.touches?e.touches[0].clientY:e.clientY);
+      el.style.left=sl+"px"; el.style.top=st+"px";
+      el.style.right="auto"; el.style.bottom="auto";
+      e.preventDefault();
+    }
+    function move(e){
+      if(!dragging) return;
+      const x=(e.touches?e.touches[0].clientX:e.clientX);
+      const y=(e.touches?e.touches[0].clientY:e.clientY);
+      let nx=sl+(x-sx), ny=st+(y-sy);
+      const maxX=Math.max(8, window.innerWidth - el.offsetWidth - 8);
+      const maxY=Math.max(8, window.innerHeight - el.offsetHeight - 8);
+      nx=Math.min(maxX, Math.max(8,nx));
+      ny=Math.min(maxY, Math.max(8,ny));
+      el.style.left=nx+"px"; el.style.top=ny+"px";
+      localStorage.setItem(SIGIL_POS_KEY, JSON.stringify({x:nx,y:ny}));
+      e.preventDefault();
+    }
+    function up(){ dragging=false; }
+    handle.addEventListener("mousedown", down, {passive:false});
+    window.addEventListener("mousemove", move, {passive:false});
+    window.addEventListener("mouseup", up);
+    handle.addEventListener("touchstart", down, {passive:false});
+    window.addEventListener("touchmove", move, {passive:false});
+    window.addEventListener("touchend", up);
+  }
+
+  function init(){
+    restore();
+    setEnabled(enabled);
+    hookUpload();
+    hookToggle();
+    makeDockDraggable();
+    applyStyle();
+    requestAnimationFrame(tick);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
