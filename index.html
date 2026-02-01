@@ -702,6 +702,7 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
 <style>
 /* Site Sigil (in-page overlay, no userscript needed) */
 #paperSiteSigil{
+  display: block;
   position: fixed;
   right: 24px;
   bottom: 82px;
@@ -714,10 +715,11 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
   will-change: transform, filter, opacity;
 }
 #paperSigilDock{
+  pointer-events: auto;
   position: fixed;
   right: 14px;
   bottom: 14px;
-  z-index: 9999;
+  z-index: 2147483647;
   display:flex;
   gap:10px;
   align-items:center;
@@ -1589,6 +1591,7 @@ Continuity ensures:
     }
   }
 
+  window.__paperSiteSigilBind = hookToggle;
   function init(){
     const saved = localStorage.getItem(KEY) || "editor";
     setMode(saved);
@@ -1895,6 +1898,7 @@ Continuity ensures:
     document.documentElement.setAttribute("data-paper-shelf", shelf);
   }
 
+  window.__paperSiteSigilBind = hookToggle;
   function init(){
     // Draggable docks
     makeDraggable(document.getElementById("variantDock"), "dockPos_variantDock");
@@ -2074,11 +2078,14 @@ Continuity ensures:
     window.addEventListener("touchend", up);
   }
 
+  window.__paperSiteSigilBind = hookToggle;
   function init(){
     restore();
     setEnabled(enabled);
     hookUpload();
     hookToggle();
+    const b = document.getElementById('paperSiteSigilToggle');
+    if (b && b.dataset) b.dataset.paperBound = '1';
     makeDockDraggable();
     applyStyle();
     requestAnimationFrame(tick);
@@ -2086,6 +2093,83 @@ Continuity ensures:
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
+})();
+</script>
+
+
+<script id="paperFirstClickAudio">
+(function(){
+  let armed = true;
+  function tryStart(){
+    if (!armed) return;
+    armed = false;
+    const audio = document.getElementById("paperAudioEl");
+    const btn = document.getElementById("paperAudioToggle");
+    if (!audio) return;
+
+    if (!audio.src) audio.src = "04-Unatco.mp3";
+    audio.volume = Math.max(0, Math.min(1, audio.volume || 0.08));
+
+    audio.play().then(()=>{
+      if (btn) btn.textContent = "Audio: On";
+    }).catch(()=>{
+      armed = true; // try again on next click if blocked
+    });
+  }
+  window.addEventListener("pointerdown", tryStart, { passive:true });
+})();
+</script>
+
+
+<script id="paperAudioHealth">
+(function(){
+  async function check(){
+    try{
+      const r = await fetch("04-Unatco.mp3", { method:"HEAD" });
+      if (!r.ok) showHint();
+    }catch(e){}
+  }
+  function showHint(){
+    if (document.getElementById("paperAudioHint")) return;
+    const d = document.createElement("div");
+    d.id = "paperAudioHint";
+    d.style.position = "fixed";
+    d.style.left = "14px";
+    d.style.bottom = "64px";
+    d.style.zIndex = "10000";
+    d.style.padding = "8px 10px";
+    d.style.borderRadius = "12px";
+    d.style.background = "rgba(32,18,18,0.78)";
+    d.style.border = "1px solid rgba(255,127,127,0.28)";
+    d.style.backdropFilter = "blur(10px)";
+    d.style.color = "rgba(250,240,240,0.95)";
+    d.style.fontFamily = "system-ui, Segoe UI, sans-serif";
+    d.style.fontSize = "12px";
+    d.innerHTML = "Audio file not found: <code style='opacity:.9'>04-Unatco.mp3</code> (check name/case + repo root).";
+    document.body.appendChild(d);
+    setTimeout(()=> d.remove(), 12000);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", check);
+  else check();
+})();
+</script>
+
+
+<script id="paperSigilRebind">
+(function(){
+  let tries = 0;
+  const max = 10;
+  const timer = setInterval(()=>{
+    tries++;
+    const b = document.getElementById("paperSiteSigilToggle");
+    const marker = b && b.dataset && b.dataset.paperBound;
+    if (b && !marker && window.__paperSiteSigilBind){
+      window.__paperSiteSigilBind();
+      b.dataset.paperBound = "1";
+      clearInterval(timer);
+    }
+    if (tries >= max) clearInterval(timer);
+  }, 400);
 })();
 </script>
 
@@ -2796,6 +2880,7 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
 <style>
 /* Site Sigil (in-page overlay, no userscript needed) */
 #paperSiteSigil{
+  display: block;
   position: fixed;
   right: 24px;
   bottom: 82px;
@@ -2808,10 +2893,11 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
   will-change: transform, filter, opacity;
 }
 #paperSigilDock{
+  pointer-events: auto;
   position: fixed;
   right: 14px;
   bottom: 14px;
-  z-index: 9999;
+  z-index: 2147483647;
   display:flex;
   gap:10px;
   align-items:center;
@@ -3598,6 +3684,7 @@ Continuity ensures:
     }
   }
 
+  window.__paperSiteSigilBind = hookToggle;
   function init(){
     const saved = localStorage.getItem(KEY) || "editor";
     setMode(saved);
@@ -3904,6 +3991,7 @@ Continuity ensures:
     document.documentElement.setAttribute("data-paper-shelf", shelf);
   }
 
+  window.__paperSiteSigilBind = hookToggle;
   function init(){
     // Draggable docks
     makeDraggable(document.getElementById("variantDock"), "dockPos_variantDock");
@@ -3926,7 +4014,7 @@ Continuity ensures:
 </script>
 
 
-<img id="paperSiteSigil" alt="Paper Sigil" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAAElBMVEUAAAB/f3+hoaGZmZmjo6O3t7dV7p+4AAAAAXRSTlMAQObYZgAAADlJREFUGJVjYIACJiYm+VmJgUQgQ0AiGhmZWSkAVAxCyoKEQBUnMYGBkYGRcAMVYMkDFhkBQAAnbgNEbGsyyoAAAAASUVORK5CYII=" />
+<img id="paperSiteSigil" ... src="assets/sigil.png" /> src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAMAAAC67D+PAAAAElBMVEUAAAB/f3+hoaGZmZmjo6O3t7dV7p+4AAAAAXRSTlMAQObYZgAAADlJREFUGJVjYIACJiYm+VmJgUQgQ0AiGhmZWSkAVAxCyoKEQBUnMYGBkYGRcAMVYMkDFhkBQAAnbgNEbGsyyoAAAAASUVORK5CYII=" />
 <div id="paperSigilDock" class="dock-draggable" aria-label="Site sigil controls">
   <div class="dock-handle">
     <div style="font-weight:650; letter-spacing:.2px;">Site Sigil</div>
@@ -4083,11 +4171,14 @@ Continuity ensures:
     window.addEventListener("touchend", up);
   }
 
+  window.__paperSiteSigilBind = hookToggle;
   function init(){
     restore();
     setEnabled(enabled);
     hookUpload();
     hookToggle();
+    const b = document.getElementById('paperSiteSigilToggle');
+    if (b && b.dataset) b.dataset.paperBound = '1';
     makeDockDraggable();
     applyStyle();
     requestAnimationFrame(tick);
@@ -4095,6 +4186,83 @@ Continuity ensures:
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
+})();
+</script>
+
+
+<script id="paperFirstClickAudio">
+(function(){
+  let armed = true;
+  function tryStart(){
+    if (!armed) return;
+    armed = false;
+    const audio = document.getElementById("paperAudioEl");
+    const btn = document.getElementById("paperAudioToggle");
+    if (!audio) return;
+
+    if (!audio.src) audio.src = "04-Unatco.mp3";
+    audio.volume = Math.max(0, Math.min(1, audio.volume || 0.08));
+
+    audio.play().then(()=>{
+      if (btn) btn.textContent = "Audio: On";
+    }).catch(()=>{
+      armed = true; // try again on next click if blocked
+    });
+  }
+  window.addEventListener("pointerdown", tryStart, { passive:true });
+})();
+</script>
+
+
+<script id="paperAudioHealth">
+(function(){
+  async function check(){
+    try{
+      const r = await fetch("04-Unatco.mp3", { method:"HEAD" });
+      if (!r.ok) showHint();
+    }catch(e){}
+  }
+  function showHint(){
+    if (document.getElementById("paperAudioHint")) return;
+    const d = document.createElement("div");
+    d.id = "paperAudioHint";
+    d.style.position = "fixed";
+    d.style.left = "14px";
+    d.style.bottom = "64px";
+    d.style.zIndex = "10000";
+    d.style.padding = "8px 10px";
+    d.style.borderRadius = "12px";
+    d.style.background = "rgba(32,18,18,0.78)";
+    d.style.border = "1px solid rgba(255,127,127,0.28)";
+    d.style.backdropFilter = "blur(10px)";
+    d.style.color = "rgba(250,240,240,0.95)";
+    d.style.fontFamily = "system-ui, Segoe UI, sans-serif";
+    d.style.fontSize = "12px";
+    d.innerHTML = "Audio file not found: <code style='opacity:.9'>04-Unatco.mp3</code> (check name/case + repo root).";
+    document.body.appendChild(d);
+    setTimeout(()=> d.remove(), 12000);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", check);
+  else check();
+})();
+</script>
+
+
+<script id="paperSigilRebind">
+(function(){
+  let tries = 0;
+  const max = 10;
+  const timer = setInterval(()=>{
+    tries++;
+    const b = document.getElementById("paperSiteSigilToggle");
+    const marker = b && b.dataset && b.dataset.paperBound;
+    if (b && !marker && window.__paperSiteSigilBind){
+      window.__paperSiteSigilBind();
+      b.dataset.paperBound = "1";
+      clearInterval(timer);
+    }
+    if (tries >= max) clearInterval(timer);
+  }, 400);
 })();
 </script>
 
