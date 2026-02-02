@@ -1,5 +1,4 @@
-# ykltG — Paper Codex (GitHub Pages)
-
+# The Paper: principles marigins.
 This repo hosts the Master Codex HTML and supporting assets.
 Site URL:
 https://krowbyrd.github.io/godex/
