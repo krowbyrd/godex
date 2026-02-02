@@ -542,12 +542,23 @@ a:visited{ color: var(--accent2); }
   bottom: 18px;
   width: 36px;
   height: 36px;
-  padding: 0;
-  border: none;
-  background: transparent;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  -webkit-appearance: none;
+  appearance: none;
   cursor: pointer;
   z-index: 2147483645;
 }
+#yumToggle:focus, #yumToggle:focus-visible{
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 
 #yumToggle img{
   width: 100%;
@@ -580,6 +591,17 @@ a:visited{ color: var(--accent2); }
   border: none !important;
   box-shadow: none !important;
 }
+
+/* Kill any residual bottle container chrome */
+#yumToggle,
+#yumToggle::before,
+#yumToggle::after {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
 
 </style>
 
@@ -2343,8 +2365,6 @@ Continuity ensures:
 })();
 </script>
 </header>
-    <div class="hint pill" id="paperAudioHint">Load an audio file to enable playback.</div>
-
     <div class="row" style="display:flex; gap:8px; align-items:center; margin-top:8px;">
       
       
@@ -2360,10 +2380,6 @@ Continuity ensures:
 
 ;
 </script>
-
-<button id="yumToggle" class="idle" aria-label="Toggle Unatco">
-  <img src="yum.webp" alt="" />
-</button>
 
 <script>
 (function(){
@@ -2392,16 +2408,6 @@ Continuity ensures:
 })();
 </script>
 
-/* Kill any residual bottle container chrome */
-#yumToggle,
-#yumToggle::before,
-#yumToggle::after {
-  border: none !important;
-  outline: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-
 </body>
 </html>
+
