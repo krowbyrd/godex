@@ -1,4 +1,4 @@
-# Godex — Paper Codex (GitHub Pages)
+# ykltG — Paper Codex (GitHub Pages)
 
 This repo hosts the Master Codex HTML and supporting assets.
 
@@ -6,7 +6,7 @@ This repo hosts the Master Codex HTML and supporting assets.
 Enable Pages: Settings → Pages → Deploy from a branch → `main` / (root)
 
 Site URL:
-https://krowbyrd.github.io/godex
+https://krowbyrd.github.io/godex/
 
 ## Userscript (Sigil)
 Install:
