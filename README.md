@@ -1,4 +1,4 @@
-# The Paper: principles marigins.
+# The Paper: principles & margins.
 This repo hosts the Master Codex HTML and supporting assets.
 Site URL:
 https://krowbyrd.github.io/godex/
