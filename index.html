@@ -603,6 +603,22 @@ a:visited{ color: var(--accent2); }
 }
 
 
+
+/* === Codex: Operational Assumptions — bullet markers harden === */
+#operational-assumptions ul{
+  list-style: disc;
+  list-style-position: outside;
+  padding-left: 1.25rem;
+  margin: 0.65rem 0 1rem;
+}
+#operational-assumptions li{
+  display: list-item;
+  margin: 0.35rem 0;
+}
+#operational-assumptions li::marker{
+  color: var(--muted);
+}
+
 </style>
 
 <style>
@@ -925,6 +941,36 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
 /* Ensure Paper Site Sigil stays above variant menu */
 #paperSiteSigil{
   z-index: 10000;
+}
+</style>
+
+
+<style id="paper-music-clean">
+/* Music button — strip border & filler (ambient icon only) */
+#unatco-sigil{
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+#unatco-sigil::before,
+#unatco-sigil::after{
+  content: none !important;
+}
+#unatco-sigil img{
+  background: transparent !important;
+  box-shadow: none !important;
+}
+</style>
+
+
+<style id="paper-sigil-hide">
+/* Codex context: keep raw sigil image hidden (surprise layer) */
+#paperSiteSigil{
+  display: none !important;
+  visibility: hidden !important;
+  content-visibility: hidden;
 }
 </style>
 
@@ -2170,7 +2216,9 @@ Continuity ensures:
 </script>
 
 
-<img id="paperSiteSigil" src="assets/sigil.png" alt="Paper Sigil" />
+<template id="paper-sigil-template">
+  <img id="paperSiteSigil" data-src="assets/sigil.png" alt="Paper Sigil" />
+</template>
 
 <div id="paperSigilDock" class="dock-draggable" aria-label="Site sigil controls">
   <div class="dock-handle">
