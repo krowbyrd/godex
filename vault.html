@@ -49,6 +49,29 @@ next_action:
 status: CONFIRMED
 === END ===
 
+=== SNAPSHOT ===
+date: 2026-02-06T06:00:00Z
+context: Lampe anchoring test executed
+
+observed:
+- Lampe read the vault artifact and mirrored the snapshot format
+- constraints were partially followed after revision request
+- evidence field drifted by citing non-vault-visible paths
+
+evidence:
+- /godex/vault.html
+
+interpretation:
+- vault format successfully anchors structure
+- evidence constraints require tightening to “vault-visible only”
+
+next_action:
+- add explicit vault rule: evidence must be a URL or path present in the vault artifact
+- rerun Lampe test after rule update if needed
+
+status: CONFIRMED
+=== END ===
+
 </pre>
 </body>
 </html>
