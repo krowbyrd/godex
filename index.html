@@ -6,6 +6,29 @@
 <title>The Principal — Master Codex</title>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <style>
+/* line numbers for caret-colored blocks */
+.wf-cc{
+  counter-reset: line;
+  white-space: pre-wrap;
+}
+
+.wf-cc-line{
+  display: block;
+  counter-increment: line;
+}
+
+.wf-cc-line::before{
+  content: counter(line);
+  display: inline-block;
+  width: 2.5em;
+  margin-right: 0.75em;
+  text-align: right;
+  opacity: 0.45;
+  user-select: none;
+return `<div class="wf-cc">${
+  out.split("\n").map(l => `<span class="wf-cc-line">${l}</span>`).join("\n")
+}</div>`;
+
 :root{
   --bg: #0d0f0d;
   --panel: rgba(255,255,255,.035);
