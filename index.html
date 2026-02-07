@@ -5,29 +5,59 @@
 <meta charset="utf-8"/>
 <title>The Principal — Master Codex</title>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<style>
-/* line numbers for caret-colored blocks */
-.wf-cc{
-  counter-reset: line;
-  white-space: pre-wrap;
+// 
+const style = document.createElement("style");
+style.textContent = `
+#wf-root{
+  position:fixed;
+  z-index:2147483647;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  color: rgba(165,180,205,0.95);
+  pointer-events:auto;
 }
 
-.wf-cc-line{
-  display: block;
-  counter-increment: line;
-}
+/* corner placement */
+#wf-root[data-corner="br"]{ right:${CFG.offsetX}px; bottom:${CFG.offsetY}px; }
+#wf-root[data-corner="bl"]{ left:${CFG.offsetX}px; bottom:${CFG.offsetY}px; }
+#wf-root[data-corner="tr"]{ right:${CFG.offsetX}px; top:${CFG.offsetY}px; }
+#wf-root[data-corner="tl"]{ left:${CFG.offsetX}px; top:${CFG.offsetY}px; }
 
-.wf-cc-line::before{
+/* caret color rendering */
+.wf-cc{ font-size:12px; white-space:pre-wrap; word-break:break-word; opacity:0.92; }
+.wf-cc-seg{ white-space:inherit; }
+
+/* line numbers (only works if you wrap lines as .wf-cc-line) */
+ .wf-cc{ counter-reset: line; }
+ .wf-cc-line{ display:block; counter-increment: line; }
+ .wf-cc-line::before{
   content: counter(line);
-  display: inline-block;
-  width: 2.5em;
-  margin-right: 0.75em;
-  text-align: right;
-  opacity: 0.45;
-  user-select: none;
-return `<div class="wf-cc">${
-  out.split("\n").map(l => `<span class="wf-cc-line">${l}</span>`).join("\n")
-}</div>`;
+  display:inline-block;
+  width:2.5em;
+  margin-right:.75em;
+  text-align:right;
+  opacity:.45;
+  user-select:none;
+}
+
+/* optional sparkle (only if you still want it) */
+@keyframes wf-sparkUp {
+  0%   { transform: translate(0,0) scale(0.9); opacity:0; }
+  15%  { opacity:1; }
+  100% { transform: translate(-6px,-26px) scale(1.05); opacity:0; }
+}
+.wf-spark{
+  position:absolute;
+  left:6px;
+  top:6px;
+  font-size:14px;
+  line-height:1;
+  pointer-events:none;
+  text-shadow: 0 0 12px rgba(175,120,255,0.35);
+  animation: wf-sparkUp 1.2s ease-out 1;
+  opacity:0;
+}
+`;
+(document.head || document.documentElement).appendChild(style);/div>`;
 
 :root{
   --bg: #0d0f0d;
