@@ -8,3 +8,12 @@
     }
   ]
 }
+{
+  "id": "05-UPDATE-001",
+  "ts": "2026-02-07T05:12:00Z",
+  "kind": "relay",
+  "from": "LENS",
+  "to": "PAPER",
+  "subject": "New Node Activation & Strata Stabilization",
+  "note": "RELAY_UPDATE ... (payload text here)"
+}
