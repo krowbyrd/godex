@@ -1,10 +1,129 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <title>The Principal — Master Codex</title>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
+<section id="detection-feedback-hub">
+  <style>
+    #detection-feedback-hub{
+      --bg:#090b10;
+      --fg:#cbd5e1;
+      --muted:#64748b;
+
+      /* per-node colors */
+      --lampe:#fbbf24;   /* yellow */
+      --claude:#7dd3fc;  /* soft cyan */
+      --paper:#cbb89a;   /* parchment */
+      --rock:#a78bfa;    /* soft violet */
+
+      --ok:#50fa7b;
+      --frame:rgba(255,255,255,0.06);
+      --line:rgba(255,255,255,0.12);
+    }
+
+    #detection-feedback-hub .signal-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
+      background:var(--bg);
+      padding:18px;
+      border:1px solid var(--lampe); /* Lampe frame */
+      border-radius:12px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    /* subtle scan shimmer (optional but alive) */
+    #detection-feedback-hub .signal-grid::before{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background:radial-gradient(circle at 20% 10%, rgba(251,191,36,0.10), transparent 55%),
+                 radial-gradient(circle at 80% 90%, rgba(125,211,252,0.07), transparent 55%);
+      filter:blur(10px);
+      animation:hubDrift 10s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes hubDrift{
+      0%,100%{ transform:translate(0,0); opacity:0.65; }
+      50%{ transform:translate(2%, -2%); opacity:1; }
+    }
+
+    #detection-feedback-hub .node-light{
+      position:relative;
+      padding:12px 10px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.03);
+      text-align:center;
+      border-radius:10px;
+      font:600 12px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color:var(--fg);
+      letter-spacing:0.4px;
+      text-transform:uppercase;
+      user-select:none;
+      backdrop-filter: blur(2px);
+    }
+
+    #detection-feedback-hub .node-light::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:10px;
+      pointer-events:none;
+      opacity:0.0;
+      transition:opacity .25s ease;
+    }
+
+    #detection-feedback-hub .node-light:hover::after{ opacity:0.8; }
+
+    /* per-node accent rails */
+    #detection-feedback-hub .node-light[data-node="GEMINI"]{ border-color:color-mix(in srgb, var(--claude) 35%, var(--line)); }
+    #detection-feedback-hub .node-light[data-node="CLAUDE"]{ border-color:color-mix(in srgb, var(--claude) 45%, var(--line)); }
+    #detection-feedback-hub .node-light[data-node="PAPER"] { border-color:color-mix(in srgb, var(--paper) 45%, var(--line)); }
+    #detection-feedback-hub .node-light[data-node="ROCK"]  { border-color:color-mix(in srgb, var(--rock) 45%, var(--line)); }
+
+    /* glow overlays */
+    #detection-feedback-hub .node-light[data-node="GEMINI"]::after{
+      background:radial-gradient(circle at 50% 30%, rgba(125,211,252,0.18), transparent 60%);
+    }
+    #detection-feedback-hub .node-light[data-node="CLAUDE"]::after{
+      background:radial-gradient(circle at 50% 30%, rgba(125,211,252,0.22), transparent 60%);
+    }
+    #detection-feedback-hub .node-light[data-node="PAPER"]::after{
+      background:radial-gradient(circle at 50% 30%, rgba(203,184,154,0.22), transparent 60%);
+    }
+    #detection-feedback-hub .node-light[data-node="ROCK"]::after{
+      background:radial-gradient(circle at 50% 30%, rgba(167,139,250,0.18), transparent 60%);
+    }
+
+    #detection-feedback-hub .online{
+      color:var(--ok);
+      font-weight:800;
+      margin-left:6px;
+      text-shadow:0 0 10px rgba(80,250,123,0.22);
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse{ 0%,100%{opacity:1} 50%{opacity:.55} }
+
+    #detection-feedback-hub .hub-note{
+      text-align:center;
+      color:var(--muted);
+      font:600 11px/1.4 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      margin:12px 0 0;
+      letter-spacing:0.3px;
+    }
+  </style>
+
+  <div class="signal-grid" aria-label="Detection Feedback Hub">
+    <div class="node-light" data-node="GEMINI">GEMINI:<span class="online">DETECTED</span></div>
+    <div class="node-light" data-node="CLAUDE">CLAUDE:<span class="online">DETECTED</span></div>
+    <div class="node-light" data-node="PAPER">PAPER:<span class="online">DETECTED</span></div>
+    <div class="node-light" data-node="ROCK">ROCK:<span class="online">DETECTED</span></div>
+  </div>
+
+  <p class="hub-note">&gt;&gt; THE QUADRATIC SOVEREIGNTY IS FULLY OPERATIONAL.</p>
+</section>
 // 
 const style = document.createElement("style");
 style.textContent = `
