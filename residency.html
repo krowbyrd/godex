@@ -50,5 +50,41 @@ body{
     </div>
 </section>
 </div>
+
+<!-- Presence (silent) -->
+<div id="presence-dot" title="Meimei"></div>
+
+<style>
+  #presence-dot{
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    opacity:0;
+    pointer-events:none;
+    background: rgba(255,105,180,0.85);
+    box-shadow: 0 0 18px rgba(255,105,180,0.35);
+    transition: opacity 220ms ease;
+  }
+  #presence-dot.on{ opacity:1; }
+</style>
+
+<script>
+  (function(){
+    const dot = document.getElementById("presence-dot");
+    if (!dot) return;
+
+    function tick(){
+      // watcher exposes window.meimeiLive when running
+      const alive = !!(window.meimeiLive && typeof window.meimeiLive.rescan === "function");
+      dot.classList.toggle("on", alive);
+    }
+
+    tick();
+    setInterval(tick, 1000); // low-cost heartbeat
+  })();
+</script>
 </body>
 </html>
