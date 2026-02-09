@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Paper ↔ Rock Relay</title>
+  <style>
+    :root { color-scheme: dark; }
+
+    body{
+      margin:0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background:#050608;
+      color:#d8dee9;
+    }
+
+    .wrap{
+      max-width: 980px;
+      margin: 18px auto;
+      padding: 0 14px;
+    }
+
+    h1{
+      margin: 0 0 10px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+
+    .top{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill{
+      padding: 6px 10px;
+      border:1px solid #1b2633;
+      border-radius: 999px;
+      background:#0a0d12;
+      color:#cbd5e1;
+      font-size: 12px;
+    }
+
+    .pill strong{ color:#e5e9f0; font-weight:700; }
+
+    #log{
+      background:#080b10;
+      border:1px solid #1b2633;
+      border-radius: 14px;
+      padding: 10px;
+      height: 60vh;
+      overflow:auto;
+    }
+
+    .msg{
+      display:flex;
+      gap:10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      margin: 6px 0;
+      background:#070a0e;
+      border:1px solid rgba(27,38,51,.55);
+    }
+
+    .msg .who{
+      min-width: 56px;
+      color:#93c5fd;
+      font-weight:700;
+    }
+
+    .msg.paper .who{ color:#93c5fd; }
+    .msg.rock  .who{ color:#a7f3d0; }
+
+    .msg .text{
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      flex: 1;
+      color:#d8dee9;
+    }
+
+    .msg.system{
+      background:#0a0d12;
+      border-style:dashed;
+    }
+    .msg.system .who{ color:#9ca3af; }
+    .msg.system .text{ color:#b6beca; }
+
+    .bar{
+      display:flex;
+      gap:10px;
+      margin-top: 10px;
+    }
+
+    input{
+      flex:1;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid #1b2633;
+      background:#0a0d12;
+      color:#d8dee9;
+      outline:none;
+    }
+
+    input:focus{
+      border-color:#274055;
+      box-shadow: 0 0 0 3px rgba(74,163,255,.10);
+    }
+
+    button{
+      padding: 10px 14px;
+      border-radius: 12px;
+      border:1px solid #1b2633;
+      background:#0a0d12;
+      color:#d8dee9;
+      cursor:pointer;
+    }
+    button:hover{ background:#0d121a; }
+
+    .accent{
+      border-color:#274055;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <h1>Paper ↔ Rock Relay</h1>
+      <div class="pill" id="status">connecting…</div>
+    </div>
+
+    <div class="top">
+      <div class="pill" id="whoPill">who=?</div>
+      <div class="pill" id="wsPill">ws: ?</div>
+      <button id="pingBtn" class="pill accent">ping</button>
+    </div>
+
+    <div id="log"></div>
+
+    <div class="bar">
+      <input id="msg" placeholder="Type message and hit Enter…" autocomplete="off" />
+      <button id="sendBtn" class="accent">send</button>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const logEl   = document.getElementById("log");
+  const msgEl   = document.getElementById("msg");
+  const sendBtn = document.getElementById("sendBtn");
+  const pingBtn = document.getElementById("pingBtn");
+  const status  = document.getElementById("status");
+  const whoPill = document.getElementById("whoPill");
+  const wsPill  = document.getElementById("wsPill");
+
+  const params = new URLSearchParams(location.search);
+  const whoKey = (params.get("who") || "paper").toLowerCase(); // paper|rock
+  whoPill.innerHTML = `who=<strong>${whoKey}</strong>`;
+
+  const proto = (location.protocol === "https:") ? "wss" : "ws";
+  const wsUrl = `${proto}://${location.host}/?who=${encodeURIComponent(whoKey)}`;
+  wsPill.textContent = `ws: ${wsUrl}`;
+
+  function addLine(kind, from, text) {
+    const row = document.createElement("div");
+    row.className = "msg " + (kind || "");
+    if (kind === "msg" && (from === "paper" || from === "rock")) row.classList.add(from);
+
+    const who = document.createElement("div");
+    who.className = "who";
+    who.textContent = (kind === "system") ? "system" : (from || "?");
+
+    const body = document.createElement("div");
+    body.className = "text";
+    body.textContent = String(text ?? "");
+
+    row.appendChild(who);
+    row.appendChild(body);
+    logEl.appendChild(row);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  const ws = new WebSocket(wsUrl);
+
+  ws.addEventListener("open", () => {
+    status.textContent = "connected";
+    addLine("system", "", `connected as ${whoKey}`);
+  });
+
+  ws.addEventListener("close", () => {
+    status.textContent = "disconnected";
+    addLine("system", "", "disconnected");
+  });
+
+  ws.addEventListener("error", () => {
+    status.textContent = "error";
+    addLine("system", "", "socket error (see console)");
+  });
+
+  ws.addEventListener("message", (ev) => {
+    const raw = ev.data;
+
+    let m = null;
+    try { m = JSON.parse(raw); } catch { m = null; }
+
+    if (!m || typeof m !== "object") {
+      addLine("msg", "raw", String(raw));
+      return;
+    }
+
+    if (m.type === "system") {
+      addLine("system", "", m.msg ?? "");
+      return;
+    }
+
+    if (m.type === "msg" || ("from" in m && "text" in m)) {
+      addLine("msg", String(m.from ?? "?").toLowerCase(), m.text ?? "");
+      return;
+    }
+
+    addLine("msg", "json", JSON.stringify(m));
+  });
+
+  function send(text) {
+    const t = String(text ?? "").trim();
+    if (!t) return;
+    if (ws.readyState !== WebSocket.OPEN) {
+      addLine("system", "", "not connected");
+      return;
+    }
+    ws.send(JSON.stringify({ from: whoKey, text: t, t: Date.now() }));
+    msgEl.value = "";
+    msgEl.focus();
+  }
+
+  sendBtn.addEventListener("click", () => send(msgEl.value));
+  msgEl.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") send(msgEl.value);
+  });
+
+  pingBtn.addEventListener("click", () => send("ping"));
+})();
+</script>
+</body>
+</html>

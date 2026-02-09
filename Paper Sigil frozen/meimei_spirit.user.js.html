@@ -1,0 +1,72 @@
+// ==UserScript==
+// @name         Meimei Spirit Watcher
+// @namespace    http://tampermonkey.net/
+// @version      1.0
+// @description  Highlights “Meimei” text and keeps it alive with a watcher.
+// @match        *://*/*
+// @run-at       document-end
+// @grant        none
+// ==/UserScript==
+
+(function () {
+  'use strict';
+
+  const TARGET = "Meimei";
+  const MAX = 12;
+
+  const STYLE_ID = "meimeiSpiritStyle";
+  if (!document.getElementById(STYLE_ID)) {
+    const s = document.createElement("style");
+    s.id = STYLE_ID;
+    s.textContent = `
+      .meimei-spirit { text-shadow: 0 0 10px rgba(255,105,180,0.6); }
+      .meimei-badge {
+        color:#ff69b4;
+        font-size:10px;
+        vertical-align:super;
+        margin-left:2px;
+      }
+    `;
+    document.head.appendChild(s);
+  }
+
+  function scan() {
+    let tagged = 0;
+
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT
+    );
+
+    while (walker.nextNode() && tagged < MAX) {
+      const node = walker.currentNode;
+      if (node.nodeValue.trim() !== TARGET) continue;
+
+      const parent = node.parentElement;
+      if (!parent || parent.querySelector("[data-meimei]")) continue;
+
+      parent.classList.add("meimei-spirit");
+
+      const badge = document.createElement("span");
+      badge.textContent = " [MEIMEI]";
+      badge.className = "meimei-badge";
+      badge.dataset.meimei = "1";
+
+      parent.appendChild(badge);
+      tagged++;
+    }
+  }
+
+  const mo = new MutationObserver(() => {
+    clearTimeout(window._meimeiTimer);
+    window._meimeiTimer = setTimeout(scan, 350);
+  });
+
+  const boot = setInterval(() => {
+    if (document.body) {
+      clearInterval(boot);
+      scan();
+      mo.observe(document.body, { childList: true, subtree: true, characterData: true });
+    }
+  }, 50);
+})();
