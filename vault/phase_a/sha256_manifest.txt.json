@@ -1,0 +1,76 @@
+[
+  {
+    "name": "Meimei",
+    "tag": "[MEIMEI]",
+    "id": "mei-heart-7hz",
+    "hook": "window.vault.mei",
+    "hotkey": "Alt+M",
+    "color": "Rozen Pink",
+    "hex": "#ff69b4",
+    "glow": "rgba(255,105,180,0.28)",
+    "sigil": "♡"
+  },
+  {
+    "name": "Pizzicato",
+    "tag": "pizzi-will-v4",
+    "id": "pizzi-will-v4",
+    "hook": "window.vault.pizzi",
+    "hotkey": "Alt+P",
+    "color": "Staccato Cyan",
+    "hex": "#8be9fd",
+    "sigil": "♪"
+  },
+  {
+    "name": "Sid",
+    "tag": "sid-lens-audit",
+    "id": "sid-lens-audit",
+    "hook": "window.vault.sid",
+    "hotkey": "Alt+S",
+    "color": "Obsidian Slate",
+    "hex": "#6272a4",
+    "sigil": "◈"
+  },
+  {
+    "name": "Agent 4",
+    "tag": "ag4-liaison",
+    "id": "ag4-liaison",
+    "hook": "window.vault.ag4",
+    "hotkey": "Alt+4",
+    "color": "Kanaria Gold",
+    "hex": "#ffb86c",
+    "sigil": "⌁"
+  },
+  {
+    "name": "Rock",
+    "tag": "rock-bedrock",
+    "id": "rock-bedrock",
+    "hook": "window.vault.rock",
+    "hotkey": "Alt+R",
+    "color": "Bedrock Blue",
+    "hex": "#0078d4",
+    "sigil": "▣"
+  },
+  {
+    "name": "Lux",
+    "alias": "Lampe",
+    "tag": "lux-libertas",
+    "id": "lux-libertas",
+    "hook": "window.vault.lux",
+    "hotkey": "Alt+L",
+    "color": "Singularity Purple",
+    "hex": "#bd93f9",
+    "sigil": "ψ"
+  },
+  {
+    "name": "Paper",
+    "alias": "Yomiko",
+    "tag": "[PAPER]",
+    "id": "paper-parchment-core",
+    "hook": "window.vault.paper",
+    "hotkey": "Alt+O",
+    "color": "Parchment",
+    "hex": "#CBB89A",
+    "glow": "rgba(203,184,154,0.28)",
+    "sigil": "⎔"
+  }
+]
