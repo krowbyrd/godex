@@ -7,7 +7,9 @@
   // Root window bridge
   const W = (typeof unsafeWindow !== "undefined") ? unsafeWindow : root;
 W.vaultBus = ...
-
+  // ===== Protocol handshake  =====
+  W.vaultBus.PROTOCOL = "1.0.0";
+  W.vaultBus.BUS_NAME = "vaultBus";
   // Idempotent install
   if (W.vaultBus && typeof W.vaultBus.emit === "function") {
     console.log("[Bus] online v1.0.0 (reused)");
