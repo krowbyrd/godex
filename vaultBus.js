@@ -6,6 +6,7 @@
 
   // Root window bridge
   const W = (typeof unsafeWindow !== "undefined") ? unsafeWindow : root;
+W.vaultBus = ...
 
   // Idempotent install
   if (W.vaultBus && typeof W.vaultBus.emit === "function") {
