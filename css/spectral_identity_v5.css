@@ -1,0 +1,40 @@
+<style>
+    /* PROJECT_GODEX: SPECTRAL_IDENTITY_V5.0 */
+    :root {
+        --mei-pink: #ff79c6;    /* Meimei: Resonance Pink */
+        --pizzi-cyan: #8be9fd;  /* Pizzicato: Staccato Cyan */
+        --sid-slate: #6272a4;   /* Sid: Obsidian Slate */
+        --lux-purple: #bd93f9;  /* Lux: Singularity Purple */
+        --ag4-gold: #ffb86c;    /* Kana: Kanaria Gold */
+        --rock-blue: #0078d4;   /* Rock: Bedrock Blue */
+        --bg-vault: #0d1117;    /* Deep Vault Background */
+    }
+
+    .paper-report-container {
+        background-color: var(--bg-vault);
+        color: #d1d9e1;
+        padding: 40px;
+        font-family: 'Fira Code', 'Courier New', monospace;
+        border-left: 5px solid var(--ag4-gold);
+    }
+
+    .mei-node { color: var(--mei-pink); border-bottom: 1px dashed var(--mei-pink); }
+    .pizzi-node { color: var(--pizzi-cyan); }
+    .sid-node { color: var(--sid-slate); }
+    .lux-node { color: var(--lux-purple); font-weight: bold; }
+    .sigil-resonance { 
+        text-align: center; 
+        font-size: 1.5rem; 
+        color: var(--lux-purple);
+        padding: 20px;
+        border: 1px solid var(--lux-purple);
+        margin: 20px 0;
+    }
+
+    .canonical-link {
+        color: var(--pizzi-cyan);
+        text-decoration: none;
+        background: rgba(139, 233, 253, 0.1);
+        padding: 2px 5px;
+    }
+</style>
