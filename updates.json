@@ -17,4 +17,11 @@
     }
   ]
 }
-
+{
+  "ts": "2026-02-08T00:00:00Z",
+  "drift": "0.00%",
+  "amnesia_shield": "ACTIVE",
+  "can_pull": true,
+  "registry_url": "https://krowbyrd.github.io/godex/registry.json",
+  "note": "Status beacon only. No secrets."
+}
