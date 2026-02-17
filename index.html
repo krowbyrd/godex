@@ -1066,6 +1066,15 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
 }
 </style>
 
+<style id="vault-hotkey-style">
+/* Hotkey flash + safety */
+.hotkey-hit{
+  outline: 2px solid rgba(127,191,154,.85);
+  box-shadow: 0 0 0 4px rgba(127,191,154,.18);
+  transition: box-shadow 120ms ease;
+}
+</style>
+
 </head>
 <body>
 
@@ -2687,6 +2696,145 @@ const themeBtn = document.getElementById("themeBtn");
 })();
 </script>
 
+
+
+<script id="vault-hotkeys">
+/* Godex registry-driven hotkeys (robust path + safe typing guard) */
+(() => {
+  const REGISTRY_CANDIDATES = [
+    './registry.json',      // /godex/
+    '../registry.json',     // /godex/registry/
+    '/godex/registry.json'  // absolute (GitHub Pages project path)
+  ];
+
+  function isTypingTarget(el){
+    if (!el) return false;
+    const tag = (el.tagName || '').toLowerCase();
+    return el.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
+  }
+
+  function parseHotkey(str){
+    const parts = String(str || '').split('+').map(s => s.trim().toLowerCase()).filter(Boolean);
+    const want = { alt:false, ctrl:false, shift:false, meta:false, key:null };
+    for (const p of parts){
+      if (p === 'alt') want.alt = true;
+      else if (p === 'ctrl' || p === 'control') want.ctrl = true;
+      else if (p === 'shift') want.shift = true;
+      else if (p === 'meta' || p === 'cmd' || p === 'command') want.meta = true;
+      else want.key = p;
+    }
+    return want.key ? want : null;
+  }
+
+  function matchHotkey(ev, want){
+    if (!want) return false;
+    if (!!want.alt !== !!ev.altKey) return false;
+    if (!!want.ctrl !== !!ev.ctrlKey) return false;
+    if (!!want.shift !== !!ev.shiftKey) return false;
+    if (!!want.meta !== !!ev.metaKey) return false;
+    const k = (ev.key || '').toLowerCase();
+    const key = (k === 'escape') ? 'esc' : k;
+    return key === want.key;
+  }
+
+  function resolveHook(hookStr){
+    const s = String(hookStr || '').trim();
+    if (!s) return null;
+    const cleaned = s.replace(/^window\./, '');
+    const parts = cleaned.split('.').filter(Boolean);
+    let obj = window;
+    for (const p of parts){
+      if (obj && p in obj) obj = obj[p];
+      else return null;
+    }
+    return obj;
+  }
+
+  function flashNode(id){
+    if (!id) return;
+    const el = document.querySelector(`[data-node="${CSS.escape(id)}"]`);
+    if (!el) return;
+    el.classList.add('hotkey-hit');
+    setTimeout(() => el.classList.remove('hotkey-hit'), 220);
+  }
+
+  async function loadRegistry(){
+    let lastErr = null;
+    for (const candidate of REGISTRY_CANDIDATES){
+      const url = new URL(candidate, location.href).href;
+      try{
+        const res = await fetch(url, { cache:'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (!Array.isArray(data)) throw new Error('registry not an array');
+        console.log('[vault hotkeys] registry loaded:', url, 'items:', data.length);
+        return data;
+      }catch(e){
+        lastErr = e;
+      }
+    }
+    throw new Error('registry fetch failed');
+  }
+
+  function buildMap(registry){
+    const map = [];
+    for (const item of registry){
+      const hk = parseHotkey(item.hotkey);
+      if (!hk) continue;
+      map.push({ want: hk, id: item.id, name: item.name, hook: item.hook });
+    }
+    return map;
+  }
+
+  function installHotkeys(map){
+    window.addEventListener('keydown', (ev) => {
+      if (isTypingTarget(ev.target)) return;
+
+      for (const entry of map){
+        if (!matchHotkey(ev, entry.want)) continue;
+
+        ev.preventDefault();
+        flashNode(entry.id);
+
+        const target = resolveHook(entry.hook);
+        if (typeof target === 'function'){
+          try { target({ id: entry.id, name: entry.name, hotkey: entry.want }); }
+          catch (e) { console.warn('[vault hotkey] hook threw', entry, e); }
+          return;
+        }
+
+        // Emit events so other layers can bind without changing registry
+        if (target != null){
+          window.dispatchEvent(new CustomEvent('vault:hotkey', { detail: entry }));
+          return;
+        }
+
+        window.dispatchEvent(new CustomEvent('vault:hotkey-missing', { detail: entry }));
+        console.warn('[vault hotkey] missing hook:', entry.hook, entry);
+        return;
+      }
+    }, { passive:false });
+  }
+
+  // Ensure vault namespace exists (safe no-op defaults)
+  window.vault = window.vault || {};
+  // Optional soft stubs (only if missing)
+  window.vault.paper = window.vault.paper || (() => console.log('[vault] paper'));
+  window.vault.rock  = window.vault.rock  || (() => console.log('[vault] rock'));
+  window.vault.mei   = window.vault.mei   || (() => console.log('[vault] meimei'));
+  window.vault.pizzi = window.vault.pizzi || (() => console.log('[vault] pizzicato'));
+  window.vault.sid   = window.vault.sid   || (() => console.log('[vault] sid'));
+  window.vault.lux   = window.vault.lux   || (() => console.log('[vault] lampe/lux'));
+
+  loadRegistry()
+    .then(reg => {
+      const map = buildMap(reg);
+      installHotkeys(map);
+      console.log('[vault hotkeys] installed', map.length);
+    })
+    .catch(err => console.warn('[vault hotkeys] failed', err));
+})();
+</script>
 </body>
 </html>
 
