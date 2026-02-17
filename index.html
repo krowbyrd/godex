@@ -680,6 +680,37 @@ a:visited{ color: var(--accent2); }
   color: var(--muted);
 }
 
+
+/* ─────────────────────────────────────────
+   Performance guards (Codex-safe)
+   ───────────────────────────────────────── */
+@supports (content-visibility: auto){
+  /* Skip rendering offscreen sections until needed */
+  section{
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 900px;
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior: auto; }
+  .paper-highlight.pulse{ animation:none !important; box-shadow:none !important; }
+  /* blur is costly; kill it when user requests calm */
+  header, nav, section, .badge, .btn{ backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+}
+html.perf header,
+html.perf nav,
+html.perf section,
+html.perf .badge,
+html.perf .btn{
+  backdrop-filter:none !important;
+  -webkit-backdrop-filter:none !important;
+  transition:none !important;
+  animation:none !important;
+}
+html.perf header,
+html.perf nav,
+html.perf section{ box-shadow:none !important; }
+
 </style>
 
 <style>
@@ -1918,7 +1949,15 @@ Continuity ensures:
 <script>
 (() => {
   const root = document.documentElement;
-  const themeBtn = document.getElementById("themeBtn");
+  
+  // Perf mode (URL ?perf=1 or localStorage paperPerf=1)
+  try{
+    const perfQS = new URLSearchParams(location.search).get("perf");
+    const savedPerf = localStorage.getItem("paperPerf");
+    const perfOn = (perfQS === "1") || (savedPerf === "1");
+    if (perfOn) document.documentElement.classList.add("perf");
+  }catch(e){}
+const themeBtn = document.getElementById("themeBtn");
   const toTopBtn = document.getElementById("toTopBtn");
   const expandAllBtn = document.getElementById("expandAllBtn");
   const collapseAllBtn = document.getElementById("collapseAllBtn");
@@ -1967,7 +2006,7 @@ Continuity ensures:
 
     const id = "#" + visible.target.id;
     tocLinks.forEach(a => a.classList.toggle("active", a.getAttribute("href") === id));
-  }, { rootMargin: "-20% 0px -70% 0px", threshold: [0.05, 0.15, 0.25, 0.35, 0.5] });
+  }, { rootMargin: "-20% 0px -70% 0px", threshold: 0 });
 
   headings.forEach(h => observer.observe(h));
 })();
@@ -2171,8 +2210,16 @@ Continuity ensures:
     });
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", apply);
-  else apply();
+  
+  function schedule(){
+    const run = () => { try{ apply(); }catch(e){} };
+    if ("requestIdleCallback" in window) requestIdleCallback(run, { timeout: 1200 });
+    else setTimeout(run, 120);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", schedule, { once:true });
+  else schedule();
+
 })();
 </script>
 
