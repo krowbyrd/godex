@@ -1,2 +1,46 @@
-/* main.css placeholder */
-html { background: #08150d; color: #d7f5e2; }
+:root{
+  --bg:#07130c;
+  --text:#d7f5e2;
+  --muted:rgba(215,245,226,.72);
+  --link:#7dffb2;
+  --panel:rgba(7,19,12,.70);
+  --border:rgba(125,255,178,.18);
+}
+
+html,body{
+  background: radial-gradient(1000px 700px at 30% 0%, rgba(40,140,90,.18), transparent 60%),
+              radial-gradient(900px 600px at 80% 30%, rgba(20,80,45,.14), transparent 55%),
+              var(--bg);
+  color:var(--text);
+}
+
+body{
+  line-height:1.6;
+  letter-spacing:.2px;
+  text-rendering:optimizeLegibility;
+}
+
+a{color:var(--link); text-underline-offset:2px;}
+a:hover{filter:brightness(1.15);}
+
+main,.container,#content,#root,.content{
+  max-width:980px;
+  margin:0 auto;
+  padding:28px 18px;
+}
+
+section,article,.panel,.card,.block,.entry{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:16px 18px;
+}
+
+pre,code{
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(125,255,178,.14);
+  border-radius:10px;
+}
+
+html,body{overflow-x:hidden;}
+img,video,canvas{max-width:100%; height:auto;}
