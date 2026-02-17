@@ -1,2 +1,134 @@
-/* relay-theme placeholder */
-a { color: #7dffb2; }
+/* relay-theme.css — Codex breathing skin (derived from Paper ↔ Rock Relay) */
+
+:root{
+  color-scheme: dark;
+
+  --bg0:#050607;
+  --bg1:#07090b;
+  --panel:#0b0d10;
+  --panel2:#0e1116;
+  --line:#18202a;
+
+  --text:#d9e2ee;
+  --muted:#90a0b5;
+
+  --accent:#2ee6a6;
+  --shadow: 0 12px 44px rgba(0,0,0,.65);
+  --r:14px;
+
+  --maxw: 980px;
+}
+
+/* Baseline */
+html,body{ height:100%; }
+body{
+  margin:0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(46,230,166,.07), transparent 55%),
+    radial-gradient(900px 700px at 85% 0%, rgba(120,170,255,.05), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  color:var(--text);
+  line-height: 1.6;
+  letter-spacing: .2px;
+  text-rendering: optimizeLegibility;
+}
+
+*{ box-sizing:border-box; }
+img,video,canvas{ max-width:100%; height:auto; }
+html,body{ overflow-x:hidden; }
+
+/* Links */
+a{
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+a:hover{ filter: brightness(1.12); }
+
+/* Main content clamp (prevents “wide puzzle flashbang”) */
+main, #content, #root, .content, .container, article{
+  max-width: var(--maxw);
+  margin: 18px auto;
+  padding: 0 14px 18px;
+}
+
+/* Headings */
+h1,h2,h3{
+  margin: 16px 0 8px;
+  letter-spacing: .2px;
+}
+h1{ font-size: 20px; }
+h2{ font-size: 16px; color: var(--text); }
+h3{ font-size: 14px; color: var(--text); }
+p{ margin: 0 0 10px; }
+small,.muted,.meta{ color: var(--muted); }
+
+/* Panels / blocks: make scattered sections feel intentional */
+section, article, .panel, .card, .block, .entry, blockquote{
+  border:1px solid var(--line);
+  border-radius: var(--r);
+  background: rgba(10,12,15,.74);
+  box-shadow: var(--shadow);
+}
+
+section, article, .panel, .card, .block, .entry{
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+
+/* Blockquotes */
+blockquote{
+  margin: 12px 0;
+  padding: 12px 14px;
+  background: rgba(12,15,20,.55);
+  border-color: rgba(24,32,42,.75);
+  color: #b7c6da;
+}
+
+/* Code */
+pre, code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+code{
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: rgba(12,15,20,.72);
+  border: 1px solid rgba(24,32,42,.75);
+}
+pre{
+  margin: 12px 0;
+  padding: 12px 14px;
+  overflow:auto;
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.02), transparent 35%),
+    radial-gradient(600px 200px at 10% 0%, rgba(46,230,166,.06), transparent 60%),
+    rgba(9,11,14,.65);
+  border: 1px solid rgba(24,32,42,.75);
+}
+
+/* Lists */
+ul,ol{ padding-left: 22px; }
+li{ margin: 4px 0; }
+
+/* Tables (quiet + readable) */
+table{
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  overflow:hidden;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(10,12,15,.55);
+}
+th,td{
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(24,32,42,.75);
+  vertical-align: top;
+}
+th{ color: var(--text); text-align:left; background: rgba(12,15,20,.72); }
+tr:last-child td{ border-bottom: none; }
+
+/* Optional: subtle selection */
+::selection{ background: rgba(46,230,166,.22); }
