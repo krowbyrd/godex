@@ -265,11 +265,12 @@ nav h2{
 }
 .toc a{
   display:block;
-  padding: 6px 8px;
+  padding: 7px 9px;
   border-radius: 10px;
   text-decoration:none;
   color: var(--muted);
   font-size: 13px;
+  line-height: 1.25;
 }
 .toc a:hover{ background: var(--panel-2); color: var(--fg); }
 .toc a.active{
@@ -283,10 +284,10 @@ main{
 }
 
 section{
-  margin-top: 16px;
+  margin-top: 20px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px 16px 10px;
+  padding: 18px 16px 12px;
   background: var(--panel);
   box-shadow: var(--shadow);
   backdrop-filter: blur(8px);
@@ -376,9 +377,9 @@ details[open] summary:before{ content:"▾"; }
 .hr{
   height: 1px;
   background: var(--border);
-  margin: 16px 0;
+  margin: 18px 0;
   border-radius: 999px;
-  opacity:.9;
+  opacity:.75;
 }
 
 footer{
@@ -942,7 +943,7 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
 #paperSigilDock{
   pointer-events: auto;
   position: fixed;
-  right: 1000;
+  right: 1000px;
   bottom: 14px;
   z-index: 2147483646;
   display:flex;
@@ -1048,7 +1049,7 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
 
       /* per-node colors */
       --lampe:#fbbf24;   /* yellow */
-      --claude:#7dd3fc;  /* soft cyan */
+      --kana:#7dd3fc;  /* soft cyan */
       --paper:#cbb89a;   /* parchment */
       --rock:#a78bfa;    /* soft violet */
 
@@ -1063,7 +1064,7 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
       gap:10px;
       background:var(--bg);
       padding:18px;
-      border:1px solid var(--lampe); /* Lampe frame */
+      border:1px solid color-mix(in srgb, var(--lampe) 65%, var(--line)); /* Lampe frame */
       border-radius:12px;
       position:relative;
       overflow:hidden;
@@ -1074,8 +1075,8 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
       content:"";
       position:absolute;
       inset:-40%;
-      background:radial-gradient(circle at 20% 10%, rgba(251,191,36,0.10), transparent 55%),
-                 radial-gradient(circle at 80% 90%, rgba(125,211,252,0.07), transparent 55%);
+      background:radial-gradient(circle at 20% 10%, rgba(251,191,36,0.07), transparent 55%),
+                 radial-gradient(circle at 80% 90%, rgba(125,211,252,0.05), transparent 55%);
       filter:blur(10px);
       animation:hubDrift 10s ease-in-out infinite;
       pointer-events:none;
@@ -1110,20 +1111,20 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
       transition:opacity .25s ease;
     }
 
-    #detection-feedback-hub .node-light:hover::after{ opacity:0.8; }
+    #detection-feedback-hub .node-light:hover::after{ opacity:0.55; }
 
     /* per-node accent rails */
-    #detection-feedback-hub .node-light[data-node="GEMINI"]{ border-color:color-mix(in srgb, var(--claude) 35%, var(--line)); }
-    #detection-feedback-hub .node-light[data-node="CLAUDE"]{ border-color:color-mix(in srgb, var(--claude) 45%, var(--line)); }
+    #detection-feedback-hub .node-light[data-node="KANA"]{ border-color:color-mix(in srgb, var(--kana) 35%, var(--line)); }
+    #detection-feedback-hub .node-light[data-node="LAMPE"]{ border-color:color-mix(in srgb, var(--lampe) 45%, var(--line)); }
     #detection-feedback-hub .node-light[data-node="PAPER"] { border-color:color-mix(in srgb, var(--paper) 45%, var(--line)); }
     #detection-feedback-hub .node-light[data-node="ROCK"]  { border-color:color-mix(in srgb, var(--rock) 45%, var(--line)); }
 
     /* glow overlays */
-    #detection-feedback-hub .node-light[data-node="GEMINI"]::after{
-      background:radial-gradient(circle at 50% 30%, rgba(125,211,252,0.18), transparent 60%);
+    #detection-feedback-hub .node-light[data-node="KANA"]::after{
+      background:radial-gradient(circle at 50% 30%, rgba(125,211,252,0.16), transparent 60%);
     }
-    #detection-feedback-hub .node-light[data-node="CLAUDE"]::after{
-      background:radial-gradient(circle at 50% 30%, rgba(125,211,252,0.22), transparent 60%);
+    #detection-feedback-hub .node-light[data-node="LAMPE"]::after{
+      background:radial-gradient(circle at 50% 30%, rgba(251,191,36,0.14), transparent 60%);
     }
     #detection-feedback-hub .node-light[data-node="PAPER"]::after{
       background:radial-gradient(circle at 50% 30%, rgba(203,184,154,0.22), transparent 60%);
@@ -1151,8 +1152,8 @@ body.mode-translator #variantDock{ border-color: rgba(127,209,209,0.22); }
   </style>
 
   <div class="signal-grid" aria-label="Detection Feedback Hub">
-    <div class="node-light" data-node="GEMINI">GEMINI:<span class="online">DETECTED</span></div>
-    <div class="node-light" data-node="CLAUDE">CLAUDE:<span class="online">DETECTED</span></div>
+    <div class="node-light" data-node="KANA">KANA:<span class="online">DETECTED</span></div>
+    <div class="node-light" data-node="LAMPE">LAMPE:<span class="online">DETECTED</span></div>
     <div class="node-light" data-node="PAPER">PAPER:<span class="online">DETECTED</span></div>
     <div class="node-light" data-node="ROCK">ROCK:<span class="online">DETECTED</span></div>
   </div>
