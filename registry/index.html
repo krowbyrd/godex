@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Godex Registry</title>
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/relay-theme.css">
+  <style>
+    .grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap:12px; }
+    .card{ padding:14px 16px; }
+    .row{ display:flex; gap:10px; align-items:center; }
+    .sigil{ font-size:18px; width:28px; height:28px; display:grid; place-items:center;
+            border-radius:10px; border:1px solid var(--line); background:rgba(12,15,20,.72); }
+    .name{ font-weight:700; }
+    .muted{ color:var(--muted); font-size:12px; }
+    .kv{ margin-top:10px; font-size:12px; }
+    .kv code{ font-size:12px; }
+    .dot{ width:10px; height:10px; border-radius:50%; background:var(--accent); opacity:.8; }
+    .topbar{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin:18px 0 10px; }
+    input{ width:100%; max-width:520px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="topbar">
+      <div>
+        <h1 style="margin:0;">Registry</h1>
+        <div class="muted">Live view of <code>/registry.json</code></div>
+      </div>
+      <a href="../">← back to Codex</a>
+    </div>
+
+    <input id="q" placeholder="filter by name, tag, id, hotkey…" autocomplete="off">
+
+    <div style="height:12px"></div>
+    <div id="grid" class="grid"></div>
+  </main>
+
+<script>
+(async () => {
+  const grid = document.getElementById('grid');
+  const q = document.getElementById('q');
+
+  let items = [];
+  try{
+    const res = await fetch('../registry.json', { cache:'no-store' });
+    if (!res.ok) throw new Error('fetch failed');
+    items = await res.json();
+  }catch(e){
+    grid.innerHTML = '<div class="panel card">Failed to load registry.json</div>';
+    return;
+  }
+
+  function render(list){
+    grid.innerHTML = list.map(x => {
+      const alias = x.alias ? ` <span class="muted">(alias: ${escapeHtml(x.alias)})</span>` : '';
+      const glow = x.glow ? x.glow : 'rgba(46,230,166,.14)';
+      const hex  = x.hex  ? x.hex  : '#2ee6a6';
+      return `
+        <div class="panel card" style="box-shadow: 0 12px 44px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.02);">
+          <div class="row">
+            <div class="sigil" style="border-color: rgba(24,32,42,.75); box-shadow: 0 0 0 3px ${glow};">
+              <span style="color:${hex}">${escapeHtml(x.sigil ?? '•')}</span>
+            </div>
+            <div>
+              <div class="name">${escapeHtml(x.name ?? '?')}${alias}</div>
+              <div class="muted">
+                <span class="dot" style="background:${hex}"></span>
+                <span>${escapeHtml(x.tag ?? '')}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="kv">
+            <div>id: <code>${escapeHtml(x.id ?? '')}</code></div>
+            <div>hook: <code>${escapeHtml(x.hook ?? '')}</code></div>
+            <div>hotkey: <code>${escapeHtml(x.hotkey ?? '')}</code></div>
+            ${x.color ? `<div>color: <code>${escapeHtml(x.color)}</code> (${escapeHtml(x.hex ?? '')})</div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function escapeHtml(s){
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  function filter(){
+    const term = q.value.trim().toLowerCase();
+    if (!term) return render(items);
+    const f = items.filter(x => JSON.stringify(x).toLowerCase().includes(term));
+    render(f);
+  }
+
+  q.addEventListener('input', filter);
+  render(items);
+})();
+</script>
+</body>
+</html>
