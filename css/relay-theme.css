@@ -112,6 +112,13 @@ pre{
 ul,ol{ padding-left: 22px; }
 li{ margin: 4px 0; }
 
+/* Hotkey flash */
+.hotkey-hit{
+  outline: 2px solid var(--accent);
+  box-shadow: 0 0 0 4px rgba(46,230,166,.18);
+  transition: box-shadow 120ms ease;
+}
+
 /* Tables (quiet + readable) */
 table{
   width: 100%;
