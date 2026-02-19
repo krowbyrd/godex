@@ -896,7 +896,12 @@
     html[data-theme="y2k"]{ --glow: rgba(10,36,106,.35); }
     html[data-theme="punk"]{ --glow: rgba(26,255,0,.35); }
 
-  </style>
+  
+    /* ===== Identity panel helpers (theme-safe) ===== */
+    #identBox .btn{ padding:6px 10px; font-size:11px; }
+    #identBox .identInput{ font-size:11px; }
+
+</style>
 </head>
 
 <body>
@@ -952,7 +957,35 @@
 
       <!-- side -->
       <div class="side">
-        <div class="sideBox">
+        
+        <div class="sideBox" id="identBox">
+          <div class="hd">
+            <span>identity</span>
+            <span class="pill" id="tokenPill">tkn: ----</span>
+          </div>
+          <div class="bd" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="tiny" style="width:40px;">user</span>
+              <input class="input identInput" id="identUser" placeholder="You" maxlength="18" style="padding:6px 8px; min-width:0; flex:1;">
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="tiny" style="width:40px;">key</span>
+              <input class="input identInput" id="identKey" placeholder="••••" type="password" maxlength="32" style="padding:6px 8px; min-width:0; flex:1;">
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="tiny" style="width:40px;">color</span>
+              <input id="identColor" type="color" value="#e46a5d" style="width:44px; height:26px; padding:0; border:2px solid; border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo); background:#fff;">
+              <span class="tiny" id="identGlowHint" style="margin-left:auto;">glow: --</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn" id="identLogin" type="button">login</button>
+              <button class="btn" id="identReset" type="button">reset</button>
+            </div>
+            <div class="tiny">Local-only. Sets name + token glow.</div>
+          </div>
+        </div>
+
+<div class="sideBox">
           <div class="hd">
             <span>signal</span>
             <span class="pill">soft</span>
@@ -1253,6 +1286,187 @@
     renderUserList();
   }
 
+  // ===== Identity (local-only): user + key => token + unique glow color =====
+  const IDENT_KEY = "wordz_identity_v1";
+
+  let IDENTITY = { user:"You", token:"----", color:null, glow:10 };
+
+  function hash32(str){
+    let h = 2166136261;
+    for (let i=0;i<str.length;i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  function usedColorsSet(){
+    const used = new Set();
+    if (Array.isArray(NPC_ROSTER)){
+      NPC_ROSTER.forEach(n => used.add(String(n.color||"").toLowerCase()));
+    }
+    return used;
+  }
+
+  function generateUniqueColor(seed){
+    const used = usedColorsSet();
+    const h = hash32(seed);
+    let hue = h % 360;
+    for (let tries=0; tries<48; tries++){
+      const s = 0.70, v = 0.95;
+      const c = v*s;
+      const x = c*(1-Math.abs(((hue/60)%2)-1));
+      const m = v-c;
+      let r=0,g=0,b=0;
+      if (hue<60){ r=c; g=x; b=0; }
+      else if (hue<120){ r=x; g=c; b=0; }
+      else if (hue<180){ r=0; g=c; b=x; }
+      else if (hue<240){ r=0; g=x; b=c; }
+      else if (hue<300){ r=x; g=0; b=c; }
+      else { r=c; g=0; b=x; }
+
+      const rr = Math.round((r+m)*255), gg = Math.round((g+m)*255), bb = Math.round((b+m)*255);
+      const hex = "#" + ((rr<<16)|(gg<<8)|bb).toString(16).padStart(6,"0");
+      if (!used.has(hex.toLowerCase())) return hex;
+      hue = (hue + 17) % 360;
+    }
+    return "#e46a5d";
+  }
+
+  function computeGlowFromSeed(seed){
+    const h = hash32(seed);
+    return 6 + (h % 11); // 6..16
+  }
+
+  function applyIdentity(){
+    window.WORDZ_USER_NAME  = IDENTITY.user || "You";
+    window.WORDZ_USER_COLOR = IDENTITY.color || null;
+    window.WORDZ_USER_GLOW  = Number(IDENTITY.glow || 10);
+
+    const pill = document.getElementById("tokenPill");
+    if (pill) pill.textContent = "tkn: " + (IDENTITY.token || "----");
+
+    const gh = document.getElementById("identGlowHint");
+    if (gh) gh.textContent = "glow: " + String(window.WORDZ_USER_GLOW || 10);
+  }
+
+  function saveIdentity(){
+    try{ localStorage.setItem(IDENT_KEY, JSON.stringify(IDENTITY)); }catch(e){}
+  }
+
+  function loadIdentity(){
+    try{
+      const raw = localStorage.getItem(IDENT_KEY);
+      if(!raw) return;
+      const obj = JSON.parse(raw);
+      if(obj && typeof obj === "object") IDENTITY = { ...IDENTITY, ...obj };
+    }catch(e){}
+  }
+
+  function deriveToken(u, k,color, IDENTITY.color || \"\"){
+    const seed = (u||"You") + "|" + (k||"") + "|" + (color||"");
+    return (hash32(seed).toString(16).toUpperCase().slice(0,4)).padStart(4,"0");
+  }
+
+  function wireIdentityUI(){
+    loadIdentity();
+
+    const uEl = document.getElementById("identUser");
+    const kEl = document.getElementById("identKey");
+    const cEl = document.getElementById("identColor");
+
+    if (uEl) uEl.value = IDENTITY.user || "You";
+    if (cEl && IDENTITY.color) cEl.value = IDENTITY.color;
+
+    // If no saved color, generate one from current seed.
+    if (!IDENTITY.color){
+      const token = deriveToken(IDENTITY.user, "", IDENTITY.color || \"\");
+      IDENTITY.token = token;
+      const seed = (IDENTITY.user||"You") + "|";
+      IDENTITY.color = generateUniqueColor(seed);
+      /* glow set after token seed */
+      if (cEl) cEl.value = IDENTITY.color;
+    }
+
+    applyIdentity();
+
+    const applyFromInputs = (forceGenerateColor=false) => {
+      const u = (uEl?.value || "You").trim() || "You";
+      const k = (kEl?.value || "");
+      const seedBase = u + "|" + k;
+
+      IDENTITY.user = u;
+      /* token set after color selection */
+      /* glow set after token seed */
+
+      if (forceGenerateColor || !IDENTITY.color){
+        IDENTITY.color = generateUniqueColor(seed);
+        if (cEl) cEl.value = IDENTITY.color;
+      }
+
+      
+      // token + glow are bound to (user|key|color) so a claimed color changes the token
+      const tokenSeed = u + "|" + k + "|" + (IDENTITY.color || "");
+      IDENTITY.token = deriveToken(u, k, IDENTITY.color || "", IDENTITY.color || \"\");
+      IDENTITY.glow  = computeGlowFromSeed(tokenSeed);
+applyIdentity();
+      saveIdentity();
+    };
+
+    document.getElementById("identLogin")?.addEventListener("click", () => {
+      applyFromInputs(true);
+      addLine("System", `^7identity set: ^2${IDENTITY.user} ^7(tkn ^3${IDENTITY.token}^7)`, "sys", "SYS");
+      saveChat();
+    });
+
+    document.getElementById("identReset")?.addEventListener("click", () => {
+      IDENTITY = { user:"You", token:"----", color:null, glow:10 };
+      try{ localStorage.removeItem(IDENT_KEY); }catch(e){}
+      if (uEl) uEl.value = "You";
+      if (kEl) kEl.value = "";
+      if (cEl) cEl.value = "#e46a5d";
+      applyFromInputs(true);
+      addLine("System", "^7identity reset.", "sys", "SYS");
+      saveChat();
+    });
+
+    // Live-update token/glow while typing (does NOT force color change)
+    uEl?.addEventListener("input", () => applyFromInputs(false));
+    kEl?.addEventListener("input", () => applyFromInputs(false));
+
+    // Manual color pick: also ensures token is up to date and no collisions.
+    cEl?.addEventListener("input", () => {
+      // make sure user/key are current (does NOT force regen)
+      applyFromInputs(false);
+
+      const used = usedColorsSet();
+      const val = String(cEl.value || "").toLowerCase();
+
+      if (used.has(val)){
+        addLine("System", "^1color collision.^7 pick another.", "sys", "SYS");
+        // revert to generated unique for this user|key
+        const u = (uEl?.value || "You").trim() || "You";
+        const k = (kEl?.value || "");
+        IDENTITY.color = generateUniqueColor(u + "|" + k);
+        if (cEl) cEl.value = IDENTITY.color;
+      } else {
+        // claim favorite color
+        IDENTITY.color = cEl.value;
+      }
+
+      // bind token/glow to claimed color
+      const u = (uEl?.value || "You").trim() || "You";
+      const k = (kEl?.value || "");
+      IDENTITY.token = deriveToken(u, k, IDENTITY.color || "", IDENTITY.color || \"\");
+      IDENTITY.glow  = computeGlowFromSeed(u + "|" + k + "|" + (IDENTITY.color || ""));
+
+      applyIdentity();
+      saveIdentity();
+    });
+}
+
+
+
 
 
   // MODIFIED addLine to include bot-specific classes for styling
@@ -1276,6 +1490,18 @@
       `<span class="when time">[${esc(nowStamp())}]</span> ` +
       `<span class="chan">[${esc(ch)}]</span>` +
       `<br><span class="msg">${parseGunzColors(p.dataset.rawmsg)}</span>`;
+
+    // apply identity to local user ("You")
+    if ((who || "") === "You" && window.WORDZ_USER_COLOR){
+      const whoEl = p.querySelector(".who");
+      if (whoEl){
+        whoEl.textContent = window.WORDZ_USER_NAME || "You";
+        whoEl.style.color = window.WORDZ_USER_COLOR;
+        whoEl.classList.add("whoGlow");
+        const g = Number(window.WORDZ_USER_GLOW || 10);
+        whoEl.style.textShadow = `0 0 ${g}px currentColor, 0 0 ${g*2}px currentColor`;
+      }
+    }
 
     log.appendChild(p);
     log.scrollTop = log.scrollHeight;
@@ -1524,6 +1750,7 @@
   document.documentElement.classList.add("preload");
   const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();
   setTheme(savedTheme || "yakult");
+  wireIdentityUI();
   requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
 
   const had = loadChat();
