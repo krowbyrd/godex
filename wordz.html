@@ -901,6 +901,22 @@
     #identBox .btn{ padding:6px 10px; font-size:11px; }
     #identBox .identInput{ font-size:11px; }
 
+
+    /* ===== YUM mode (toggle) — theme-safe subtle overlay ===== */
+    .frame{ position:relative; }
+    body.yumMode .frame::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(255,255,255,.22), rgba(255,255,255,0) 35%),
+        radial-gradient(circle at 80% 30%, rgba(255,255,255,.18), rgba(255,255,255,0) 40%),
+        linear-gradient(135deg, rgba(255,0,0,.06), rgba(255,255,255,0) 55%);
+      mix-blend-mode: soft-light;
+      opacity:.9;
+    }
+
 </style>
 </head>
 
@@ -968,16 +984,25 @@
               <span class="tiny" style="width:40px;">user</span>
               <input class="input identInput" id="identUser" placeholder="You" maxlength="18" style="padding:6px 8px; min-width:0; flex:1;">
             </div>
+
             <div style="display:flex; gap:8px; align-items:center;">
-              <span class="tiny" style="width:40px;">key</span>
-              <input class="input identInput" id="identKey" placeholder="••••" type="password" maxlength="32" style="padding:6px 8px; min-width:0; flex:1;">
+              <span class="tiny" style="width:40px;">code</span>
+              <input class="input identInput" id="identCode" readonly value="0000000" style="padding:6px 8px; min-width:0; flex:1; opacity:.85;">
             </div>
-            <div style="display:flex; gap:8px; align-items:center;">
+<div style="display:flex; gap:8px; align-items:center;">
               <span class="tiny" style="width:40px;">color</span>
               <input id="identColor" type="color" value="#e46a5d" style="width:44px; height:26px; padding:0; border:2px solid; border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo); background:#fff;">
               <span class="tiny" id="identGlowHint" style="margin-left:auto;">glow: --</span>
             </div>
-            <div style="display:flex; gap:8px;">
+            
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="tiny" style="width:40px;">yum</span>
+              <label class="tiny" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="checkbox" id="yumToggle">
+                <span>overlay</span>
+              </label>
+            </div>
+<div style="display:flex; gap:8px;">
               <button class="btn" id="identLogin" type="button">login</button>
               <button class="btn" id="identReset" type="button">reset</button>
             </div>
@@ -1329,7 +1354,7 @@ const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
   // ===== Identity (local-only): user + key => token + unique glow color =====
   const IDENT_KEY = "wordz_identity_v1";
 
-  let IDENTITY = { user:"You", token:"----", color:null, glow:10 };
+  let IDENTITY = { user:"You", code:"0000000", color:null, glow:10 };
 
   function hash32(str){
     let h = 2166136261;
@@ -1384,7 +1409,9 @@ const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
     window.WORDZ_USER_GLOW  = Number(IDENTITY.glow || 10);
 
     const pill = document.getElementById("tokenPill");
-    if (pill) pill.textContent = "tkn: " + (IDENTITY.token || "----");
+    if (pill) pill.textContent = "id: " + (IDENTITY.code || "0000000");
+    const codeEl = document.getElementById("identCode");
+    if (codeEl) codeEl.value = (IDENTITY.code || "0000000");
 
     const gh = document.getElementById("identGlowHint");
     if (gh) gh.textContent = "glow: " + String(window.WORDZ_USER_GLOW || 10);
@@ -1407,46 +1434,71 @@ const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
     }catch(e){}
   }
 
-  function deriveToken(u,k){
-    const seed = (u||"You") + "|" + (k||"");
-    return (hash32(seed).toString(16).toUpperCase().slice(0,4)).padStart(4,"0");
+  function deriveCode7(name, color){
+    const seed = (String(name || "You").trim() + "|" + String(color || "#000000").trim().toLowerCase());
+    const num = hash32(seed) % 10000000; // 7 digits
+    return String(num).padStart(7, "0");
   }
 
-  function wireIdentityUI(){
+function wireIdentityUI(){
     loadIdentity();
 
     const uEl = document.getElementById("identUser");
-    const kEl = document.getElementById("identKey");
-    const cEl = document.getElementById("identColor");
+const cEl = document.getElementById("identColor");
 
     if (uEl) uEl.value = IDENTITY.user || "You";
     if (cEl && IDENTITY.color) cEl.value = IDENTITY.color;
 
     // If no saved color, generate one from current seed.
     if (!IDENTITY.color){
-      const token = deriveToken(IDENTITY.user, "");
-      IDENTITY.token = token;
-      const seed = (IDENTITY.user||"You") + "|";
-      IDENTITY.color = generateUniqueColor(seed);
-      IDENTITY.glow = computeGlowFromSeed(seed);
+      const seed0 = (IDENTITY.user||"You") + "|" + (cEl?.value || "#000000");
+      IDENTITY.color = generateUniqueColor(seed0);
       if (cEl) cEl.value = IDENTITY.color;
+      IDENTITY.code = deriveCode7(IDENTITY.user, IDENTITY.color);
+      IDENTITY.glow = computeGlowFromSeed(String(IDENTITY.user)+"|"+String(IDENTITY.color).toLowerCase());
     }
 
-    applyIdentity();
+
+
+  // ===== YUM toggle (local-only) =====
+  const YUM_KEY = "wordz_yum_v1";
+  function applyYum(on){
+    document.body.classList.toggle("yumMode", !!on);
+  }
+  function wireYumToggle(){
+    const t = document.getElementById("yumToggle");
+    if (!t) return;
+    let on = false;
+    try{ on = localStorage.getItem(YUM_KEY) === "1"; }catch(e){}
+    t.checked = on;
+    applyYum(on);
+    t.addEventListener("change", () => {
+      const v = t.checked ? "1" : "0";
+      try{ localStorage.setItem(YUM_KEY, v); }catch(e){}
+      applyYum(t.checked);
+      addLine("System", t.checked ? "^7yum overlay: ^2on" : "^7yum overlay: ^7off", "sys", "SYS");
+      saveChat();
+    });
+  }
+
+applyIdentity();
 
     const applyFromInputs = (forceGenerateColor=false) => {
       const u = (uEl?.value || "You").trim() || "You";
-      const k = (kEl?.value || "");
-      const seed = u + "|" + k;
-
       IDENTITY.user = u;
-      IDENTITY.token = deriveToken(u, k);
-      IDENTITY.glow = computeGlowFromSeed(seed);
 
+      let color = (cEl?.value || IDENTITY.color || "#000000");
       if (forceGenerateColor || !IDENTITY.color){
-        IDENTITY.color = generateUniqueColor(seed);
+        const seed0 = u + "|" + String(color).toLowerCase();
+        IDENTITY.color = generateUniqueColor(seed0);
+        color = IDENTITY.color;
         if (cEl) cEl.value = IDENTITY.color;
+      } else {
+        IDENTITY.color = color;
       }
+
+      IDENTITY.code = deriveCode7(IDENTITY.user, IDENTITY.color);
+      IDENTITY.glow = computeGlowFromSeed(String(IDENTITY.user) + "|" + String(IDENTITY.color).toLowerCase());
 
       applyIdentity();
       saveIdentity();
@@ -1454,12 +1506,12 @@ const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
 
     document.getElementById("identLogin")?.addEventListener("click", () => {
       applyFromInputs(true);
-      addLine("System", `^7identity set: ^2${IDENTITY.user} ^7(tkn ^3${IDENTITY.token}^7)`, "sys", "SYS");
+      addLine("System", `^7identity set: ^2${IDENTITY.user} ^7(id ^3${IDENTITY.code}^7)`, "sys", "SYS");
       saveChat();
     });
 
     document.getElementById("identReset")?.addEventListener("click", () => {
-      IDENTITY = { user:"You", token:"----", color:null, glow:10 };
+      IDENTITY = { user:"You", code:"0000000", color:null, glow:10 };
       try{ localStorage.removeItem(IDENT_KEY); }catch(e){}
       if (uEl) uEl.value = "You";
       if (kEl) kEl.value = "";
@@ -1779,7 +1831,8 @@ const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
   const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();
   setTheme(savedTheme || "yakult");
   wireIdentityUI();
-  requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
+    wireYumToggle();
+requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
 
   const had = loadChat();
   if(!had){
