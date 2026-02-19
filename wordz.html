@@ -1,21 +1,618 @@
-<a href="https://krowbyrd.github.io/godex/wordz.html" target="_blank" style="text-decoration:none;">
-  <div style="width:320px;max-width:100%;font-family:Tahoma,Arial,sans-serif;border:1px solid #f0d7c6;border-radius:14px;overflow:hidden;background:#fff6ee;">
-    <div style="padding:8px 10px;background:linear-gradient(#ffe9de,#ffd6c8);color:#7a2e25;font-weight:bold;border-bottom:1px solid #f0d7c6;display:flex;justify-content:space-between;">
-      <span>WordZ</span><span style="opacity:.8;">yakult</span>
+<!-- wordz.html — Yakult “live chat” shell (local-only) -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WordZ :: yakult</title>
+  <style>
+    :root{
+      --bg:#fffaf4;        /* milk-cream */
+      --panel:#fff6ee;     /* soft bottle tone */
+      --panel2:#f9efe4;    /* depth */
+      --text:#2a2a2a;      /* warm dark */
+      --muted:#8a8178;     /* calm brown-gray */
+      --line:#f0d7c6;      /* faint divider */
+      --accent:#e46a5d;    /* gentle coral */
+      --accent2:#ffd6c8;   /* header wash */
+      --shadow:0 10px 24px rgba(228,106,93,.10);
+      --r:16px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --ui: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 800px at 20% 0%, #fff 0%, var(--bg) 55%, #fff7ef 100%);
+      color:var(--text);
+      font-family:var(--ui);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+
+    .frame{
+      width:min(720px, 100%);
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      overflow:hidden;
+      background:linear-gradient(#fff, var(--panel));
+      box-shadow:var(--shadow);
+    }
+
+    .top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 16px;
+      background:linear-gradient(#ffe9de, var(--accent2));
+      border-bottom:1px solid var(--line);
+    }
+
+    .brand{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+      min-width:0;
+    }
+    .brand b{
+      font-size:18px;
+      letter-spacing:.4px;
+      color:#7a2e25;
+    }
+    .tag{
+      font-size:12px;
+      color:#7a2e25;
+      opacity:.85;
+      padding:4px 10px;
+      border:1px solid rgba(122,46,37,.18);
+      border-radius:999px;
+      background:rgba(255,255,255,.6);
+      white-space:nowrap;
+    }
+
+    .status{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-family:var(--mono);
+      font-size:12px;
+      color:#7a2e25;
+      opacity:.9;
+      white-space:nowrap;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:#42d392;
+      box-shadow:0 0 0 5px rgba(66,211,146,.15);
+    }
+
+    .body{
+      display:grid;
+      grid-template-columns: 1fr 220px;
+      gap:12px;
+      padding:14px;
+      background:linear-gradient(#fffaf4, #fff7ef);
+    }
+
+    @media (max-width: 720px){
+      .body{ grid-template-columns:1fr; }
+    }
+
+    .card{
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      background:#fff;
+      overflow:hidden;
+    }
+
+    .cardHead{
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(#fff, #fff8f2);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .cardHead .title{
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--muted);
+    }
+    .pill{
+      font-family:var(--mono);
+      font-size:11px;
+      color:#7a2e25;
+      border:1px solid var(--line);
+      background:var(--panel2);
+      padding:3px 8px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+
+    /* “Chat log” */
+    .log{
+      height:320px;
+      overflow:auto;
+      padding:12px;
+      font-family:var(--mono);
+      font-size:12px;
+      line-height:1.45;
+      background:
+        linear-gradient(#fff, #fff),
+        repeating-linear-gradient(to bottom, rgba(240,215,198,.15) 0px, rgba(240,215,198,.15) 1px, transparent 1px, transparent 22px);
+      background-blend-mode: normal;
+    }
+    .line{ margin:0 0 10px; }
+    .who{ color:#7a2e25; font-weight:700; }
+    .when{ color:var(--muted); }
+    .msg{ color:var(--text); }
+    .sys .who{ color:var(--accent); }
+
+    /* Typing indicator */
+    .typing{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-top:1px solid var(--line);
+      background:linear-gradient(#fff, #fff8f2);
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--muted);
+      min-height:40px;
+    }
+    .dots{
+      display:inline-flex;
+      gap:4px;
+      align-items:center;
+    }
+    .dots i{
+      width:6px;height:6px;border-radius:50%;
+      background:rgba(138,129,120,.55);
+      display:inline-block;
+      animation: bounce 1.1s infinite ease-in-out;
+    }
+    .dots i:nth-child(2){ animation-delay:.15s; }
+    .dots i:nth-child(3){ animation-delay:.30s; }
+    @keyframes bounce{
+      0%, 80%, 100% { transform: translateY(0); opacity:.6; }
+      40% { transform: translateY(-3px); opacity:1; }
+    }
+
+    /* Input strip */
+    .composer{
+      padding:12px;
+      border-top:1px solid var(--line);
+      background:linear-gradient(#fff, #fff8f2);
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .input{
+      flex:1;
+      min-width:220px;
+      padding:10px 12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--text);
+      outline:none;
+    }
+    .input:focus{
+      box-shadow:0 0 0 4px rgba(228,106,93,.15);
+      border-color: rgba(228,106,93,.45);
+    }
+
+    .btn{
+      padding:10px 12px;
+      border:1px solid rgba(228,106,93,.35);
+      background:linear-gradient(#ffe9de, #ffd6c8);
+      color:#7a2e25;
+      border-radius:14px;
+      cursor:pointer;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .btn:hover{ filter:saturate(1.05); }
+    .btn:active{ transform: translateY(1px); }
+
+    .chips{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      padding:12px;
+    }
+    .chip{
+      font-family:var(--mono);
+      font-size:12px;
+      border:1px solid var(--line);
+      background:var(--panel2);
+      color:#7a2e25;
+      padding:8px 10px;
+      border-radius:999px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .chip:hover{ background:#fff; }
+    .chip:active{ transform: translateY(1px); }
+
+    /* Side panel */
+    .side{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+    .sideBox{
+      border:1px solid var(--line);
+      border-radius:var(--r);
+      background:#fff;
+      overflow:hidden;
+    }
+    .sideBox .hd{
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(#fff, #fff8f2);
+      font-family:var(--mono);
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .sideBox .bd{
+      padding:12px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+    .tiny{
+      font-family:var(--mono);
+      font-size:11px;
+      color:var(--muted);
+      opacity:.95;
+    }
+    a{ color: var(--accent); text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+  </style>
+</head>
+
+<body>
+  <div class="frame" id="app">
+    <div class="top">
+      <div class="brand">
+        <b>WordZ</b>
+        <span class="tag">yakult</span>
+      </div>
+      <div class="status" title="local-only">
+        <span class="dot"></span>
+        <span id="statusText">online</span>
+      </div>
     </div>
 
-    <div style="padding:10px;background:#fffaf4;">
-      <div style="font-size:12px;color:#8a8178;margin-bottom:8px;"># bio · live shell</div>
+    <div class="body">
+      <!-- main -->
+      <div class="card">
+        <div class="cardHead">
+          <div class="title"># bio · live shell</div>
+          <div class="pill" id="modePill">local</div>
+        </div>
 
-      <div style="border:1px solid #f0d7c6;border-radius:12px;background:#fff;padding:8px;height:90px;overflow:hidden;">
-        <b style="color:#7a2e25;">System</b>
-        <span style="color:#8a8178;font-size:11px;">now</span><br>
-        <span style="color:#2a2a2a;">WordZ shell online.</span><br><br>
+        <div class="log" id="log" aria-label="chat log"></div>
 
-        <b style="color:#7a2e25;">You</b>
-        <span style="color:#8a8178;font-size:11px;">now</span><br>
-        <span style="color:#2a2a2a;">Click to enter…</span>
+        <div class="typing" id="typing" style="display:none;">
+          <span class="who">WordZ</span>
+          <span class="when">typing</span>
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        </div>
+
+        <div class="composer">
+          <input class="input" id="input" placeholder="Type (local-only) …" maxlength="240" />
+          <button class="btn" id="send">Send</button>
+          <span class="tiny">No accounts. No server. Just the illusion.</span>
+        </div>
+
+        <div class="chips" id="chips">
+          <div class="chip" data-say="hello">hello</div>
+          <div class="chip" data-say="status?">status?</div>
+          <div class="chip" data-say="leave a note">leave a note</div>
+          <div class="chip" data-say="what is this?">what is this?</div>
+        </div>
+      </div>
+
+      <!-- side -->
+      <div class="side">
+        <div class="sideBox">
+          <div class="hd">
+            <span>signal</span>
+            <span class="pill">soft</span>
+          </div>
+          <div class="bd">
+            A tiny page that looks alive.<br>
+            All replies are local and ephemeral-ish.
+            <div style="margin-top:10px" class="tiny">
+              Tip: this is meant to be linked from a forum bio.
+            </div>
+          </div>
+        </div>
+
+        <div class="sideBox">
+          <div class="hd">
+            <span>controls</span>
+            <span class="pill">quiet</span>
+          </div>
+          <div class="bd">
+            <div class="tiny">Theme:</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+              <button class="btn" style="padding:8px 10px; border-radius:999px;" data-theme="yakult" type="button">yakult</button>
+              <button class="btn" style="padding:8px 10px; border-radius:999px;" data-theme="y2k" type="button">y2k</button>
+              <button class="btn" style="padding:8px 10px; border-radius:999px;" data-theme="punk" type="button">punk</button>
+            </div>
+            <div style="margin-top:10px" class="tiny">
+              Stored in <code>localStorage</code>.
+            </div>
+          </div>
+        </div>
+
+        <div class="sideBox">
+          <div class="hd">
+            <span>link</span>
+            <span class="pill">portal</span>
+          </div>
+          <div class="bd">
+            Put this in your clan description:
+            <div class="tiny" style="margin-top:8px; padding:8px; border:1px solid var(--line); border-radius:12px; background:var(--panel2);">
+              WordZ :: yakult<br>
+              # bio · live shell<br>
+              [ System | now ] WordZ shell online.<br>
+              [ WordZ  | now ] typing…<br>
+              https://krowbyrd.github.io/godex/wordz.html
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</a>
+
+<script>
+(() => {
+  // ---------- tiny utilities ----------
+  const $ = (id) => document.getElementById(id);
+  const log = $("log");
+  const typing = $("typing");
+  const input = $("input");
+  const sendBtn = $("send");
+  const statusText = $("statusText");
+  const modePill = $("modePill");
+
+  const CHAT_KEY = "wordz_yakult_chat_v1";
+  const THEME_KEY = "wordz_theme_v1";
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const nowStamp = () => {
+    const d = new Date();
+    return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  };
+
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[c]));
+  }
+
+  function addLine(who, msg, cls=""){
+    const p = document.createElement("p");
+    p.className = `line ${cls}`.trim();
+    p.innerHTML = `<span class="who">${esc(who)}</span> <span class="when">| ${nowStamp()}</span><br><span class="msg">${esc(msg)}</span>`;
+    log.appendChild(p);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function saveChat(){
+    try{
+      // store as simple array of {who,msg,cls,t}
+      const items = [...log.querySelectorAll(".line")].slice(-80).map(p => {
+        const who = p.querySelector(".who")?.textContent || "";
+        const msg = p.querySelector(".msg")?.textContent || "";
+        const cls = p.classList.contains("sys") ? "sys" : "";
+        return { who, msg, cls, t: Date.now() };
+      });
+      localStorage.setItem(CHAT_KEY, JSON.stringify(items));
+    }catch(e){}
+  }
+
+  function loadChat(){
+    try{
+      const raw = localStorage.getItem(CHAT_KEY);
+      if(!raw) return false;
+      const items = JSON.parse(raw);
+      if(!Array.isArray(items)) return false;
+      log.innerHTML = "";
+      for(const it of items){
+        addLine(it.who || "?", it.msg || "", it.cls || "");
+      }
+      return items.length > 0;
+    }catch(e){
+      return false;
+    }
+  }
+
+  // ---------- fake “presence” ----------
+  const presence = ["online","idle","online","online","idle"];
+  setInterval(() => {
+    const next = presence[Math.floor(Math.random() * presence.length)];
+    statusText.textContent = next;
+  }, 7000);
+
+  // ---------- bot brain ----------
+  const replies = {
+    "hello": [
+      "hello.",
+      "you found the shell.",
+      "words stay soft here."
+    ],
+    "status?": [
+      "status: idle.",
+      "signals: stable.",
+      "market: ignored."
+    ],
+    "leave a note": [
+      "noted.",
+      "stored locally (ish).",
+      "thank you for the words."
+    ],
+    "what is this?": [
+      "a small page pretending to be alive.",
+      "a bio portal. nothing more.",
+      "a shell that holds text."
+    ]
+  };
+
+  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function showTyping(ms){
+    typing.style.display = "flex";
+    clearTimeout(showTyping._t);
+    showTyping._t = setTimeout(() => (typing.style.display = "none"), ms);
+  }
+
+  function botReply(key){
+    showTyping(800 + Math.random()*600);
+    setTimeout(() => {
+      typing.style.display = "none";
+      const pool = replies[key] || ["…"];
+      addLine("WordZ", pick(pool));
+      saveChat();
+    }, 700 + Math.random()*700);
+  }
+
+  // background “incoming” drift (keeps it feeling alive)
+  const drift = [
+    "…",
+    "log: quiet.",
+    "milk-cream UI engaged.",
+    "signal: minimal.",
+    "typing indicator is a lie (affectionate)."
+  ];
+  setInterval(() => {
+    // 1 in 3 chance to emit a drift line, only if user has interacted or log has content
+    const hasContent = log.querySelectorAll(".line").length > 2;
+    if(!hasContent) return;
+    if(Math.random() < 0.33){
+      showTyping(900);
+      setTimeout(() => {
+        typing.style.display = "none";
+        addLine("WordZ", pick(drift));
+        saveChat();
+      }, 700);
+    }
+  }, 14000);
+
+  // ---------- user send ----------
+  function send(text){
+    const msg = String(text || input.value || "").trim();
+    if(!msg) return;
+    addLine("You", msg);
+    input.value = "";
+    input.focus();
+    saveChat();
+
+    // route to bot on known keys, else generic response
+    const key = (msg.toLowerCase().trim());
+    if(replies[key]) botReply(key);
+    else botReply("what is this?");
+  }
+
+  sendBtn.addEventListener("click", () => send());
+  input.addEventListener("keydown", (e) => {
+    if(e.key === "Enter"){
+      e.preventDefault();
+      send();
+    }
+  });
+
+  document.getElementById("chips").addEventListener("click", (e) => {
+    const chip = e.target.closest(".chip");
+    if(!chip) return;
+    send(chip.getAttribute("data-say") || "");
+  });
+
+  // ---------- themes ----------
+  const THEMES = {
+    yakult: {
+      bg:"#fffaf4", panel:"#fff6ee", panel2:"#f9efe4", text:"#2a2a2a", muted:"#8a8178",
+      line:"#f0d7c6", accent:"#e46a5d", accent2:"#ffd6c8", shadow:"0 10px 24px rgba(228,106,93,.10)",
+      r:"16px"
+    },
+    y2k: {
+      bg:"#e9eef6", panel:"#d4d0c8", panel2:"#c0c0c0", text:"#000000", muted:"#444444",
+      line:"#000000", accent:"#0a246a", accent2:"#3a6ea5", shadow:"none",
+      r:"0px"
+    },
+    punk: {
+      bg:"#000000", panel:"#0a0a0a", panel2:"#050505", text:"#e6e6e6", muted:"#6b6b6b",
+      line:"#111111", accent:"#00e5ff", accent2:"#1aff00", shadow:"inset 0 0 12px rgba(0,255,0,.15), 0 0 8px rgba(0,255,0,.25)",
+      r:"0px"
+    }
+  };
+
+  function setTheme(name){
+    const t = THEMES[name] || THEMES.yakult;
+    const r = document.documentElement.style;
+    r.setProperty("--bg", t.bg);
+    r.setProperty("--panel", t.panel);
+    r.setProperty("--panel2", t.panel2);
+    r.setProperty("--text", t.text);
+    r.setProperty("--muted", t.muted);
+    r.setProperty("--line", t.line);
+    r.setProperty("--accent", t.accent);
+    r.setProperty("--accent2", t.accent2);
+    r.setProperty("--shadow", t.shadow);
+    r.setProperty("--r", t.r);
+
+    // minor theme-specific tweaks
+    if(name === "punk"){
+      document.body.style.fontFamily = `"Courier New", monospace`;
+      document.body.style.background =
+        `repeating-linear-gradient(to bottom, #000 0px, #000 2px, #020202 3px)`;
+      modePill.textContent = "local · punk";
+    } else if(name === "y2k"){
+      document.body.style.fontFamily = `Tahoma, Verdana, Arial, sans-serif`;
+      document.body.style.background = t.bg;
+      modePill.textContent = "local · y2k";
+    } else {
+      document.body.style.fontFamily = "";
+      document.body.style.background = "";
+      modePill.textContent = "local";
+    }
+
+    try{ localStorage.setItem(THEME_KEY, name); }catch(e){}
+  }
+
+  document.querySelectorAll("[data-theme]").forEach(btn => {
+    btn.addEventListener("click", () => setTheme(btn.getAttribute("data-theme")));
+  });
+
+  // ---------- boot ----------
+  const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();
+  setTheme(savedTheme || "yakult");
+
+  const had = loadChat();
+  if(!had){
+    addLine("System", "WordZ shell online.", "sys");
+    addLine("WordZ", "typing…");
+    addLine("You", "Click a chip, or type a line.");
+    saveChat();
+  }
+  input.focus();
+})();
+</script>
+</body>
+</html>
