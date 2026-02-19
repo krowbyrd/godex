@@ -1033,8 +1033,7 @@
             </div>
           </div>
         </div>
-      </div>
-    
+
         <div class="sideBox">
           <div class="hd">
             <span>users</span>
@@ -1042,7 +1041,7 @@
           </div>
           <ul class="userList" id="userList" aria-label="npc users"></ul>
         </div>
-
+      </div>
 </div>
   </div>
 
@@ -1099,10 +1098,10 @@
 
   function esc(s){
     return String(s).replace(/[&<>"']/g, c => ({
-      "&":"&",
-      "<":"<",
-      ">":">",
-      "\"":""",
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
       "'":"&#039;"
     }[c]));
   }
@@ -1159,70 +1158,27 @@
     { name: "RoomTemp",    color: "#ffff40", state: "idle",   topics: ["vibe","quiet","timing"] },
     { name: "NullPointer", color: "#ff40ff", state: "online", topics: ["bugs","edges","inputs"] },
     { name: "Archivist",   color: "#aaaaaa", state: "online", topics: ["notes","logs","memory"] },
-    { name: "NeonLobby",   color: "#00ccff", state: "online", topics: ["room","vibe","timing"] },
-    { name: "RazorWire",   color: "#ff9900", state: "online", topics: ["edges","bugs","inputs"] },
-    { name: "MilkCarton",  color: "#c060ff", state: "idle",   topics: ["vibe","notes","memory"] },
-    { name: "SysClock",    color: "#40ffff", state: "online", topics: ["status","timing","ops"] },
-    { name: "BevelBoss",   color: "#ffcc40", state: "idle",   topics: ["ui","edges","notes"] },
-
   ];
 
   const NPC_CHANNELS = ["ROOM","CLAN","SYS"];
 
   // "Gun topics" here = game/chat flavor only (matches/loadouts vibes), no real-world instructions.
   const TOPIC_LINES = {
-    ops: ["^2ping ok.","^7relay quiet.","^3instance idle.","^7signals stable.",
-"^7ops: local-only, still alive.",
-"^7ops question: ship shell or polish bevels?",
-],
+    ops: ["^2ping ok.","^7relay quiet.","^3instance idle.","^7signals stable."],
     relay: ["^7bus: clear.","^7packets: calm.","^5handoff clean."],
     status: ["^2online.","^7idle.","^4watching."],
-    clan: ["^7[CLAN] chatter drifting.","^7someone joined the room.","^7someone left a note.",
-"^7[WrdZ] roll call.",
-"^7question: duel set or chill lobby?",
-"^7question: hallway is calling—who’s in?",
-"^7question: what map is muscle memory for you?",
-"^7quote: My life for Aiur.",
-"^7quote: En Taro Adun.",
-],
-    room: ["^7room feels light today.","^7matchmaking: imaginary.",
-"^7question: spectate or queue?",
-"^7question: ping smooth or spicy?",
-"^7quote: You must construct additional pylons.",
-"^7quote: Battlecruiser operational.",
-"^7quote: Nuclear launch detected.",
-],
-    matches: ["^3warmup only.","^7no ranked. just motion.",
-"^7question: k-style nostalgia check?",
-"^7question: aim calm or flick chaos?",
-"^7question: one more round—what’s your pick?",
-"^7question: warmup with wallshots or straight in?",
-],
+    clan: ["^7[CLAN] chatter drifting.","^7someone joined the room.","^7someone left a note."],
+    room: ["^7room feels light today.","^7matchmaking: imaginary."],
+    matches: ["^3warmup only.","^7no ranked. just motion."],
     patch: ["^7notes are incomplete.","^7build feels stable."],
     version: ["^7v0.0.x energy.","^7shell-first, always."],
-    notes: ["^7log appended.","^7archived locally.",
-"^7question: what do we freeze next?",
-"^7question: what’s the smallest useful log line?",
-"^7margin note: saved.",
-],
+    notes: ["^7log appended.","^7archived locally."],
     portal: ["^3blue link looks real.","^7click-through confirmed."],
     links: ["^3external jump armed.","^7confirm modal: expected."],
-    ui: ["^7bevels: correct.","^7angles: business.",
-"^7ui check: borders held.",
-"^7ui check: buttons clicky.",
-"^7question: glow subtle or loud?",
-],
-    vibe: ["^7quiet window.","^7milk-cream palette.",
-"^7yakult-core, bevels sharp.",
-"^7question: y2k switch later?",
-"^7quote: We require more vespene gas.",
-"^7quote: Carrier has arrived.",
-],
+    ui: ["^7bevels: correct.","^7angles: business."],
+    vibe: ["^7quiet window.","^7milk-cream palette."],
     timing: ["^7slow loop. steady hand.","^7no rush."],
-    bugs: ["^6edge case spotted.","^6input sanitized.",
-"^7question: repro steps or folklore?",
-"^7question: race condition or vibes?",
-],
+    bugs: ["^6edge case spotted.","^6input sanitized."],
     edges: ["^6corners squared.","^6borders held."],
     inputs: ["^6user typed.","^6shell replied."],
     logs: ["^7remember this frame.","^7the log holds."],
@@ -1294,8 +1250,8 @@
     const lineCount = log.querySelectorAll(".line").length;
     if (lineCount < 2) return;
 
-    // FURTHER INCREASED CHATTINESS: Probability changed from 0.70 to 0.90
-    if (!chance(0.90)) return;
+    // Quiet by default
+    if (!chance(0.30)) return;
 
     // Pick speaker (sometimes respond to lastNpc)
     let npc = null;
@@ -1669,58 +1625,13 @@
     { who: "System", msg: "all systems nominal, mostly."},
     { who: "Echo_Bot", msg: "can you hear me now?"},
     { who: "Agent_X", msg: "stay frosty."},
-    { who: "Watcher", msg: "always watching, never blinking."},
-    { who: "WordZ", msg: "^7question: k-style or classic aim?"},
-    { who: "WordZ", msg: "^7question: what map feels like home?"},
-    { who: "Oracle", msg: "^7quote: En Taro Adun."},
-    { who: "Agent_X", msg: "^7quote: Battlecruiser operational."},
-    { who: "Watcher", msg: "^7quote: Nuclear launch detected."},
-    { who: "Echo_Bot", msg: "^7quote: You must construct additional pylons."},
-    { who: "System", msg: "^7[WrdZ] lobby lights on."},
-    { who: "System", msg: "^7note: bevels aligned."},
-    { who: "WordZ", msg: "^7ops: local-only, still alive."},
-    { who: "WordZ", msg: "^7ops question: ship shell or polish bevels?"},
-    { who: "ClanLog", msg: "^7[WrdZ] roll call."},
-    { who: "ClanLog", msg: "^7question: duel set or chill lobby?"},
-    { who: "ClanLog", msg: "^7question: hallway is calling—who’s in?"},
-    { who: "ClanLog", msg: "^7question: what map is muscle memory for you?"},
-    { who: "ClanLog", msg: "^7quote: My life for Aiur."},
-    { who: "ClanLog", msg: "^7quote: En Taro Adun."},
-    { who: "RoomTemp", msg: "^7yakult-core, bevels sharp."},
-    { who: "RoomTemp", msg: "^7question: y2k switch later?"},
-    { who: "RoomTemp", msg: "^7quote: We require more vespene gas."},
-    { who: "RoomTemp", msg: "^7quote: Carrier has arrived."},
-    { who: "BlueLink", msg: "efficiency reports: within acceptable parameters."},
-    { who: "BlueLink", msg: "^7ui check: borders held."},
-    { who: "BlueLink", msg: "^7ui check: buttons clicky."},
-    { who: "BlueLink", msg: "^7question: glow subtle or loud?"},
-    { who: "NullPointer", msg: "^7question: repro steps or folklore?"},
-    { who: "NullPointer", msg: "^7question: race condition or vibes?"},
-    { who: "Archivist", msg: "^7question: what do we freeze next?"},
-    { who: "Archivist", msg: "^7question: what’s the smallest useful log line?"},
-    { who: "Archivist", msg: "^7margin note: saved."},
-    { who: "Oracle", msg: "^7quote: Stay awhile and listen." }, // Diablo 2
-    { who: "Agent_X", msg: "^7quote: Not enough mana." }, // Diablo 2
-    { who: "Watcher", msg: "^7quote: You have been slain!" }, // Diablo 2
-    { who: "Echo_Bot", msg: "^7quote: Fresh meat!" }, // Diablo 2
-    { who: "WordZ", msg: "^7quote: Hail to the King, baby." }, // Diablo 2
-    { who: "WordZ", msg: "^7question: k-style nostalgia check?" }, // GunZ: The Duel
-    { who: "WordZ", msg: "^7question: aim calm or flick chaos?" }, // GunZ: The Duel
-    { who: "WordZ", msg: "^7question: one more round—what’s your pick?" }, // GunZ: The Duel
-    { who: "WordZ", msg: "^7question: warmup with wallshots or straight in?" }, // GunZ: The Duel
-    // New diverse quotes
-    { who: "System", msg: "^7Analyzing system logs for anomalies... All clear." },
-    { who: "Oracle", msg: "^7The whispers of the data stream grow louder." },
-    { who: "Agent_X", msg: "^7Maintaining stealth protocols. No unauthorized access." },
-    { who: "Echo_Bot", msg: "^7My circuits hum with digital poetry." },
-    { who: "Watcher", msg: "^7A new pattern emerges from the chaos." },
+    { who: "Watcher", msg: "always watching, never blinking."}
   ];
 
   setInterval(() => {
     const hasContent = log.querySelectorAll(".line").length > 2;
     if(!hasContent) return;
-    // Further Increased chattiness: Probability changed from 0.70 to 0.90
-    if(Math.random() < 0.90){ 
+    if(Math.random() < 0.33){
       showTyping(900);
       setTimeout(() => {
         typing.style.display = "none";
@@ -1729,8 +1640,7 @@
         saveChat();
       }, 700);
     }
-  // DECREASED INTERVAL: From 7000ms to 4000ms for even more frequent chatter
-  }, 4000); 
+  }, 14000);
 
   function send(text){
     const msg = String(text || input.value || "").trim();
@@ -1785,7 +1695,7 @@
     },
     punk: {
       bg:"#000000", panel:"#0a0a0a", panel2:"#050505", text:"#e6e6e6", muted:"#6b6b6b",
-      line:"#111111", accent:"#00e5ff", accent2:"#1aff00", shadow:"inset 0 0 12px rgba(0,255,0,.15), 0 0 8px rgba(0,255,0,.25)",
+      line:"#111111", accent:"#1aff00", accent2:"#1aff00", shadow:"inset 0 0 12px rgba(0,255,0,.15), 0 0 8px rgba(0,255,0,.25)",
       r:"0px"
     }
   };
@@ -1836,10 +1746,8 @@
 
   // ===== NPC panel + ambient chatter =====
   renderUserList();
-  // MODIFIED INTERVAL for npcPresenceTick (kept previous adjustment)
-  setInterval(npcPresenceTick, 8000 + Math.floor(Math.random()*4000)); 
-  // MODIFIED INTERVAL for npcChatterTick
-  setInterval(npcChatterTick, 3000 + Math.floor(Math.random()*2000)); // Further adjusted from 5000+3000
+  setInterval(npcPresenceTick, 12000 + Math.floor(Math.random()*6000));
+  setInterval(npcChatterTick, 9000 + Math.floor(Math.random()*7000));
 
   input.focus();
 })();
