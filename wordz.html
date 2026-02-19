@@ -160,7 +160,13 @@
     .msg{ color:var(--text); }
     .sys .who{ color:var(--accent); }
 
-    /* Typing indicator */
+    
+
+    /* GunZ-ish line chrome (doesn't affect theme variables) */
+    .time{ color:var(--muted); }
+    .chan{ color:var(--muted); }
+    .sep{ color:var(--muted); }
+/* Typing indicator */
     .typing{
       display:flex;
       align-items:center;
@@ -1015,24 +1021,83 @@
     }[c]));
   }
 
+
+  // ===== GunZ-style inline color codes (e.g., ^1red ^2green ^3blue) =====
+  const GUNZ_COLORS = {
+    "0": "#ffffff",
+    "1": "#ff4040",
+    "2": "#40ff40",
+    "3": "#4080ff",
+    "4": "#ffff40",
+    "5": "#40ffff",
+    "6": "#ff40ff",
+    "7": "#aaaaaa",
+  };
+
+  function parseGunzColors(text){
+    let current = GUNZ_COLORS["0"];
+    let out = "";
+    const str = String(text ?? "");
+    for (let i = 0; i < str.length; i++){
+      if (str[i] === "^" && GUNZ_COLORS[str[i+1]]){
+        current = GUNZ_COLORS[str[i+1]];
+        i++; // skip color digit
+        continue;
+      }
+      out += `<span style="color:${current}">${esc(str[i])}</span>`;
+    }
+    return out;
+  }
+
+  function stripGunzCodes(text){
+    return String(text ?? "").replace(/\^[0-7]/g, "");
+  }
+
+  function inferChannel(who, cls){
+    const w = String(who || "").toLowerCase();
+    if (cls && String(cls).includes("sys")) return "SYS";
+    if (w === "system") return "SYS";
+    if (w === "you") return "YOU";
+    // Default: feels like CLAN/ROOM chatter
+    return "CLAN";
+  }
+
+
   // MODIFIED addLine to include bot-specific classes for styling
-  function addLine(who, msg, cls=""){
+  function addLine(who, msg, cls="", channel=null){
     const p = document.createElement("p");
     p.className = `line ${cls}`.trim();
+
+    // Preserve raw message so ^color codes survive save/load
+    p.dataset.rawmsg = String(msg ?? "");
+    const ch = channel || inferChannel(who, cls);
+    p.dataset.channel = ch;
+
     // Generate a sanitized class name from the 'who'
-    const whoClass = `who-${who.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-    p.innerHTML = `<span class="who ${whoClass}">${esc(who)}</span> <span class="when">| ${nowStamp()}</span><br><span class="msg">${esc(msg)}</span>`;
+    const whoClass = `who-${String(who ?? "?").toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+
+    // GunZ-ish format:
+    // Name [HH:MM] [CHAN]
+    // message (with ^color codes)
+    p.innerHTML =
+      `<span class="who ${whoClass}">${esc(who)}</span> ` +
+      `<span class="when time">[${esc(nowStamp())}]</span> ` +
+      `<span class="chan">[${esc(ch)}]</span>` +
+      `<br><span class="msg">${parseGunzColors(p.dataset.rawmsg)}</span>`;
+
     log.appendChild(p);
     log.scrollTop = log.scrollHeight;
   }
+
 
   function saveChat(){
     try{
       const items = [...log.querySelectorAll(".line")].slice(-80).map(p => {
         const who = p.querySelector(".who")?.textContent || "";
-        const msg = p.querySelector(".msg")?.textContent || "";
+        const msg = p.dataset.rawmsg || (p.querySelector(".msg")?.textContent || "");
         const cls = p.classList.contains("sys") ? "sys" : "";
-        return { who, msg, cls, t: Date.now() };
+        const channel = p.dataset.channel || "";
+        return { who, msg, cls, channel, t: Date.now() };
       });
       localStorage.setItem(CHAT_KEY, JSON.stringify(items));
     }catch(e){}
@@ -1046,7 +1111,7 @@
       if(!Array.isArray(items)) return false;
       log.innerHTML = "";
       for(const it of items){
-        addLine(it.who || "?", it.msg || "", it.cls || "");
+        addLine(it.who || "?", it.msg || "", it.cls || "", it.channel || null);
       }
       return items.length > 0;
     }catch(e){
@@ -1140,16 +1205,16 @@
 
   const driftMessages = [
     { who: "WordZ", msg: "…"},
-    { who: "WordZ", msg: "log: quiet."},
+    { who: "WordZ", msg: "^7log: quiet."},
     { who: "WordZ", msg: "milk-cream UI engaged."},
-    { who: "WordZ", msg: "signal: minimal."},
+    { who: "WordZ", msg: "^7signal: minimal."},
     { who: "WordZ", msg: "typing indicator is a lie (affectionate)."},
     { who: "Oracle", msg: "the digital tides shift."},
     { who: "Echo_Bot", msg: "a thought, gently reverberating."},
     { who: "Agent_X", msg: "perimeter clear, for now."},
     { who: "Watcher", msg: "new data points on the horizon."},
     { who: "WordZ", msg: "just floating along."},
-    { who: "System", msg: "background processes humming."}, 
+    { who: "System", msg: "^7background processes humming."}, 
     { who: "Echo_Bot", msg: "reflection in the code."},
     { who: "Agent_X", msg: "nothing to report. yet."},
     { who: "Oracle", msg: "the threads weave unseen."},
@@ -1270,9 +1335,9 @@
 
   const had = loadChat();
   if(!had){
-    addLine("System", "WordZ shell online.", "sys");
-    addLine("WordZ", "typing…", "sys");
-    addLine("You", "Click a chip, or type a line.", "sys");
+    addLine("System", "^2WordZ shell online.", "sys", "SYS");
+    addLine("WordZ", "^3typing…", "sys", "CLAN");
+    addLine("You", "^7Click a chip, or type a line.", "sys", "YOU");
     saveChat();
   }
   input.focus();
