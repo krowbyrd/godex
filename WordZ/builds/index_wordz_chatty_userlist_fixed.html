@@ -1159,13 +1159,12 @@
     { name: "RoomTemp",    color: "#ffff40", state: "idle",   topics: ["vibe","quiet","timing"] },
     { name: "NullPointer", color: "#ff40ff", state: "online", topics: ["bugs","edges","inputs"] },
     { name: "Archivist",   color: "#aaaaaa", state: "online", topics: ["notes","logs","memory"] },
-  
-    { name: "NeonLobby",   color: "#00ffff", state: "online", topics: ["room","vibe","timing"] },
+    { name: "NeonLobby",   color: "#00ccff", state: "online", topics: ["room","vibe","timing"] },
     { name: "RazorWire",   color: "#ff9900", state: "online", topics: ["edges","bugs","inputs"] },
     { name: "MilkCarton",  color: "#c060ff", state: "idle",   topics: ["vibe","notes","memory"] },
     { name: "SysClock",    color: "#40ffff", state: "online", topics: ["status","timing","ops"] },
-    { name: "ForumBio",    color: "#00ccff", state: "online", topics: ["portal","links","ui"] },
     { name: "BevelBoss",   color: "#ffcc40", state: "idle",   topics: ["ui","edges","notes"] },
+
   ];
 
   const NPC_CHANNELS = ["ROOM","CLAN","SYS"];
@@ -1193,18 +1192,6 @@
     memory: ["^7localStorage: faithful.","^7state preserved."],
   };
 
-  const QUOTES = [
-    "^7“Desks clear. Notes aligned. Pages ready.”",
-    "^7“Information is enough.”",
-    "^7“Shell first. Reality later.”",
-    "^7“Angles: business. Soul: punk.”",
-    "^7“Be kind to the log; it remembers.”",
-    "^7“Local-first. Noise-last.”",
-    "^7“Milk-cream UI, razor edges.”",
-    "^7“Quiet systems still move.”"
-  ];
-
-
   function npcByName(name){
     return NPC_ROSTER.find(n => n.name === name) || null;
   }
@@ -1216,22 +1203,6 @@
     if (!ul || !pill) return;
 
     ul.innerHTML = "";
-
-    // self (identity) blended into list (top)
-    const selfName = (window.WORDZ_USER_NAME || "You");
-    const selfColor = (window.WORDZ_USER_COLOR || "#2a2a2a");
-    const liSelf = document.createElement("li");
-    liSelf.className = "userRow";
-    const dotSelf = document.createElement("span");
-    dotSelf.className = "uDot";
-    const nameSelf = document.createElement("span");
-    nameSelf.className = "uName whoGlow";
-    nameSelf.textContent = selfName;
-    nameSelf.style.color = selfColor;
-    liSelf.appendChild(dotSelf);
-    liSelf.appendChild(nameSelf);
-    ul.appendChild(liSelf);
-
     for (const npc of NPC_ROSTER){
       const li = document.createElement("li");
       li.className = "userRow";
@@ -1248,9 +1219,6 @@
       li.appendChild(name);
       ul.appendChild(li);
     }
-
-    pill.textContent = String(NPC_ROSTER.length + 1);
-  }
 
     pill.textContent = String(NPC_ROSTER.length);
   }
@@ -1290,7 +1258,7 @@
     if (lineCount < 2) return;
 
     // Quiet by default
-    if (!chance(0.55)) return;
+    if (!chance(0.30)) return;
 
     // Pick speaker (sometimes respond to lastNpc)
     let npc = null;
@@ -1303,11 +1271,9 @@
 
     // Pick topic (sometimes mirror last topic)
     const topic = chance(0.45) ? lastTopic : randomTopicFor(npc);
-    let line = pick(TOPIC_LINES[topic] || TOPIC_LINES.ops);
+    const line = pick(TOPIC_LINES[topic] || TOPIC_LINES.ops);
 
-    // occasional quote drop
-    if (chance(0.22)) line = pick(QUOTES);
-const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
+    const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
     const chan = (topic === "ops" || topic === "relay" || topic === "status") ? "SYS"
               : (topic === "clan") ? "CLAN" : "ROOM";
 
@@ -1388,10 +1354,6 @@ const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
 
     const gh = document.getElementById("identGlowHint");
     if (gh) gh.textContent = "glow: " + String(window.WORDZ_USER_GLOW || 10);
-
-    // keep user list synced
-    try{ renderUserList(); }catch(e){}
-
   }
 
   function saveIdentity(){
@@ -1792,7 +1754,7 @@ const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
   // ===== NPC panel + ambient chatter =====
   renderUserList();
   setInterval(npcPresenceTick, 12000 + Math.floor(Math.random()*6000));
-  setInterval(npcChatterTick, 5500 + Math.floor(Math.random()*5000));
+  setInterval(npcChatterTick, 9000 + Math.floor(Math.random()*7000));
 
   input.focus();
 })();
