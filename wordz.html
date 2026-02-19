@@ -1169,7 +1169,7 @@
   }
 
   function stripGunzCodes(text){
-    return String(text ?? "").replace(/\^[0-7]/g, "");
+    return String(text ?? "").replace(/^\^[0-79]/g, "");
   }
 
   function inferChannel(who, cls){
@@ -1416,12 +1416,11 @@ function wireIdentityUI(){
 
     // If no saved color, generate one from current seed.
     if (!IDENTITY.color){
-      const token = deriveToken(IDENTITY.user, "");
-      IDENTITY.token = token;
-      const seed = (IDENTITY.user||"You") + "|";
+      const seed = (IDENTITY.user||"You") + "|" + (cEl?.value || "#000000");
       IDENTITY.color = generateUniqueColor(seed);
-      IDENTITY.glow = computeGlowFromSeed(seed);
       if (cEl) cEl.value = IDENTITY.color;
+      IDENTITY.code = deriveCode7(IDENTITY.user, IDENTITY.color);
+      IDENTITY.glow = computeGlowFromSeed(String(IDENTITY.user)+"|"+String(IDENTITY.color).toLowerCase());
     }
 
     
@@ -1451,16 +1450,22 @@ applyIdentity();
 
     const applyFromInputs = (forceGenerateColor=false) => {
       const u = (uEl?.value || "You").trim() || "You";
-      const color = (cEl?.value || IDENTITY.color || "#000000");
-      const seed = u + "|" + String(color).toLowerCase();IDENTITY.user = u;
-      IDENTITY.code = deriveCode7(u, color);
-      
+      IDENTITY.user = u;
 
-
+      // color: generate on login/reset, otherwise keep current picker value
+      let color = (cEl?.value || IDENTITY.color || "#000000");
       if (forceGenerateColor || !IDENTITY.color){
-        IDENTITY.color = generateUniqueColor(seed);
+        const seed0 = u + "|" + String(color).toLowerCase();
+        IDENTITY.color = generateUniqueColor(seed0);
+        color = IDENTITY.color;
         if (cEl) cEl.value = IDENTITY.color;
+      } else {
+        IDENTITY.color = color;
       }
+
+      // 7-digit code + glow derived from (name + color)
+      IDENTITY.code = deriveCode7(IDENTITY.user, IDENTITY.color);
+      IDENTITY.glow = computeGlowFromSeed(String(IDENTITY.user) + "|" + String(IDENTITY.color).toLowerCase());
 
       applyIdentity();
       saveIdentity();
