@@ -1085,25 +1085,60 @@
     "5": "#40ffff",
     "6": "#ff40ff",
     "7": "#aaaaaa",
-  };
+      "9": "#ffffff",
+};
+
+  function updateDefaultGunzColor(){
+    // Default color follows current theme text color.
+    // This makes ^0 (and ^9) readable on light/dark themes automatically.
+    const c = getComputedStyle(document.body).color || "#000000";
+    GUNZ_COLORS["0"] = c;
+    GUNZ_COLORS["9"] = c;
+  }
+
+
 
   function parseGunzColors(text){
+    updateDefaultGunzColor();
     let current = GUNZ_COLORS["0"];
     let out = "";
     const str = String(text ?? "");
+
+    const isWordChar = (c) => /[A-Za-z0-9_]/.test(c);
+
     for (let i = 0; i < str.length; i++){
+      // GunZ color codes: ^0-^7 and ^9 (default color)
       if (str[i] === "^" && GUNZ_COLORS[str[i+1]]){
         current = GUNZ_COLORS[str[i+1]];
-        i++; // skip color digit
+        i++;
         continue;
       }
+
+      // Mentions: @Name (NPCs glow in their roster color)
+      if (str[i] === "@"){
+        let j = i + 1;
+        while (j < str.length && isWordChar(str[j])) j++;
+        const name = str.slice(i+1, j);
+        const npc = npcByName(name);
+        if (npc){
+          out += `<span class="whoGlow" style="color:${npc.color}">${esc("@"+name)}</span>`;
+          i = j - 1;
+          continue;
+        }
+      }
+
+      out += `<span style="color:${current}">${esc(str[i])}</span>`;
+    }
+    return out;
+  }
+
       out += `<span style="color:${current}">${esc(str[i])}</span>`;
     }
     return out;
   }
 
   function stripGunzCodes(text){
-    return String(text ?? "").replace(/\^[0-7]/g, "");
+    return String(text ?? "").replace(/\^[0-79]/g, "");
   }
 
   function inferChannel(who, cls){
@@ -1112,7 +1147,7 @@
     if (w === "system") return "SYS";
     if (w === "you") return "YOU";
     // Default: feels like CLAN/ROOM chatter
-    return "CLAN";
+    return "WrdZ";
   }
 
 
@@ -1128,14 +1163,14 @@
     { name: "Archivist",   color: "#aaaaaa", state: "online", topics: ["notes","logs","memory"] },
   ];
 
-  const NPC_CHANNELS = ["ROOM","CLAN","SYS"];
+  const NPC_CHANNELS = ["ROOM","WrdZ","SYS"];
 
   // "Gun topics" here = game/chat flavor only (matches/loadouts vibes), no real-world instructions.
   const TOPIC_LINES = {
     ops: ["^2ping ok.","^7relay quiet.","^3instance idle.","^7signals stable."],
     relay: ["^7bus: clear.","^7packets: calm.","^5handoff clean."],
     status: ["^2online.","^7idle.","^4watching."],
-    clan: ["^7[CLAN] chatter drifting.","^7someone joined the room.","^7someone left a note."],
+    clan: ["^7[WrdZ] chatter drifting.","^7someone joined the room.","^7someone left a note."],
     room: ["^7room feels light today.","^7matchmaking: imaginary."],
     matches: ["^3warmup only.","^7no ranked. just motion."],
     patch: ["^7notes are incomplete.","^7build feels stable."],
@@ -1154,7 +1189,8 @@
   };
 
   function npcByName(name){
-    return NPC_ROSTER.find(n => n.name === name) || null;
+    const q = String(name || "").toLowerCase();
+    return NPC_ROSTER.find(n => n.name.toLowerCase() === q) || null;
   }
   function chance(p){ return Math.random() < p; }
 
@@ -1236,7 +1272,7 @@
 
     const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
     const chan = (topic === "ops" || topic === "relay" || topic === "status") ? "SYS"
-              : (topic === "clan") ? "CLAN" : "ROOM";
+              : (topic === "clan") ? "WrdZ" : "ROOM";
 
     npcSay(npc, replyPrefix + line, chan);
 
@@ -1385,6 +1421,21 @@
           chosenWho = inputKey.split(":")[0].replace(/_/g, ' ');
           chosenWho = chosenWho.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
         }
+
+
+  function desuChorus(){
+    const lines = ["^1de^2su", "^1DE^2SU", "is it ^1de^2su ^9time?"];
+    const speakers = Array.isArray(NPC_ROSTER) ? NPC_ROSTER.slice(0) : [];
+    for (let i = speakers.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [speakers[i], speakers[j]] = [speakers[j], speakers[i]];
+    }
+    const chosen = speakers.slice(0, Math.min(3, speakers.length));
+    chosen.forEach((npc, idx) => {
+      setTimeout(() => npcSay(npc, lines[idx % lines.length], "WrdZ"), 250 + idx * 500);
+    });
+  }
+
       } else {
         responsePool = replies["what is this?"];
         chosenWho = pick(botParticipants);
@@ -1441,7 +1492,13 @@
     input.focus();
     saveChat();
 
-    const key = (msg.toLowerCase().trim());
+    
+
+    // ^1de^2su trigger: NPC chorus
+    if (/^\^1de\^2su$/i.test(msg.trim())) {
+      desuChorus();
+    }
+const key = (msg.toLowerCase().trim());
 
     if (key.startsWith("oracle:") && replies["oracle:query"]) {
       botReply("oracle:query");
@@ -1524,12 +1581,13 @@
   document.documentElement.classList.add("preload");
   const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();
   setTheme(savedTheme || "yakult");
+  updateDefaultGunzColor();
   requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
 
   const had = loadChat();
   if(!had){
     addLine("System", "^2WordZ shell online.", "sys", "SYS");
-    addLine("WordZ", "^3typing…", "sys", "CLAN");
+    addLine("WordZ", "^3typing…", "sys", "WrdZ");
     addLine("You", "^7Click a chip, or type a line.", "sys", "YOU");
     saveChat();
   }
