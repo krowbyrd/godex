@@ -13,17 +13,13 @@
       --text:#2a2a2a;      /* warm dark */
       --muted:#8a8178;     /* calm brown-gray */
       --line:#f0d7c6;      /* faint divider */
-            --spine: var(--spine); /* borders (spine) */
-      --chat-bg:#ffffff; /* chat paper */
-      --chat-grid: rgba(240,215,198,.15); /* chat grid */
---accent:#e46a5d;    /* gentle coral */
+      --accent:#e46a5d;    /* gentle coral */
       --accent2:#ffd6c8;   /* header wash */
       --shadow:0 10px 24px rgba(228,106,93,.10);
       --r:16px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --ui: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
-      --glow: rgba(255,255,255,.22);
-}
+    }
 
     /* --- ADDED/MODIFIED: Global radii variables --- */
     :root {
@@ -47,10 +43,10 @@
 
     .frame{
       width:min(720px, 100%);
-      border:1px solid var(--spine);
+      border:1px solid var(--line);
       border-radius:var(--r);
       overflow:hidden;
-      background:linear-gradient(var(--panel), var(--panel2));
+      background:linear-gradient(#fff, var(--panel));
       box-shadow:var(--shadow);
     }
 
@@ -60,7 +56,7 @@
       justify-content:space-between;
       padding:14px 16px;
       background:linear-gradient(#ffe9de, var(--accent2));
-      border-bottom:1px solid var(--spine);
+      border-bottom:1px solid var(--line);
     }
 
     .brand{
@@ -114,16 +110,16 @@
     }
 
     .card{
-      border:1px solid var(--spine);
+      border:1px solid var(--line);
       border-radius:var(--r);
-      background:var(--panel);
+      background:#fff;
       overflow:hidden;
     }
 
     .cardHead{
       padding:10px 12px;
-      border-bottom:1px solid var(--spine);
-      background:linear-gradient(var(--panel), var(--panel2));
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(#fff, #fff8f2);
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -138,7 +134,7 @@
       font-family:var(--mono);
       font-size:11px;
       color:#7a2e25;
-      border:1px solid var(--spine);
+      border:1px solid var(--line);
       background:var(--panel2);
       padding:3px 8px;
       border-radius:999px;
@@ -153,10 +149,9 @@
       font-family:var(--mono);
       font-size:12px;
       line-height:1.45;
-      border:1px solid var(--spine);
       background:
-        linear-gradient(var(--chat-bg), var(--chat-bg)),
-        repeating-linear-gradient(to bottom, var(--chat-grid) 0px, var(--chat-grid) 1px, transparent 1px, transparent 22px);
+        linear-gradient(#fff, #fff),
+        repeating-linear-gradient(to bottom, rgba(240,215,198,.15) 0px, rgba(240,215,198,.15) 1px, transparent 1px, transparent 22px);
       background-blend-mode: normal;
     }
     .line{ margin:0 0 10px; }
@@ -175,8 +170,7 @@
 
     /* ===== NPC user list + per-name glow (theme-safe) ===== */
     :root{ --msgShadow: rgba(0,0,0,.35); }
-    html[data-theme="punk"]{ --msgShadow: rgba(255,255,255,.22);   --glow: rgba(255,0,204,.35);
-}
+    html[data-theme="punk"]{ --msgShadow: rgba(255,255,255,.22); }
     .msg span{ text-shadow: 0 1px 0 var(--msgShadow); } /* improves contrast on light themes */
 
     .whoGlow{ text-shadow: 0 0 6px currentColor, 0 0 14px currentColor; }
@@ -222,8 +216,8 @@
       align-items:center;
       gap:8px;
       padding:10px 12px;
-      border-top:1px solid var(--spine);
-      background:linear-gradient(var(--panel), var(--panel2));
+      border-top:1px solid var(--line);
+      background:linear-gradient(#fff, #fff8f2);
       font-family:var(--mono);
       font-size:12px;
       color:var(--muted);
@@ -261,15 +255,14 @@
       --bar-top:#6b3a1e;
       --bar-bot:#3e1f10;
       --bar-text:#ffe7c2;
-      --glow: rgba(255,204,102,.30);
-}
+    }
 
 
     /* Input strip */
     .composer{
       padding:12px;
-      border-top:1px solid var(--spine);
-      background:linear-gradient(var(--panel), var(--panel2));
+      border-top:1px solid var(--line);
+      background:linear-gradient(#fff, #fff8f2);
       display:flex;
       gap:10px;
       align-items:center;
@@ -279,9 +272,9 @@
       flex:1;
       min-width:220px;
       padding:10px 12px;
-      border:1px solid var(--spine);
+      border:1px solid var(--line);
       border-radius:14px;
-      background:var(--panel);
+      background:#fff;
       font-family:var(--mono);
       font-size:12px;
       color:var(--text);
@@ -314,7 +307,7 @@
     .chip{
       font-family:var(--mono);
       font-size:12px;
-      border:1px solid var(--spine);
+      border:1px solid var(--line);
       background:var(--panel2);
       color:#7a2e25;
       padding:8px 10px;
@@ -322,7 +315,7 @@
       cursor:pointer;
       user-select:none;
     }
-    .chip:hover{ background:var(--panel); }
+    .chip:hover{ background:#fff; }
     .chip:active{ transform: translateY(1px); }
 
     /* Side panel */
@@ -332,15 +325,15 @@
       gap:12px;
     }
     .sideBox{
-      border:1px solid var(--spine);
+      border:1px solid var(--line);
       border-radius:var(--r);
-      background:var(--panel);
+      background:#fff;
       overflow:hidden;
     }
     .sideBox .hd{
       padding:10px 12px;
-      border-bottom:1px solid var(--spine);
-      background:linear-gradient(var(--panel), var(--panel2));
+      border-bottom:1px solid var(--line);
+      background:linear-gradient(#fff, #fff8f2);
       font-family:var(--mono);
       font-size:12px;
       color:var(--muted);
@@ -411,17 +404,15 @@
       min-width:0;
     }
 
-      .winIcon{
+    .winIcon{
       width: clamp(14px, 2.2vh, 20px);
       height: clamp(14px, 2.2vh, 20px);
       display:block;
       object-fit:contain;
       image-rendering:pixelated;
+      border:1px solid #00000055;
       flex:0 0 auto;
-      border:0;
-      background:transparent;
-      box-shadow:none;
-      outline:none;
+      background:#fff;
     }
 
     .winText{
@@ -549,8 +540,7 @@
       --bar-top:#ff6f6a;
       --bar-bot:#e0463d;
       --bar-text:#ffffff;
-      --glow: rgba(255,77,77,.40);
-}
+    }
 
     html[data-theme="y2k"]{
       --bg:#e9eef6;
@@ -565,8 +555,7 @@
       --bar-top:#0a246a;
       --bar-bot:#3a6ea5;
       --bar-text:#ffffff;
-      --glow: rgba(0,255,255,.35);
-}
+    }
 
     html[data-theme="punk"]{
       --bg:#000000;
@@ -582,54 +571,6 @@
       --bar-bot:#003300;
       --bar-text:#1aff00;
     }
-
-    html[data-theme="paper"]{
-      --bg:#f3f1ea;
-      --panel:#f8f7f2;
-      --panel2:#e7e3d8;
-      --text:#1b1b1b;
-      --muted:#5f5a52;
-      --line:#bdb6aa;
-      --accent:#2b4c7e;   /* ink */
-      --shadow:0 10px 24px rgba(0,0,0,.18);
-
-      --bar-top:#3f3f3f;
-      --bar-bot:#1f1f1f;
-      --bar-text:#ffffff;
-      --glow: rgba(220,220,255,.22);
-}
-
-    html[data-theme="cobalt"]{
-      --bg:#050b1a;
-      --panel:#0b1330;
-      --panel2:#101b44;
-      --text:#e6ecff;
-      --muted:#93a4d6;
-      --line:#1d2a5c;
-      --accent:#4de1ff;  /* neon ice */
-      --shadow: inset 0 0 12px rgba(77,225,255,.10), 0 10px 24px rgba(0,0,0,.35);
-
-      --bar-top:#0f2d8a;
-      --bar-bot:#0a1b55;
-      --bar-text:#e6ecff;
-      --glow: rgba(90,150,255,.30);
-}
-
-    html[data-theme="amber"]{
-      --bg:#0b0702;
-      --panel:#130c04;
-      --panel2:#1b1207;
-      --text:#ffd37a;
-      --muted:#b58c43;
-      --line:#2c1c09;
-      --accent:#ffb000;  /* CRT amber */
-      --shadow: inset 0 0 10px rgba(255,176,0,.08), 0 10px 24px rgba(0,0,0,.45);
-
-      --bar-top:#3b230a;
-      --bar-bot:#1f1206;
-      --bar-text:#ffd37a;
-      --glow: rgba(255,176,0,.35);
-}
 
     /* ---------------------------------------------------------------------- */
     /* --- ADDED/MODIFIED: Custom Updates CSS (Place these at the very end) --- */
@@ -682,7 +623,7 @@
       border-radius: 0px !important; /* Force rectangular for yakult theme button */
       background: var(--panel);
       color: var(--text);
-      border-color: var(--spine);
+      border-color: var(--line);
     }
     html[data-theme="yakult"] .sideBox .bd > div > button.btn[data-theme="yakult"]:hover,
     html[data-theme="yakult"] .sideBox .bd > div > button.btn[data-theme="yakult"]:focus {
@@ -701,7 +642,7 @@
       border-radius: 0px !important; /* Y2K button is rectangular */
       background: var(--panel);
       color: var(--text);
-      border-color: var(--spine);
+      border-color: var(--line);
     }
     html[data-theme="y2k"] .sideBox .bd > div > button.btn[data-theme="y2k"]:hover,
     html[data-theme="y2k"] .sideBox .bd > div > button.btn[data-theme="y2k"]:focus {
@@ -720,7 +661,7 @@
       border-radius: 0px !important; /* Punk button is rectangular */
       background: var(--panel);
       color: var(--text);
-      border-color: var(--spine);
+      border-color: var(--line);
     }
     html[data-theme="punk"] .sideBox .bd > div > button.btn[data-theme="punk"]:hover,
     html[data-theme="punk"] .sideBox .bd > div > button.btn[data-theme="punk"]:focus {
@@ -809,12 +750,12 @@
     html[data-theme="punk"] .typing,
     html[data-theme="punk"] .composer {
       background: var(--panel);
-      border-top-color: var(--spine);
+      border-top-color: var(--line);
     }
     html[data-theme="punk"] .input {
       background: var(--panel2);
       color: var(--text);
-      border-color: var(--spine);
+      border-color: var(--line);
     }
     html[data-theme="punk"] .composer .tiny {
       color: var(--muted);
@@ -886,27 +827,6 @@
     html[data-theme="punk"] .log .who-echo-bot { color: #00FFFF; /* Cyan */ }
     html[data-theme="punk"] .log .who-agent-x { color: #FFFF00; /* Yellow */ }
     html[data-theme="punk"] .log .who-watcher { color: #FF6600; /* Orange */ }
-
-    /* Individual Bot Colors for Paper Theme */
-    html[data-theme="paper"] .log .who-wordz { color: var(--accent); }
-    html[data-theme="paper"] .log .who-oracle { color: #8B4513; /* SaddleBrown */ }
-    html[data-theme="paper"] .log .who-echo-bot { color: #6A5ACD; /* SlateBlue */ }
-    html[data-theme="paper"] .log .who-agent-x { color: #B22222; /* FireBrick */ }
-    html[data-theme="paper"] .log .who-watcher { color: #2F4F4F; /* DarkSlateGray */ }
-
-    /* Individual Bot Colors for Cobalt Theme */
-    html[data-theme="cobalt"] .log .who-wordz { color: var(--accent); }
-    html[data-theme="cobalt"] .log .who-oracle { color: #FFCC00; /* Gold */ }
-    html[data-theme="cobalt"] .log .who-echo-bot { color: #7F5CFF; /* Purple */ }
-    html[data-theme="cobalt"] .log .who-agent-x { color: #FF5C8A; /* Pink */ }
-    html[data-theme="cobalt"] .log .who-watcher { color: #50FA7B; /* Green */ }
-
-    /* Individual Bot Colors for Amber Theme */
-    html[data-theme="amber"] .log .who-wordz { color: var(--accent); }
-    html[data-theme="amber"] .log .who-oracle { color: #FFDD55; /* Light Gold */ }
-    html[data-theme="amber"] .log .who-echo-bot { color: #FF8C00; /* DarkOrange */ }
-    html[data-theme="amber"] .log .who-agent-x { color: #FF4444; /* Red */ }
-    html[data-theme="amber"] .log .who-watcher { color: #A2FF00; /* Acid */ }
 
     /* Your own messages */
     .log .who-you {
@@ -995,10 +915,6 @@
     html[data-theme="yakult"]{ --glow: rgba(232,76,61,.35); }
     html[data-theme="y2k"]{ --glow: rgba(10,36,106,.35); }
     html[data-theme="punk"]{ --glow: rgba(26,255,0,.35); }
-    html[data-theme="wood"]{ --glow: rgba(212,160,74,.35); }
-    html[data-theme="paper"]{ --glow: rgba(43,76,126,.35); }
-    html[data-theme="cobalt"]{ --glow: rgba(77,225,255,.35); }
-    html[data-theme="amber"]{ --glow: rgba(255,176,0,.35); }
 
   
     /* ===== Identity panel helpers (theme-safe) ===== */
@@ -1052,7 +968,7 @@
     }
 
     .themeBtn[data-theme="yakult"]{
-      --p-bar: linear-gradient(#ff4d4d, #cc0000);
+      --p-bar: linear-gradient(#ff6f6a, #e0463d);
       --p-panel: linear-gradient(#fffefc, #f9efe4);
       --p-text:#7a2e25;
     }
@@ -1080,26 +996,7 @@
     }
 
 
-    
-
-    .themeBtn[data-theme="paper"]{
-      --p-bar: linear-gradient(#3f3f3f, #1f1f1f);
-      --p-panel: linear-gradient(#f8f7f2, #e7e3d8);
-      --p-text:#1b1b1b;
-    }
-    .themeBtn[data-theme="cobalt"]{
-      --p-bar: linear-gradient(#0f2d8a, #0a1b55);
-      --p-panel: linear-gradient(#0b1330, #101b44);
-      --p-text:#4de1ff;
-      text-shadow:none;
-    }
-    .themeBtn[data-theme="amber"]{
-      --p-bar: linear-gradient(#3b230a, #1f1206);
-      --p-panel: linear-gradient(#130c04, #1b1207);
-      --p-text:#ffb000;
-      text-shadow:none;
-    }
-/* ===== Wood theme: wood-grain surfaces (added) ===== */
+    /* ===== Wood theme: wood-grain surfaces (added) ===== */
     html[data-theme="wood"] body{
       background:
         radial-gradient(1000px 700px at 20% 0%, rgba(255,231,194,.06) 0%, rgba(0,0,0,0) 60%),
@@ -1191,186 +1088,6 @@
       background-blend-mode: normal;
     }
 
-
-    /* ---------------------------------------------------------------------- */
-    /* --- ADDED: Dark Themes Pack (terminal/concrete/library/circuit) ------- */
-    /* ---------------------------------------------------------------------- */
-
-    html[data-theme="terminal"]{
-      --bg:#000000;
-      --panel:#050505;
-      --panel2: repeating-linear-gradient(
-        0deg,
-        #050505 0px,
-        #050505 2px,
-        #030303 2px,
-        #030303 4px
-      );
-      --text:#dfffe0;
-      --muted:#43a85a;
-      --line:#0b2b12;
-      --accent:#39ff14;
-      --shadow: inset 0 0 14px rgba(57,255,20,.10), 0 10px 24px rgba(0,0,0,.55);
-
-      --bar-top:#001a0a;
-      --bar-bot:#000d05;
-      --bar-text:#39ff14;
-      --chat-bg:#000b05
-      --chat-grid:rgba(57,255,20,.10)
-      --spine:#134a25
-      --glow: rgba(57,255,20,.30);
-}
-
-    html[data-theme="concrete"]{
-      --bg:#0f1115;
-      --panel:#1a1d22;
-      --panel2: repeating-linear-gradient(
-        90deg,
-        #2c3138 0px,
-        #2c3138 38px,
-        #252a31 38px,
-        #252a31 42px
-      );
-      --text:#e9eef2;
-      --muted:#aab3bd;
-      --line:#3b414a;
-      --accent:#9fb4c7;
-      --shadow: 0 10px 24px rgba(0,0,0,.45);
-
-      --bar-top:#2a2f37;
-      --bar-bot:#1b1f26;
-      --bar-text:#e9eef2;
-      --glow: rgba(159,180,199,.26);
-}
-
-    html[data-theme="library"]{
-      --bg:#060b18;
-      --panel:#0e1633;
-      --panel2: repeating-linear-gradient(
-        90deg,
-        #0e1633 0px,
-        #0e1633 14px,
-        #111c3e 14px,
-        #111c3e 18px,
-        #1a2a5c 18px,
-        #1a2a5c 20px
-      );
-      --text:#f3e7d3;
-      --muted:#a28f7a;
-      --line:#25315a;
-      --accent:#caa15a;
-      --shadow: inset 0 0 16px rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.45);
-
-      --bar-top:#1a244a;
-      --bar-bot:#0d132b;
-      --bar-text:#f3e7d3;
-      --chat-bg:#0a122b
-      --chat-grid:rgba(202,161,90,.08)
-      --spine:#2b3d7a
-      --glow: rgba(202,161,90,.26);
-}
-
-    html[data-theme="circuit"]{
-      --bg:#021012;
-      --panel:#041a1e;
-      --panel2:
-        linear-gradient(rgba(255,198,0,.10) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,198,0,.08) 1px, transparent 1px),
-        #041a1e;
-      --text:#e9fff7;
-      --muted:#8ad6c3;
-      --line:#0e3a3f;
-      --accent:#ffc600;
-      --shadow: inset 0 0 14px rgba(255,198,0,.08), 0 10px 24px rgba(0,0,0,.55);
-
-      --bar-top:#0b2a2d;
-      --bar-bot:#061a1c;
-      --bar-text:#ffc600;
-      --chat-bg:#03161a
-      --chat-grid:rgba(255,198,0,.08)
-      --spine:#145e64
-      --glow: rgba(255,198,0,.26);
-}
-
-    /* Theme picker brick previews */
-    .themeBtn[data-theme="terminal"]{
-      --p-bar: linear-gradient(#001a0a, #000d05);
-      --p-panel: repeating-linear-gradient(0deg, #050505 0px, #050505 2px, #030303 2px, #030303 4px);
-      --p-text:#39ff14;
-      text-shadow:none;
-    }
-    .themeBtn[data-theme="concrete"]{
-      --p-bar: linear-gradient(#2a2f37, #1b1f26);
-      --p-panel: repeating-linear-gradient(90deg, #2c3138 0px, #2c3138 38px, #252a31 38px, #252a31 42px);
-      --p-text:#e9eef2;
-      text-shadow:none;
-    }
-    .themeBtn[data-theme="library"]{
-      --p-bar: linear-gradient(#1a244a, #0d132b);
-      --p-panel: repeating-linear-gradient(90deg, #0e1633 0px, #0e1633 14px, #111c3e 14px, #111c3e 18px, #1a2a5c 18px, #1a2a5c 20px);
-      --p-text:#f3e7d3;
-    }
-    .themeBtn[data-theme="circuit"]{
-      --p-bar: linear-gradient(#0b2a2d, #061a1c);
-      --p-panel: linear-gradient(rgba(255,198,0,.10) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,198,0,.08) 1px, transparent 1px),
-                #041a1e;
-      --p-text:#ffc600;
-      text-shadow:none;
-    }
-
-
-/* stream mini player */
-#streamPlayerBar { max-width: 100%; }
-#streamPlayerBar input[type="range"]{ padding:0; }
-
-
-.themeBtn.isActive,
-.themeBtn[aria-pressed="true"],
-.themeBtn:focus-visible{
-  box-shadow: 0 0 0 1px var(--line), 0 0 12px var(--glow);
-}
-
-
-
-/* ===== Theme auras (hover + active use per-button glow) ===== */
-  .themeBtn{ --btnGlow: var(--glow); }
-  .themeBtn[data-theme="yakult"]{ --btnGlow: rgba(255,77,77,.40); }
-  .themeBtn[data-theme="y2k"]{ --btnGlow: rgba(0,255,255,.35); }
-  .themeBtn[data-theme="punk"]{ --btnGlow: rgba(255,0,204,.35); }
-  .themeBtn[data-theme="wood"]{ --btnGlow: rgba(255,204,102,.30); }
-  .themeBtn[data-theme="paper"]{ --btnGlow: rgba(220,220,255,.22); }
-  .themeBtn[data-theme="cobalt"]{ --btnGlow: rgba(90,150,255,.30); }
-  .themeBtn[data-theme="amber"]{ --btnGlow: rgba(255,176,0,.35); }
-  .themeBtn[data-theme="terminal"]{ --btnGlow: rgba(57,255,20,.30); }
-  .themeBtn[data-theme="concrete"]{ --btnGlow: rgba(159,180,199,.26); }
-  .themeBtn[data-theme="library"]{ --btnGlow: rgba(202,161,90,.26); }
-  .themeBtn[data-theme="circuit"]{ --btnGlow: rgba(255,198,0,.26); }
-  .themeBtn:hover{
-    box-shadow: 0 0 0 1px var(--line), 0 0 12px var(--btnGlow);
-  }
-  .themeBtn.isActive,
-  .themeBtn[aria-pressed="true"],
-  .themeBtn:focus-visible{
-    box-shadow: 0 0 0 1px var(--line), 0 0 14px var(--btnGlow);
-  }
-
-/* ===== Typing box glow (composer input) ===== */
-  .composer .input{
-    transition: box-shadow .12s linear, border-color .12s linear;
-  }
-  .composer .input:focus,
-  .composer .input:focus-visible{
-    border-color: rgba(255,255,255,.22);
-    box-shadow: 0 0 0 1px var(--line), 0 0 14px var(--glow);
-    outline: none;
-  }
-
-
-
-  /* Corner yum bottle: force transparent, no frame on all themes */
-  #winIcon{ background:transparent !important; border:0 !important; box-shadow:none !important; }
-
 </style>
 </head>
 
@@ -1444,7 +1161,7 @@
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
               <span class="tiny" style="width:40px;">color</span>
-              <input id="identColor" type="color" value="#e46a5d" style="width:44px; height:26px; padding:0; border:2px solid; border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo); background:var(--panel);">
+              <input id="identColor" type="color" value="#e46a5d" style="width:44px; height:26px; padding:0; border:2px solid; border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo); background:#fff;">
               <span class="tiny" id="identGlowHint" style="margin-left:auto;">glow: --</span>
             </div>
             <div style="display:flex; gap:8px;">
@@ -1480,14 +1197,7 @@
               <button class="btn themeBtn" data-theme="y2k" type="button"><span>y2k</span></button>
               <button class="btn themeBtn" data-theme="punk" type="button"><span>punk</span></button>
               <button class="btn themeBtn" data-theme="wood" type="button"><span>wood</span></button>
-                          <button class="btn themeBtn" data-theme="paper" type="button"><span>paper</span></button>
-              <button class="btn themeBtn" data-theme="cobalt" type="button"><span>cobalt</span></button>
-              <button class="btn themeBtn" data-theme="amber" type="button"><span>amber</span></button>
-              <button class="btn themeBtn" data-theme="terminal" type="button"><span>terminal</span></button>
-              <button class="btn themeBtn" data-theme="concrete" type="button"><span>concrete</span></button>
-              <button class="btn themeBtn" data-theme="library" type="button"><span>library</span></button>
-              <button class="btn themeBtn" data-theme="circuit" type="button"><span>circuit</span></button>
-</div>
+            </div>
             <div style="margin-top:10px" class="tiny">
               Stored in <code>localStorage</code>.
             </div>
@@ -1500,40 +1210,14 @@
             <span class="pill">portal</span>
           </div>
           <div class="bd">
-            <div id="djHeader" style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-              <div id="djName" style="font-weight:800; letter-spacing:.2px;">DJ: —</div>
-              <span class="pill" id="djPill">dj</span>
+            Put this in your clan description:
+            <div class="tiny" style="margin-top:8px; padding:8px; border:1px solid var(--line); border-radius:12px; background:var(--panel2);">
+              WordZ :: yakult<br>
+              # bio · live shell<br>
+              [ System | now ] WordZ shell online.<br>
+              [ WordZ  | now ] typing…<br>
+              https://krowbyrd.github.io/godex/wordz.html
             </div>
-            <img id="djImg" alt="dj art" style="margin-top:8px; width:100%; max-height:160px; border:1px solid var(--spine); border-radius:8px; object-fit:cover; background:var(--panel); display:none;" />
-<div class="tiny" id="streamBlock" style="margin-top:10px; padding:10px; border:1px solid var(--spine); border-radius:12px; background:var(--panel2);">
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
-                <span class="pill">stream</span>
-                <select id="streamSelect" style="width:92px;min-width:92px;max-width:92px;flex:0 0 92px;height:18px;padding:0 4px;line-height:18px;"></select>
-              </div>
-              <div style="display:flex; gap:10px; align-items:center;">
-                <img id="streamImg" alt="stream art" style="width:54px; height:54px; border-radius:12px; border:1px solid var(--spine); object-fit:cover; background:var(--panel);" />
-                <div style="min-width:0;">
-                  <div id="streamName" style="font-weight:700; letter-spacing:.2px;"></div>
-                  <div class="tiny" style="opacity:.9; margin-top:2px;">
-                    <a id="streamLink" href="#" target="_blank" rel="noopener" style="color:var(--accent2); text-decoration:none;">open</a>
-                    <span style="opacity:.6;"> · </span>
-                    <a id="streamDirect" href="#" target="_blank" rel="noopener" style="color:var(--accent2); text-decoration:none;">direct</a>
-                  </div>
-                </div>
-              </div>
-              <div id="streamPlayerBar" style="margin-top:8px; display:flex; align-items:center; gap:6px; padding:6px; border:1px solid var(--spine); border-radius:4px; background:var(--panel); width:100%; box-sizing:border-box;">
-                <button id="streamPlayBtn" class="btn" style="padding:3px 8px; border-radius:4px; min-width:56px; flex:0 0 auto; font-size:12px; line-height:1.2;">play</button>
-                <input id="streamVol" type="range" min="0" max="1" step="0.01" aria-label="stream volume" style="width:28px;min-width:28px;max-width:28px;flex:0 0 28px;height:14px;padding:0;margin:0;">
-                <span id="streamStatus" class="tiny" style="opacity:.85; white-space:nowrap; font-size:11px; line-height:1;">stopped</span>
-                <audio id="streamAudio" preload="none"></audio>
-              </div>
-              <div class="tiny" style="margin-top:10px; padding:8px; border:1px dashed rgba(255,255,255,.14); border-radius:12px; background:rgba(0,0,0,.10);">
-                <span style="opacity:.8;">Badge (copy/paste):</span><br>
-                <span id="streamBadgeText"></span>
-              </div>
-            </div>
-            </div>
-
           </div>
         </div>
 
@@ -2201,45 +1885,6 @@
       line:"#5b3b26", accent:"#d4a04a", accent2:"#3a261a", shadow:"inset 0 0 18px rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.35)",
       r:"0px"
     }
-
-    ,
-    paper: {
-      bg:"#f3f1ea", panel:"#f8f7f2", panel2:"#e7e3d8", text:"#1b1b1b", muted:"#5f5a52",
-      line:"#bdb6aa", accent:"#2b4c7e", accent2:"#1f1f1f", shadow:"0 10px 24px rgba(0,0,0,.18)",
-      r:"0px"
-    },
-    cobalt: {
-      bg:"#050b1a", panel:"#0b1330", panel2:"#101b44", text:"#e6ecff", muted:"#93a4d6",
-      line:"#1d2a5c", accent:"#4de1ff", accent2:"#0f2d8a", shadow:"inset 0 0 12px rgba(77,225,255,.10), 0 10px 24px rgba(0,0,0,.35)",
-      r:"0px"
-    },
-    amber: {
-      bg:"#0b0702", panel:"#130c04", panel2:"#1b1207", text:"#ffd37a", muted:"#b58c43",
-      line:"#2c1c09", accent:"#ffb000", accent2:"#3b230a", shadow:"inset 0 0 10px rgba(255,176,0,.08), 0 10px 24px rgba(0,0,0,.45)",
-      r:"0px"
-    }
-
-    ,
-    terminal: {
-      bg:"#000000", panel:"#050505", panel2:"#030303", text:"#dfffe0", muted:"#43a85a",
-      line:"#0b2b12", accent:"#39ff14", accent2:"#001a0a", shadow:"inset 0 0 14px rgba(57,255,20,.10), 0 10px 24px rgba(0,0,0,.55)",
-      r:"0px"
-    },
-    concrete: {
-      bg:"#0f1115", panel:"#1a1d22", panel2:"#2c3138", text:"#e9eef2", muted:"#aab3bd",
-      line:"#3b414a", accent:"#9fb4c7", accent2:"#2a2f37", shadow:"0 10px 24px rgba(0,0,0,.45)",
-      r:"0px"
-    },
-    library: {
-      bg:"#060b18", panel:"#0e1633", panel2:"#111c3e", text:"#f3e7d3", muted:"#a28f7a",
-      line:"#25315a", accent:"#caa15a", accent2:"#1a244a", shadow:"inset 0 0 16px rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.45)",
-      r:"0px"
-    },
-    circuit: {
-      bg:"#021012", panel:"#041a1e", panel2:"#0e3a3f", text:"#e9fff7", muted:"#8ad6c3",
-      line:"#0e3a3f", accent:"#ffc600", accent2:"#0b2a2d", shadow:"inset 0 0 14px rgba(255,198,0,.08), 0 10px 24px rgba(0,0,0,.55)",
-      r:"0px"
-    }
   };
 
   function syncThemeButtons(active){
@@ -2260,317 +1905,15 @@
     if(winTagTextEl) winTagTextEl.textContent = t;
 
     if(modePill){
-      modePill.textContent = (t === "yakult") ? "local" : ("local · " + t);
+      modePill.textContent = (t === "punk") ? "local · punk"
+                        : (t === "y2k") ? "local · y2k"
+                        : (t === "wood") ? "local · wood"
+                        : "local";
     }
-    syncThemeButtons(t);
+syncThemeButtons(t);
   }
 
-  
-  // ---------- streams (badge + image in clan description block) ----------
-  const STREAM_KEY = "wordz_stream";
-  const STREAM_PLAY_KEY = "wordz_stream_play";
-  const STREAM_VOL_KEY = "wordz_stream_vol";
-
-  let streamWantsPlay = false;
-  const STREAMS = {
-    radio_main: {
-      label: "r/a/dio · main",
-      badgeName: "r/a/dio",
-      site: "https://r-a-d.io/",
-      direct: "https://relay1.r-a-d.io/main.mp3",
-      image: "https://r-a-d.io/assets/images/logo_image_small.png",
-      embed: "https://r-a-d.io/",
-      aspect: 16/9
-    },
-    radio_relay2: {
-      label: "r/a/dio · relay2",
-      badgeName: "r/a/dio",
-      site: "https://r-a-d.io/",
-      direct: "https://relay2.r-a-d.io/main.mp3",
-      image: "https://r-a-d.io/assets/images/logo_image_small.png",
-      embed: "https://r-a-d.io/",
-      aspect: 16/9
-    },
-    radio_relay3: {
-      label: "r/a/dio · relay3",
-      badgeName: "r/a/dio",
-      site: "https://r-a-d.io/",
-      direct: "https://relay3.r-a-d.io/main.mp3",
-      image: "https://r-a-d.io/assets/images/logo_image_small.png",
-      embed: "https://r-a-d.io/",
-      aspect: 16/9
-    }
-  };
-
-
-  // DJ panel (name + image) — tries multiple r/a/dio API shapes for resilience
-  let djPollTimer = null;
-  let djLastKey = null;
-
-  function pickDjName(obj){
-    if(!obj || typeof obj !== "object") return null;
-    const directKeys = ["djname","dj_name","djName","dj","current_dj","currentDj","name"];
-    for(const k of directKeys){
-      if(typeof obj[k] === "string" && obj[k].trim()) return obj[k].trim();
-    }
-    // nested common patterns
-    if(obj.dj && typeof obj.dj === "object"){
-      const n = pickDjName(obj.dj);
-      if(n) return n;
-    }
-    if(obj.current && typeof obj.current === "object"){
-      const n = pickDjName(obj.current);
-      if(n) return n;
-    }
-    if(obj.now_playing && typeof obj.now_playing === "object"){
-      const n = pickDjName(obj.now_playing);
-      if(n) return n;
-    }
-    return null;
-  }
-
-  function pickDjImageToken(obj){
-    if(!obj || typeof obj !== "object") return null;
-    const keys = ["dj_image","djImage","djimage","image","avatar","img","dj_img"];
-    for(const k of keys){
-      if(typeof obj[k] === "string" && obj[k].trim()) return obj[k].trim();
-    }
-    if(obj.dj && typeof obj.dj === "object"){
-      const t = pickDjImageToken(obj.dj);
-      if(t) return t;
-    }
-    if(obj.current && typeof obj.current === "object"){
-      const t = pickDjImageToken(obj.current);
-      if(t) return t;
-    }
-    if(obj.now_playing && typeof obj.now_playing === "object"){
-      const t = pickDjImageToken(obj.now_playing);
-      if(t) return t;
-    }
-    return null;
-  }
-
-  function buildDjImageUrl(base, token){
-    if(!token) return null;
-    if(/^https?:\/\//i.test(token)) return token;
-    // already looks like an API path
-    if(token.startsWith("/")) return base + token;
-    // r-a-d.io pattern: /api/dj-image/<token>.png
-    if(/\.png$/i.test(token)) return base + "/api/dj-image/" + token;
-    return base + "/api/dj-image/" + token + ".png";
-  }
-
-  function setDjUI(name, imgUrl){
-    const elName = document.getElementById("djName");
-    const elImg = document.getElementById("djImg");
-    if(elName) elName.textContent = name ? name : "DJ: —";
-    if(elImg){
-      if(imgUrl){
-        elImg.src = imgUrl;
-        elImg.loading = "lazy";
-        elImg.decoding = "async";
-        elImg.style.display = "";
-      }else{
-        elImg.removeAttribute("src");
-        elImg.style.display = "none";
-      }
-    }
-  }
-
-  async function refreshDj(cfg){
-    const base = (cfg.api || cfg.site || "").replace(/\/+$/,"");
-    if(!base){ setDjUI("DJ: —", null); return; }
-
-    // endpoints seen in the wild / plausible variants
-    const endpoints = [
-      base + "/api/dj",
-      base + "/api/nowplaying",
-      base + "/api/now-playing",
-      base + "/api/status"
-    ];
-
-    for(const url of endpoints){
-      try{
-        const res = await fetch(url, { cache: "no-store" });
-        if(!res.ok) continue;
-        const data = await res.json();
-        const name = pickDjName(data);
-        const token = pickDjImageToken(data);
-        const imgUrl = buildDjImageUrl(base, token);
-        if(name || imgUrl){
-          setDjUI(name || "DJ: —", imgUrl);
-          return;
-        }
-      }catch(e){
-        // ignore and try next endpoint
-      }
-    }
-    // fallback
-    setDjUI("DJ: —", null);
-  }
-
-  function startDjPolling(streamKey, cfg){
-    if(djPollTimer) clearInterval(djPollTimer);
-    djPollTimer = null;
-    djLastKey = streamKey;
-
-    // do an immediate refresh
-    refreshDj(cfg);
-
-    // poll lightly
-    djPollTimer = setInterval(() => {
-      // only poll if still on same stream
-      const currentKey = (() => { try { return localStorage.getItem(STREAM_KEY) || streamKey; } catch(e){ return streamKey; } })();
-      if(currentKey !== djLastKey) return;
-      refreshDj(cfg);
-    }, 30000);
-  }
-  function setStream(key){
-    const keys = Object.keys(STREAMS);
-    const k = (STREAMS[key] ? key : keys[0]);
-    const cfg = STREAMS[k];
-
-    try{ localStorage.setItem(STREAM_KEY, k); }catch(e){}
-
-    const sel = document.getElementById("streamSelect");
-    if(sel && sel.value !== k) sel.value = k;
-
-    const img = document.getElementById("streamImg");
-    if(img){
-      img.src = cfg.image;
-      img.loading = "lazy";
-      img.decoding = "async";
-    }
-
-    const name = document.getElementById("streamName");
-    if(name) name.textContent = cfg.label;
-
-    const link = document.getElementById("streamLink");
-    if(link) link.href = cfg.site;
-
-    const direct = document.getElementById("streamDirect");
-    if(direct) direct.href = cfg.direct;
-    // player
-    const audio = document.getElementById("streamAudio");
-    const playBtn = document.getElementById("streamPlayBtn");
-    const status = document.getElementById("streamStatus");
-    if(audio){
-      const wasPlaying = streamWantsPlay || (() => { try { return localStorage.getItem(STREAM_PLAY_KEY) === "1"; } catch(e){ return false; } })();
-      // swap source if needed
-      if(audio.dataset.srcKey !== k){
-        audio.pause();
-        audio.src = cfg.direct;
-        audio.dataset.srcKey = k;
-        audio.load();
-      }
-      if(wasPlaying){
-        streamWantsPlay = true;
-        // autoplay may be blocked until a user gesture; still attempt
-        audio.play().catch(() => {
-          if(status) status.textContent = "ready";
-          if(playBtn) playBtn.textContent = "play";
-        });
-      } else {
-        if(status) status.textContent = "ready";
-        if(playBtn) playBtn.textContent = "play";
-      }
-    }
-
-    const badge = document.getElementById("streamBadgeText");
-    if(badge){
-      // plain-text-ish badge so it works in "clan description" fields
-      const short = (cfg.label.split("·")[1] || cfg.label).trim();
-      badge.innerHTML =
-        `WordZ :: stream<br>` +
-        `[ Stream | ${cfg.badgeName} ] ${short}<br>` +
-        `${cfg.direct}<br>` +
-        `img: ${cfg.image}`;
-    }
-
-    startDjPolling(k, cfg);
-
-  }
-
-  function initStreams(){
-    const sel = document.getElementById("streamSelect");
-    if(!sel) return;
-
-    sel.innerHTML = "";
-    for(const [k,cfg] of Object.entries(STREAMS)){
-      const opt = document.createElement("option");
-      opt.value = k;
-      opt.textContent = cfg.label;
-      sel.appendChild(opt);
-    }
-
-    sel.addEventListener("change", () => setStream(sel.value));
-
-    // player wiring
-    const audio = document.getElementById("streamAudio");
-    const playBtn = document.getElementById("streamPlayBtn");
-    const vol = document.getElementById("streamVol");
-    const status = document.getElementById("streamStatus");
-
-    if(audio && vol){
-      const savedVol = (() => { try { return localStorage.getItem(STREAM_VOL_KEY); } catch(e){ return null; } })();
-      const v = (savedVol != null && !isNaN(parseFloat(savedVol))) ? Math.max(0, Math.min(1, parseFloat(savedVol))) : 0.65;
-      audio.volume = v;
-      vol.value = String(v);
-
-      vol.addEventListener("input", () => {
-        const nv = Math.max(0, Math.min(1, parseFloat(vol.value || "0")));
-        audio.volume = nv;
-        try{ localStorage.setItem(STREAM_VOL_KEY, String(nv)); }catch(e){}
-      });
-    }
-
-    if(audio && playBtn){
-      const sync = () => {
-        if(!status) return;
-        if(audio.error){ status.textContent = "error"; return; }
-        status.textContent = audio.paused ? "paused" : "playing";
-      };
-
-      playBtn.addEventListener("click", () => {
-        if(audio.paused){
-          streamWantsPlay = true;
-          try{ localStorage.setItem(STREAM_PLAY_KEY, "1"); }catch(e){}
-          audio.play().then(() => {
-            playBtn.textContent = "pause";
-            if(status) status.textContent = "playing";
-          }).catch(() => {
-            // autoplay blocked or stream unavailable
-            playBtn.textContent = "play";
-            if(status) status.textContent = "ready";
-          });
-        } else {
-          streamWantsPlay = false;
-          try{ localStorage.setItem(STREAM_PLAY_KEY, "0"); }catch(e){}
-          audio.pause();
-          playBtn.textContent = "play";
-          if(status) status.textContent = "paused";
-        }
-      });
-
-      audio.addEventListener("play", () => { if(playBtn) playBtn.textContent = "pause"; sync(); });
-      audio.addEventListener("pause", () => { if(playBtn) playBtn.textContent = "play"; sync(); });
-      audio.addEventListener("error", sync);
-      audio.addEventListener("ended", () => {
-        streamWantsPlay = false;
-        try{ localStorage.setItem(STREAM_PLAY_KEY, "0"); }catch(e){}
-        if(playBtn) playBtn.textContent = "play";
-        if(status) status.textContent = "stopped";
-      });
-
-      // initial UI state
-      sync();
-    }
-
-    const saved = (() => { try { return localStorage.getItem(STREAM_KEY); } catch(e){ return null; } })();
-    setStream(saved || Object.keys(STREAMS)[0]);
-  }
-
-// Theme button clicks
+  // Theme button clicks
   document.querySelectorAll(".themeBtn[data-theme]").forEach(btn => {
     btn.addEventListener("click", () => setTheme(btn.getAttribute("data-theme")));
   });
@@ -2580,7 +1923,6 @@
   const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();
   setTheme(savedTheme || "yakult");
   wireIdentityUI();
-  initStreams();
   requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
 
   const had = loadChat();
