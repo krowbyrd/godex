@@ -160,6 +160,10 @@
     .msg{ color:var(--text); }
     .sys .who{ color:var(--accent); }
 
+    .time{ color:var(--muted); }
+    .chan{ color:var(--muted); }
+    .sep{ color:var(--muted); }
+
     /* Typing indicator */
     .typing{
       display:flex;
@@ -781,6 +785,71 @@
       box-shadow: 0 0 8px var(--accent), inset 0 0 4px var(--accent) !important;
     }
 
+  
+    /* ===== Theme transitions + active-glow (added) ===== */
+    :root{ --theme-ease: 180ms ease; --glow: rgba(228,106,93,.35); }
+
+    html.preload *{ transition: none !important; }
+
+    body,
+    .frame,
+    .winTop,
+    .card,
+    .sideBox,
+    .log,
+    .composer,
+    .typing,
+    .input,
+    .btn,
+    .chip,
+    .pill,
+    .winBtn{
+      transition:
+        background-color var(--theme-ease),
+        color var(--theme-ease),
+        border-color var(--theme-ease),
+        box-shadow var(--theme-ease),
+        filter var(--theme-ease);
+    }
+    .winTop{
+      transition:
+        background var(--theme-ease),
+        color var(--theme-ease),
+        border-color var(--theme-ease),
+        box-shadow var(--theme-ease);
+    }
+
+    /* Theme button base (rectangular + Win98-ish bevel) */
+    .themeBtn{
+      border-radius:0 !important;
+      border:2px solid;
+      border-color: var(--win-hi) var(--win-lo) var(--win-lo) var(--win-hi);
+      background: var(--win-face);
+      color: var(--win-text);
+      padding: 6px 10px !important;
+      font-size: 11px !important;
+      cursor: pointer;
+      outline: none;
+    }
+    .themeBtn:active{
+      border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo);
+    }
+
+    /* Active theme button glow */
+    .themeBtn[data-active="1"]{
+      pointer-events:none;
+      cursor: default;
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,.25),
+        0 0 10px var(--glow),
+        inset 0 0 0 1px rgba(255,255,255,.45);
+    }
+
+    /* Glow color follows theme */
+    html[data-theme="yakult"]{ --glow: rgba(232,76,61,.35); }
+    html[data-theme="y2k"]{ --glow: rgba(10,36,106,.35); }
+    html[data-theme="punk"]{ --glow: rgba(26,255,0,.35); }
+
   </style>
 </head>
 
@@ -859,9 +928,9 @@
           <div class="bd">
             <div class="tiny">Theme:</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-              <button class="btn" style="padding:8px 10px; border-radius:999px;" data-theme="yakult" type="button">yakult</button>
-              <button class="btn" style="padding:8px 10px; border-radius:999px;" data-theme="y2k" type="button">y2k</button>
-              <button class="btn" style="padding:8px 10px; border-radius:999px;" data-theme="punk" type="button">punk</button>
+              <button class="btn themeBtn" data-theme="yakult" type="button">yakult</button>
+              <button class="btn themeBtn" data-theme="y2k" type="button">y2k</button>
+              <button class="btn themeBtn" data-theme="punk" type="button">punk</button>
             </div>
             <div style="margin-top:10px" class="tiny">
               Stored in <code>localStorage</code>.
@@ -950,24 +1019,87 @@
     }[c]));
   }
 
+
+  // ===== GunZ-style inline color codes (e.g., ^1red ^2green) =====
+  const GUNZ_COLORS = {
+    "0": "#ffffff",
+    "1": "#ff4040",
+    "2": "#40ff40",
+    "3": "#4080ff",
+    "4": "#ffff40",
+    "5": "#40ffff",
+    "6": "#ff40ff",
+    "7": "#aaaaaa",
+  };
+
+  function parseGunzColors(text){
+    let current = GUNZ_COLORS["0"];
+    let out = "";
+    const s = String(text ?? "");
+    for (let i = 0; i < s.length; i++){
+      if (s[i] === "^" && GUNZ_COLORS[s[i+1]]){
+        current = GUNZ_COLORS[s[i+1]];
+        i++; // skip color digit
+        continue;
+      }
+      out += `<span style="color:${current}">${esc(s[i])}</span>`;
+    }
+    return out;
+  }
+
+  function stripGunzCodes(text){
+    return String(text ?? "").replace(/\^[0-7]/g, "");
+  }
+
+
   // MODIFIED addLine to include bot-specific classes for styling
-  function addLine(who, msg, cls=""){
+  function addLine(who, msg, cls="", channel=null){
     const p = document.createElement("p");
     p.className = `line ${cls}`.trim();
-    // Generate a sanitized class name from the 'who'
-    const whoClass = `who-${who.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-    p.innerHTML = `<span class="who ${whoClass}">${esc(who)}</span> <span class="when">| ${nowStamp()}</span><br><span class="msg">${esc(msg)}</span>`;
+
+    // Preserve raw message for save/load (keeps ^color codes)
+    p.dataset.rawmsg = String(msg ?? "");
+    p.dataset.channel = channel ?? "";
+
+    // Bot color classes: who-<sanitized>
+    const whoKey = String(who ?? "?").toLowerCase().replace(/[^a-z0-9]/g, "-");
+    const whoClass = `who-${whoKey}`;
+
+    // GunZ-like line format:
+    // [HH:MM] [CHAN] Name: message(with ^color codes)
+    const ts = nowStamp();
+    const chan = (channel ?? inferChannel(who, cls));
+
+    p.innerHTML =
+      `<span class="time">[${esc(ts)}]</span> ` +
+      `<span class="chan">[${esc(chan)}]</span> ` +
+      `<span class="who ${whoClass}">${esc(who)}</span>` +
+      `<span class="sep">:</span> ` +
+      `<span class="msg">${parseGunzColors(p.dataset.rawmsg)}</span>`;
+
     log.appendChild(p);
     log.scrollTop = log.scrollHeight;
   }
+
+  function inferChannel(who, cls){
+    const w = String(who || "").toLowerCase();
+    if (cls && String(cls).includes("sys")) return "SYS";
+    if (w === "system") return "SYS";
+    if (w === "you") return "YOU";
+    if (w === "wordz") return "CLAN";
+    // ambient NPC chatter can feel like ROOM
+    return "ROOM";
+  }
+
 
   function saveChat(){
     try{
       const items = [...log.querySelectorAll(".line")].slice(-80).map(p => {
         const who = p.querySelector(".who")?.textContent || "";
-        const msg = p.querySelector(".msg")?.textContent || "";
+        const msg = p.dataset.rawmsg || (p.querySelector(".msg")?.textContent || "");
         const cls = p.classList.contains("sys") ? "sys" : "";
-        return { who, msg, cls, t: Date.now() };
+        const channel = p.dataset.channel || "";
+        return { who, msg, cls, channel, t: Date.now() };
       });
       localStorage.setItem(CHAT_KEY, JSON.stringify(items));
     }catch(e){}
@@ -1075,16 +1207,16 @@
 
   const driftMessages = [
     { who: "WordZ", msg: "…"},
-    { who: "WordZ", msg: "log: quiet."},
+    { who: "WordZ", msg: "^7log: quiet."},
     { who: "WordZ", msg: "milk-cream UI engaged."},
-    { who: "WordZ", msg: "signal: minimal."},
+    { who: "WordZ", msg: "^7signal: minimal."},
     { who: "WordZ", msg: "typing indicator is a lie (affectionate)."},
     { who: "Oracle", msg: "the digital tides shift."},
     { who: "Echo_Bot", msg: "a thought, gently reverberating."},
     { who: "Agent_X", msg: "perimeter clear, for now."},
     { who: "Watcher", msg: "new data points on the horizon."},
     { who: "WordZ", msg: "just floating along."},
-    { who: "System", msg: "background processes humming."}, 
+    { who: "System", msg: "^7background processes humming."}, 
     { who: "Echo_Bot", msg: "reflection in the code."},
     { who: "Agent_X", msg: "nothing to report. yet."},
     { who: "Oracle", msg: "the threads weave unseen."},
@@ -1168,22 +1300,50 @@
     }
   };
 
+  function syncThemeButtons(active){
+    document.querySelectorAll(".themeBtn[data-theme]").forEach(btn => {
+      btn.dataset.active = (btn.getAttribute("data-theme") === active) ? "1" : "0";
+    });
+  }
+
   function setTheme(name){
     const t = (THEMES[name] ? name : "yakult");
     document.documentElement.setAttribute("data-theme", t);
     try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
 
-    const winTitleTextEl = document.getElementById("winTitleText");\n    if(winTitleTextEl) winTitleTextEl.textContent = "WordZ :: " + (t === "yakult" ? "yakult" : t);
+    // Title + mode pill
+    const winTitleTextEl = document.getElementById("winTitleText");
+    const winTagTextEl = document.getElementById("winTagText");
+    if(winTitleTextEl) winTitleTextEl.textContent = "WordZ";
+    if(winTagTextEl) winTagTextEl.textContent = t;
 
-    const modePillEl = $(\"modePill\");\n    if(modePillEl) {\n      if(t === "punk") modePillEl.textContent = "local · punk";\n      else if(t === "y2k") modePillEl.textContent = "local · y2k";\n      else modePillEl.textContent = "local";\n    }
+    if(modePill){
+      modePill.textContent = (t === "punk") ? "local · punk" : (t === "y2k") ? "local · y2k" : "local";
+    }
 
-    document.querySelectorAll(".sideBox .bd > div > button.btn[data-theme]").forEach(btn => {\n      if (btn.getAttribute("data-theme") === t) {\n        btn.setAttribute("data-active", "true");\n      } else {\n        btn.removeAttribute("data-active");\n      }\n    });\n  }
+    syncThemeButtons(t);
+  }
 
-  document.querySelectorAll("[data-theme]").forEach(btn => {\n    btn.addEventListener("click", () => setTheme(btn.getAttribute("data-theme")));\n  });
+  // Theme button clicks
+  document.querySelectorAll(".themeBtn[data-theme]").forEach(btn => {
+    btn.addEventListener("click", () => setTheme(btn.getAttribute("data-theme")));
+  });
 
-  // ---------- boot ----------\n  const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();\n  setTheme(savedTheme || "yakult");
+  // ---------- boot ----------
+  document.documentElement.classList.add("preload");
+  const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();
+  setTheme(savedTheme || "yakult");
+  requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
 
-  const had = loadChat();\n  if(!had){\n    addLine("System", "WordZ shell online.", "sys");\n    addLine("WordZ", "typing…", "sys");\n    addLine("You", "Click a chip, or type a line.", "sys");\n    saveChat();\n  }\n  input.focus();\n})();
+  const had = loadChat();
+  if(!had){
+    addLine("System", "^2WordZ shell online.", "sys", "SYS");
+    addLine("WordZ", "^3typing…", "sys", "CLAN");
+    addLine("You", "^7Click a chip, or type a line.", "sys", "YOU");
+    saveChat();
+  }
+  input.focus();
+})();
 </script>
 </body>
 </html>
