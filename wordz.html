@@ -1293,10 +1293,10 @@
   function npcChatterTick(){
     // Don’t start until there is some content
     const lineCount = log.querySelectorAll(".line").length;
-    if (lineCount < 2) return;
+    if (lineCount < 0) return;
 
     // Quiet by default
-    if (!chance(0.50)) return;
+    if (!chance(0.80)) return;
 
     // Pick speaker (sometimes respond to lastNpc)
     let npc = null;
@@ -1328,6 +1328,12 @@ const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
       }
     }
     renderUserList();
+
+  // WORDZ_USERLIST_PULSE (embed-safe)
+  try{ renderUserList(); }catch(e){}
+  setTimeout(() => { try{ renderUserList(); }catch(e){} }, 0);
+  setTimeout(() => { try{ renderUserList(); }catch(e){} }, 300);
+  setInterval(() => { try{ renderUserList(); }catch(e){} }, 2500);
   }
 
   // ===== Identity (local-only): user + key => token + unique glow color =====
@@ -1811,6 +1817,14 @@ applyIdentity();
 requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
 
   const had = loadChat();
+
+  // WORDZ_SEED_HELLO
+  if (log && log.querySelectorAll(".line").length === 0){
+    addLine("System", "^7boot: ^2ok ^7| ^3yakult ^7shell online", "sys", "SYS");
+    const npc0 = (NPC_ROSTER && NPC_ROSTER.length) ? NPC_ROSTER[0] : null;
+    if (npc0) { addLine(npc0.name, "^7welcome to ^1WrdZ^7.", "", "LOBBY"); const p0 = log.lastElementChild; if (p0) styleWhoSpan(p0, npc0.name); }
+    saveChat();
+  }
   if(!had){
     addLine("System", "^2WordZ shell online.", "sys", "SYS");
     addLine("WordZ", "^3typing…", "sys", "CLAN");
@@ -1821,7 +1835,7 @@ requestAnimationFrame(() => document.documentElement.classList.remove("preload")
   // ===== NPC panel + ambient chatter =====
   renderUserList();
   setInterval(npcPresenceTick, 12000 + Math.floor(Math.random()*6000));
-  setInterval(npcChatterTick, 6000 + Math.floor(Math.random()*5000));
+  setInterval(npcChatterTick, 3000 + Math.floor(Math.random()*3500));
 
   input.focus();
 })();
