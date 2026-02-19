@@ -241,6 +241,23 @@
       40% { transform: translateY(-3px); opacity:1; }
     }
 
+    html[data-theme="wood"]{
+      --bg:#1a120c;
+      --panel:#2a1b12;     /* dark wood */
+      --panel2:#3a261a;    /* depth */
+      --text:#f3e6d4;      /* warm parchment */
+      --muted:#c7b39a;
+      --line:#5b3b26;
+      --accent:#d4a04a;    /* brass */
+      --accent2:#3a261a;
+      --shadow: inset 0 0 18px rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.35);
+
+      --bar-top:#6b3a1e;
+      --bar-bot:#3e1f10;
+      --bar-text:#ffe7c2;
+    }
+
+
     /* Input strip */
     .composer{
       padding:12px;
@@ -901,6 +918,80 @@
     #identBox .btn{ padding:6px 10px; font-size:11px; }
     #identBox .identInput{ font-size:11px; }
 
+
+    /* ===== Theme picker: brick tiles with mini-previews (added) ===== */
+    .themeGrid{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:8px;
+    }
+    .themeGrid .themeBtn:nth-child(even){ margin-top:10px; }
+
+    .themeBtn{
+      width:92px;
+      height:44px;
+      position:relative;
+      padding:0 !important;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      font-size:11px !important;
+      line-height:1;
+      overflow:hidden;
+      letter-spacing:0;
+      text-transform:lowercase;
+    }
+    .themeBtn::before{
+      content:"";
+      position:absolute;
+      inset:0 0 auto 0;
+      height:12px;
+      background: var(--p-bar, linear-gradient(var(--bar-top), var(--bar-bot)));
+      border-bottom:1px solid rgba(0,0,0,.35);
+    }
+    .themeBtn::after{
+      content:"";
+      position:absolute;
+      inset:12px 0 0 0;
+      background: var(--p-panel, var(--panel));
+    }
+    .themeBtn span{
+      position:relative;
+      z-index:1;
+      padding:6px 6px 5px;
+      color: var(--p-text, var(--win-text));
+      text-shadow: 0 1px 0 rgba(0,0,0,.25);
+    }
+
+    .themeBtn[data-theme="yakult"]{
+      --p-bar: linear-gradient(#ff6f6a, #e0463d);
+      --p-panel: linear-gradient(#fffefc, #f9efe4);
+      --p-text:#7a2e25;
+    }
+    .themeBtn[data-theme="y2k"]{
+      --p-bar: linear-gradient(#0a246a, #3a6ea5);
+      --p-panel: linear-gradient(#ffffff, #dfe7f3);
+      --p-text:#000000;
+    }
+    .themeBtn[data-theme="punk"]{
+      --p-bar: linear-gradient(#001100, #003300);
+      --p-panel: linear-gradient(#0a0a0a, #050505);
+      --p-text:#1aff00;
+      text-shadow:none;
+    }
+    .themeBtn[data-theme="wood"]{
+      --p-bar: linear-gradient(#6b3a1e, #3e1f10);
+      --p-panel: repeating-linear-gradient(
+        90deg,
+        #2a1b12 0px,
+        #2a1b12 10px,
+        #331f14 10px,
+        #331f14 18px
+      );
+      --p-text:#ffe7c2;
+    }
+
 </style>
 </head>
 
@@ -1006,10 +1097,11 @@
           </div>
           <div class="bd">
             <div class="tiny">Theme:</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-              <button class="btn themeBtn" data-theme="yakult" type="button">yakult</button>
-              <button class="btn themeBtn" data-theme="y2k" type="button">y2k</button>
-              <button class="btn themeBtn" data-theme="punk" type="button">punk</button>
+            <div class="themeGrid">
+              <button class="btn themeBtn" data-theme="yakult" type="button"><span>yakult</span></button>
+              <button class="btn themeBtn" data-theme="y2k" type="button"><span>y2k</span></button>
+              <button class="btn themeBtn" data-theme="punk" type="button"><span>punk</span></button>
+              <button class="btn themeBtn" data-theme="wood" type="button"><span>wood</span></button>
             </div>
             <div style="margin-top:10px" class="tiny">
               Stored in <code>localStorage</code>.
@@ -1698,6 +1790,12 @@
       line:"#111111", accent:"#1aff00", accent2:"#1aff00", shadow:"inset 0 0 12px rgba(0,255,0,.15), 0 0 8px rgba(0,255,0,.25)",
       r:"0px"
     }
+    ,
+    wood: {
+      bg:"#1a120c", panel:"#2a1b12", panel2:"#3a261a", text:"#f3e6d4", muted:"#c7b39a",
+      line:"#5b3b26", accent:"#d4a04a", accent2:"#3a261a", shadow:"inset 0 0 18px rgba(0,0,0,.35), 0 10px 24px rgba(0,0,0,.35)",
+      r:"0px"
+    }
   };
 
   function syncThemeButtons(active){
@@ -1718,10 +1816,12 @@
     if(winTagTextEl) winTagTextEl.textContent = t;
 
     if(modePill){
-      modePill.textContent = (t === "punk") ? "local · punk" : (t === "y2k") ? "local · y2k" : "local";
+      modePill.textContent = (t === "punk") ? "local · punk"
+                        : (t === "y2k") ? "local · y2k"
+                        : (t === "wood") ? "local · wood"
+                        : "local";
     }
-
-    syncThemeButtons(t);
+syncThemeButtons(t);
   }
 
   // Theme button clicks
