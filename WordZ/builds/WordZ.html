@@ -405,11 +405,11 @@
     }
 
     .winIcon{
-      width:16px;
-      height:16px;
+      width: clamp(14px, 2.2vh, 20px);
+      height: clamp(14px, 2.2vh, 20px);
       display:block;
-      object-fit:cover;
-      image-rendering:pixelated;
+      object-fit:contain;
+      image-rendering:auto;
       border:1px solid #00000055;
       flex:0 0 auto;
       background:#fff;
@@ -1045,6 +1045,48 @@
 
     /* identity: single reset button */
     #identReset{ width: 100%; }
+
+
+    /* ===== Responsive Win98 chrome (mobile / narrow windows) ===== */
+    @media (max-width: 520px){
+      .frame{ width: 100%; }
+      .winTop{ padding: 0 4px; }
+      .winText{ max-width: 48vw; }
+      .status{ gap:6px; }
+      #statusText{ display:none; } /* keep dot only */
+      .winBtn{ width:18px; height:16px; }
+    }
+    @media (max-width: 380px){
+      .winText{ max-width: 40vw; }
+      .winRight{ gap:6px; }
+    }
+
+
+    /* ===== Yakult palette (from bottle) ===== */
+    html[data-theme="yakult"]{
+      --bg:#f7f1e3;        /* bottle cream highlight */
+      --panel:#fbf6ea;     /* label cream */
+      --panel2:#e2cfad;    /* warm tan */
+      --text:#241c16;      /* deep cocoa */
+      --muted:#7a6a5a;     /* warm gray-brown */
+      --line:#d7c3a7;      /* divider tan */
+      --accent:#d12729;    /* Yakult red */
+      --accent2:#f3d5cf;   /* soft blush */
+      --shadow:0 10px 24px rgba(0,0,0,.14);
+
+      --bar-top:#d12729;
+      --bar-bot:#a41c21;
+      --bar-text:#ffffff;
+
+      --glow: rgba(209,39,41,.35);
+    }
+    /* make yakult log paper slightly warmer */
+    html[data-theme="yakult"] .log{
+      background:
+        linear-gradient(#fffaf0, #fffaf0),
+        repeating-linear-gradient(to bottom, rgba(209,39,41,.05) 0px, rgba(209,39,41,.05) 1px, transparent 1px, transparent 22px);
+      background-blend-mode: normal;
+    }
 
 </style>
 </head>
