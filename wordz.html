@@ -166,6 +166,50 @@
     .time{ color:var(--muted); }
     .chan{ color:var(--muted); }
     .sep{ color:var(--muted); }
+
+
+    /* ===== NPC user list + per-name glow (theme-safe) ===== */
+    :root{ --msgShadow: rgba(0,0,0,.35); }
+    html[data-theme="punk"]{ --msgShadow: rgba(255,255,255,.22); }
+    .msg span{ text-shadow: 0 1px 0 var(--msgShadow); } /* improves contrast on light themes */
+
+    .whoGlow{ text-shadow: 0 0 6px currentColor, 0 0 14px currentColor; }
+
+    .userList{
+      list-style:none;
+      margin:0;
+      padding:8px 10px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      max-height: 220px;
+      overflow:auto;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+    .userRow{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .uDot{
+      width:8px;height:8px;border-radius:50%;
+      background:#42d392;
+      box-shadow:0 0 0 4px rgba(66,211,146,.18);
+      flex:0 0 auto;
+    }
+    .uDot.idle{
+      background:#c7bfb7;
+      box-shadow:0 0 0 4px rgba(199,191,183,.18);
+    }
+    .uName{
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
 /* Typing indicator */
     .typing{
       display:flex;
@@ -852,7 +896,12 @@
     html[data-theme="y2k"]{ --glow: rgba(10,36,106,.35); }
     html[data-theme="punk"]{ --glow: rgba(26,255,0,.35); }
 
-  </style>
+  
+    /* ===== Identity panel helpers (theme-safe) ===== */
+    #identBox .btn{ padding:6px 10px; font-size:11px; }
+    #identBox .identInput{ font-size:11px; }
+
+</style>
 </head>
 
 <body>
@@ -908,7 +957,35 @@
 
       <!-- side -->
       <div class="side">
-        <div class="sideBox">
+        
+        <div class="sideBox" id="identBox">
+          <div class="hd">
+            <span>identity</span>
+            <span class="pill" id="tokenPill">tkn: ----</span>
+          </div>
+          <div class="bd" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="tiny" style="width:40px;">user</span>
+              <input class="input identInput" id="identUser" placeholder="You" maxlength="18" style="padding:6px 8px; min-width:0; flex:1;">
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="tiny" style="width:40px;">key</span>
+              <input class="input identInput" id="identKey" placeholder="••••" type="password" maxlength="32" style="padding:6px 8px; min-width:0; flex:1;">
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="tiny" style="width:40px;">color</span>
+              <input id="identColor" type="color" value="#e46a5d" style="width:44px; height:26px; padding:0; border:2px solid; border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo); background:#fff;">
+              <span class="tiny" id="identGlowHint" style="margin-left:auto;">glow: --</span>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn" id="identLogin" type="button">login</button>
+              <button class="btn" id="identReset" type="button">reset</button>
+            </div>
+            <div class="tiny">Local-only. Sets name + token glow.</div>
+          </div>
+        </div>
+
+<div class="sideBox">
           <div class="hd">
             <span>signal</span>
             <span class="pill">soft</span>
@@ -957,7 +1034,16 @@
           </div>
         </div>
       </div>
-    </div>
+    
+        <div class="sideBox">
+          <div class="hd">
+            <span>users</span>
+            <span class="pill" id="userCount">0</span>
+          </div>
+          <ul class="userList" id="userList" aria-label="npc users"></ul>
+        </div>
+
+</div>
   </div>
 
 <script>
@@ -1032,7 +1118,6 @@
     "5": "#40ffff",
     "6": "#ff40ff",
     "7": "#aaaaaa",
-    "9": "inherit", // reset to default/inherit
   };
 
   function parseGunzColors(text){
@@ -1051,7 +1136,7 @@
   }
 
   function stripGunzCodes(text){
-    return String(text ?? "").replace(/\^[0-7,9]/g, "");
+    return String(text ?? "").replace(/\^[0-7]/g, "");
   }
 
   function inferChannel(who, cls){
@@ -1062,6 +1147,316 @@
     // Default: feels like CLAN/ROOM chatter
     return "CLAN";
   }
+
+
+  // ===== NPC roster (local-only) =====
+  // NPCs appear in the user list and can chatter + reply to each other.
+  const NPC_ROSTER = [
+    { name: "YakultOps",   color: "#e46a5d", state: "online", topics: ["ops","relay","status"] },
+    { name: "ClanLog",     color: "#4080ff", state: "online", topics: ["clan","room","matches"] },
+    { name: "PatchNotes",  color: "#40ff40", state: "idle",   topics: ["patch","version","notes"] },
+    { name: "BlueLink",    color: "#0000ee", state: "online", topics: ["portal","links","ui"] },
+    { name: "RoomTemp",    color: "#ffff40", state: "idle",   topics: ["vibe","quiet","timing"] },
+    { name: "NullPointer", color: "#ff40ff", state: "online", topics: ["bugs","edges","inputs"] },
+    { name: "Archivist",   color: "#aaaaaa", state: "online", topics: ["notes","logs","memory"] },
+    { name: "NeonLobby",   color: "#00ccff", state: "online", topics: ["room","vibe","timing"] },
+    { name: "RazorWire",   color: "#ff9900", state: "online", topics: ["edges","bugs","inputs"] },
+    { name: "MilkCarton",  color: "#c060ff", state: "idle",   topics: ["vibe","notes","memory"] },
+    { name: "SysClock",    color: "#40ffff", state: "online", topics: ["status","timing","ops"] },
+    { name: "BevelBoss",   color: "#ffcc40", state: "idle",   topics: ["ui","edges","notes"] },
+
+  ];
+
+  const NPC_CHANNELS = ["ROOM","CLAN","SYS"];
+
+  // "Gun topics" here = game/chat flavor only (matches/loadouts vibes), no real-world instructions.
+  const TOPIC_LINES = {
+    ops: ["^2ping ok.","^7relay quiet.","^3instance idle.","^7signals stable."],
+    relay: ["^7bus: clear.","^7packets: calm.","^5handoff clean."],
+    status: ["^2online.","^7idle.","^4watching."],
+    clan: ["^7[CLAN] chatter drifting.","^7someone joined the room.","^7someone left a note."],
+    room: ["^7room feels light today.","^7matchmaking: imaginary."],
+    matches: ["^3warmup only.","^7no ranked. just motion."],
+    patch: ["^7notes are incomplete.","^7build feels stable."],
+    version: ["^7v0.0.x energy.","^7shell-first, always."],
+    notes: ["^7log appended.","^7archived locally."],
+    portal: ["^3blue link looks real.","^7click-through confirmed."],
+    links: ["^3external jump armed.","^7confirm modal: expected."],
+    ui: ["^7bevels: correct.","^7angles: business."],
+    vibe: ["^7quiet window.","^7milk-cream palette."],
+    timing: ["^7slow loop. steady hand.","^7no rush."],
+    bugs: ["^6edge case spotted.","^6input sanitized."],
+    edges: ["^6corners squared.","^6borders held."],
+    inputs: ["^6user typed.","^6shell replied."],
+    logs: ["^7remember this frame.","^7the log holds."],
+    memory: ["^7localStorage: faithful.","^7state preserved."],
+  };
+
+  function npcByName(name){
+    return NPC_ROSTER.find(n => n.name === name) || null;
+  }
+  function chance(p){ return Math.random() < p; }
+
+  function renderUserList(){
+    const ul = document.getElementById("userList");
+    const pill = document.getElementById("userCount");
+    if (!ul || !pill) return;
+
+    ul.innerHTML = "";
+    for (const npc of NPC_ROSTER){
+      const li = document.createElement("li");
+      li.className = "userRow";
+
+      const dot = document.createElement("span");
+      dot.className = "uDot" + (npc.state === "idle" ? " idle" : "");
+
+      const name = document.createElement("span");
+      name.className = "uName whoGlow";
+      name.textContent = npc.name;
+      name.style.color = npc.color;
+
+      li.appendChild(dot);
+      li.appendChild(name);
+      ul.appendChild(li);
+    }
+
+    pill.textContent = String(NPC_ROSTER.length);
+  }
+
+  function styleWhoSpan(p, who){
+    const npc = npcByName(who);
+    if (!npc) return;
+    const whoEl = p.querySelector(".who");
+    if (!whoEl) return;
+    whoEl.style.color = npc.color;
+    whoEl.classList.add("whoGlow");
+  }
+
+  let lastNpc = null;
+  let lastTopic = "ops";
+
+  function randomTopicFor(npc){
+    const t = pick(npc.topics);
+    return TOPIC_LINES[t] ? t : "ops";
+  }
+
+  function npcSay(npc, text, channel){
+    const ch = channel || pick(NPC_CHANNELS);
+    showTyping(650 + Math.random()*600);
+    setTimeout(() => {
+      typing.style.display = "none";
+      addLine(npc.name, text, "", ch);
+      const p = log.lastElementChild;
+      if (p) styleWhoSpan(p, npc.name);
+      saveChat();
+    }, 550 + Math.random()*550);
+  }
+
+  function npcChatterTick(){
+    // Don’t start until there is some content
+    const lineCount = log.querySelectorAll(".line").length;
+    if (lineCount < 2) return;
+
+    // Quiet by default
+    if (!chance(0.30)) return;
+
+    // Pick speaker (sometimes respond to lastNpc)
+    let npc = null;
+    if (lastNpc && chance(0.35)){
+      const others = NPC_ROSTER.filter(n => n.name !== lastNpc);
+      npc = pick(others);
+    } else {
+      npc = pick(NPC_ROSTER);
+    }
+
+    // Pick topic (sometimes mirror last topic)
+    const topic = chance(0.45) ? lastTopic : randomTopicFor(npc);
+    const line = pick(TOPIC_LINES[topic] || TOPIC_LINES.ops);
+
+    const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
+    const chan = (topic === "ops" || topic === "relay" || topic === "status") ? "SYS"
+              : (topic === "clan") ? "CLAN" : "ROOM";
+
+    npcSay(npc, replyPrefix + line, chan);
+
+    lastNpc = npc.name;
+    lastTopic = topic;
+  }
+
+  function npcPresenceTick(){
+    for (const n of NPC_ROSTER){
+      if (Math.random() < 0.15){
+        n.state = (n.state === "online") ? "idle" : "online";
+      }
+    }
+    renderUserList();
+  }
+
+  // ===== Identity (local-only): user + key => token + unique glow color =====
+  const IDENT_KEY = "wordz_identity_v1";
+
+  let IDENTITY = { user:"You", token:"----", color:null, glow:10 };
+
+  function hash32(str){
+    let h = 2166136261;
+    for (let i=0;i<str.length;i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  function usedColorsSet(){
+    const used = new Set();
+    if (Array.isArray(NPC_ROSTER)){
+      NPC_ROSTER.forEach(n => used.add(String(n.color||"").toLowerCase()));
+    }
+    return used;
+  }
+
+  function generateUniqueColor(seed){
+    const used = usedColorsSet();
+    const h = hash32(seed);
+    let hue = h % 360;
+    for (let tries=0; tries<48; tries++){
+      const s = 0.70, v = 0.95;
+      const c = v*s;
+      const x = c*(1-Math.abs(((hue/60)%2)-1));
+      const m = v-c;
+      let r=0,g=0,b=0;
+      if (hue<60){ r=c; g=x; b=0; }
+      else if (hue<120){ r=x; g=c; b=0; }
+      else if (hue<180){ r=0; g=c; b=x; }
+      else if (hue<240){ r=0; g=x; b=c; }
+      else if (hue<300){ r=x; g=0; b=c; }
+      else { r=c; g=0; b=x; }
+
+      const rr = Math.round((r+m)*255), gg = Math.round((g+m)*255), bb = Math.round((b+m)*255);
+      const hex = "#" + ((rr<<16)|(gg<<8)|bb).toString(16).padStart(6,"0");
+      if (!used.has(hex.toLowerCase())) return hex;
+      hue = (hue + 17) % 360;
+    }
+    return "#e46a5d";
+  }
+
+  function computeGlowFromSeed(seed){
+    const h = hash32(seed);
+    return 6 + (h % 11); // 6..16
+  }
+
+  function applyIdentity(){
+    window.WORDZ_USER_NAME  = IDENTITY.user || "You";
+    window.WORDZ_USER_COLOR = IDENTITY.color || null;
+    window.WORDZ_USER_GLOW  = Number(IDENTITY.glow || 10);
+
+    const pill = document.getElementById("tokenPill");
+    if (pill) pill.textContent = "tkn: " + (IDENTITY.token || "----");
+
+    const gh = document.getElementById("identGlowHint");
+    if (gh) gh.textContent = "glow: " + String(window.WORDZ_USER_GLOW || 10);
+  }
+
+  function saveIdentity(){
+    try{ localStorage.setItem(IDENT_KEY, JSON.stringify(IDENTITY)); }catch(e){}
+  }
+
+  function loadIdentity(){
+    try{
+      const raw = localStorage.getItem(IDENT_KEY);
+      if(!raw) return;
+      const obj = JSON.parse(raw);
+      if(obj && typeof obj === "object") IDENTITY = { ...IDENTITY, ...obj };
+    }catch(e){}
+  }
+
+  function deriveToken(u,k){
+    const seed = (u||"You") + "|" + (k||"");
+    return (hash32(seed).toString(16).toUpperCase().slice(0,4)).padStart(4,"0");
+  }
+
+  function wireIdentityUI(){
+    loadIdentity();
+
+    const uEl = document.getElementById("identUser");
+    const kEl = document.getElementById("identKey");
+    const cEl = document.getElementById("identColor");
+
+    if (uEl) uEl.value = IDENTITY.user || "You";
+    if (cEl && IDENTITY.color) cEl.value = IDENTITY.color;
+
+    // If no saved color, generate one from current seed.
+    if (!IDENTITY.color){
+      const token = deriveToken(IDENTITY.user, "");
+      IDENTITY.token = token;
+      const seed = (IDENTITY.user||"You") + "|";
+      IDENTITY.color = generateUniqueColor(seed);
+      IDENTITY.glow = computeGlowFromSeed(seed);
+      if (cEl) cEl.value = IDENTITY.color;
+    }
+
+    applyIdentity();
+
+    const applyFromInputs = (forceGenerateColor=false) => {
+      const u = (uEl?.value || "You").trim() || "You";
+      const k = (kEl?.value || "");
+      const seed = u + "|" + k;
+
+      IDENTITY.user = u;
+      IDENTITY.token = deriveToken(u, k);
+      IDENTITY.glow = computeGlowFromSeed(seed);
+
+      if (forceGenerateColor || !IDENTITY.color){
+        IDENTITY.color = generateUniqueColor(seed);
+        if (cEl) cEl.value = IDENTITY.color;
+      }
+
+      applyIdentity();
+      saveIdentity();
+    };
+
+    document.getElementById("identLogin")?.addEventListener("click", () => {
+      applyFromInputs(true);
+      addLine("System", `^7identity set: ^2${IDENTITY.user} ^7(tkn ^3${IDENTITY.token}^7)`, "sys", "SYS");
+      saveChat();
+    });
+
+    document.getElementById("identReset")?.addEventListener("click", () => {
+      IDENTITY = { user:"You", token:"----", color:null, glow:10 };
+      try{ localStorage.removeItem(IDENT_KEY); }catch(e){}
+      if (uEl) uEl.value = "You";
+      if (kEl) kEl.value = "";
+      if (cEl) cEl.value = "#e46a5d";
+      applyFromInputs(true);
+      addLine("System", "^7identity reset.", "sys", "SYS");
+      saveChat();
+    });
+
+    // Live-update token/glow while typing (does NOT force color change)
+    uEl?.addEventListener("input", () => applyFromInputs(false));
+    kEl?.addEventListener("input", () => applyFromInputs(false));
+
+    // Manual color pick: also ensures token is up to date and no collisions.
+    cEl?.addEventListener("input", () => {
+      // make sure token is current even if user never clicked login
+      applyFromInputs(false);
+
+      const used = usedColorsSet();
+      const val = String(cEl.value || "").toLowerCase();
+      if (used.has(val)){
+        addLine("System", "^1color collision.^7 pick another.", "sys", "SYS");
+        // revert to generated unique
+        IDENTITY.color = generateUniqueColor((IDENTITY.user||"You") + "|" + (kEl?.value||""));
+        if (cEl) cEl.value = IDENTITY.color;
+      } else {
+        IDENTITY.color = cEl.value;
+      }
+      applyIdentity();
+      saveIdentity();
+    });
+  }
+
+
+
 
 
   // MODIFIED addLine to include bot-specific classes for styling
@@ -1085,6 +1480,18 @@
       `<span class="when time">[${esc(nowStamp())}]</span> ` +
       `<span class="chan">[${esc(ch)}]</span>` +
       `<br><span class="msg">${parseGunzColors(p.dataset.rawmsg)}</span>`;
+
+    // apply identity to local user ("You")
+    if ((who || "") === "You" && window.WORDZ_USER_COLOR){
+      const whoEl = p.querySelector(".who");
+      if (whoEl){
+        whoEl.textContent = window.WORDZ_USER_NAME || "You";
+        whoEl.style.color = window.WORDZ_USER_COLOR;
+        whoEl.classList.add("whoGlow");
+        const g = Number(window.WORDZ_USER_GLOW || 10);
+        whoEl.style.textShadow = `0 0 ${g}px currentColor, 0 0 ${g*2}px currentColor`;
+      }
+    }
 
     log.appendChild(p);
     log.scrollTop = log.scrollHeight;
@@ -1113,7 +1520,8 @@
       log.innerHTML = "";
       for(const it of items){
         addLine(it.who || "?", it.msg || "", it.cls || "", it.channel || null);
-      }
+        { const p = log.lastElementChild; if(p) styleWhoSpan(p, it.who || "?"); }
+}
       return items.length > 0;
     }catch(e){
       return false;
@@ -1127,15 +1535,6 @@
   }, 7000);
 
   function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
-
-  function shuffle(arr){
-    const a = arr.slice();
-    for(let i=a.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
 
   const botParticipants = ["WordZ", "Oracle", "Echo_Bot", "Agent_X", "Watcher"];
 
@@ -1258,22 +1657,6 @@
     input.focus();
     saveChat();
 
-    // DESU trigger (npc swarm)
-    if (/(^|\s)desu(\s|$)/i.test(stripGunzCodes(msg))){
-      const variants = ["^1de^2su", "^1DE^2SU", "^7is it ^1de^2su ^9time?"];
-      const picks = shuffle(NPC_ROSTER).slice(0, Math.min(3, NPC_ROSTER.length));
-      let d = 420;
-      for (const npc of picks){
-        const v = variants[Math.floor(Math.random()*variants.length)];
-        setTimeout(() => {
-          npcSay(npc, v, "CLAN");
-          saveChat();
-        }, d);
-        d += 420;
-      }
-    }
-
-
     const key = (msg.toLowerCase().trim());
 
     if (key.startsWith("oracle:") && replies["oracle:query"]) {
@@ -1357,6 +1740,7 @@
   document.documentElement.classList.add("preload");
   const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();
   setTheme(savedTheme || "yakult");
+  wireIdentityUI();
   requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
 
   const had = loadChat();
@@ -1366,6 +1750,12 @@
     addLine("You", "^7Click a chip, or type a line.", "sys", "YOU");
     saveChat();
   }
+
+  // ===== NPC panel + ambient chatter =====
+  renderUserList();
+  setInterval(npcPresenceTick, 12000 + Math.floor(Math.random()*6000));
+  setInterval(npcChatterTick, 9000 + Math.floor(Math.random()*7000));
+
   input.focus();
 })();
 </script>
