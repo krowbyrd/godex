@@ -281,23 +281,245 @@
     }
     a{ color: var(--accent); text-decoration:none; }
     a:hover{ text-decoration:underline; }
+  
+    /* ===== WordZ Base Shell: Win98 Business Chrome (invariant) ===== */
+    :root{
+      --win-face:#d4d0c8;
+      --win-hi:#ffffff;
+      --win-lo:#808080;
+      --win-text:#000000;
+
+      --bar-top:#ff6f6a;   /* Yakult Win98 red */
+      --bar-bot:#e0463d;
+      --bar-text:#ffffff;
+
+      --r:0px; /* angular */
+      --ui: Tahoma, Verdana, Arial, sans-serif;
+    }
+
+    body{
+      font-family:var(--ui);
+      background:var(--bg);
+    }
+
+    .frame{
+      border-radius:0;
+      overflow:hidden;
+      background:var(--win-face);
+      border:2px solid;
+      border-color: var(--win-hi) var(--win-lo) var(--win-lo) var(--win-hi);
+      box-shadow:var(--shadow);
+    }
+
+    .winTop{
+      height:32px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 6px;
+      background:linear-gradient(var(--bar-top), var(--bar-bot));
+      color:var(--bar-text);
+      border-bottom:1px solid #00000040;
+      user-select:none;
+    }
+
+    .winTitle{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+    }
+
+    .winIcon{
+      width:16px;
+      height:16px;
+      background:linear-gradient(#fff, #bbb);
+      border:1px solid #00000055;
+      flex:0 0 auto;
+    }
+
+    .winText{
+      font-weight:bold;
+      font-size:12px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .winRight{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex:0 0 auto;
+    }
+
+    /* Re-skin status for titlebar */
+    .status{
+      color:var(--bar-text);
+      opacity:1;
+      font-family:var(--mono);
+      font-size:12px;
+    }
+    .dot{
+      background:#42d392;
+      box-shadow:0 0 0 4px rgba(66,211,146,.18);
+    }
+
+    /* Win98 buttons */
+    .winBtns{ display:flex; gap:4px; }
+    .winBtn{
+      width:22px; height:20px;
+      background:var(--win-face);
+      color:var(--win-text);
+      border:2px solid;
+      border-color: var(--win-hi) var(--win-lo) var(--win-lo) var(--win-hi);
+      font-family:var(--ui);
+      font-size:12px;
+      line-height:16px;
+      padding:0;
+      cursor:pointer;
+    }
+    .winBtn:active{
+      border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo);
+    }
+    .winBtnClose{ font-weight:bold; }
+
+    .body{
+      background:var(--win-face);
+      padding:10px;
+      gap:10px;
+    }
+
+    .card,
+    .sideBox{
+      border-radius:0;
+      border:2px solid;
+      border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo);
+      background:var(--panel);
+    }
+
+    .cardHead,
+    .sideBox .hd,
+    .composer,
+    .typing{
+      border-radius:0;
+      background:var(--win-face);
+      border-bottom:1px solid #00000030;
+    }
+    .composer{ border-top:1px solid #00000030; }
+    .typing{ border-top:1px solid #00000030; }
+
+    .pill{
+      border-radius:0;
+      border:1px solid #00000040;
+      background:var(--panel2);
+      color:var(--text);
+    }
+
+    .input{
+      border-radius:0;
+      border:2px solid;
+      border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo);
+      box-shadow:none;
+    }
+    .input:focus{
+      box-shadow:none;
+      border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo);
+      outline:1px dotted #00000055;
+      outline-offset:-4px;
+    }
+
+    .btn{
+      border-radius:0;
+      border:2px solid;
+      border-color: var(--win-hi) var(--win-lo) var(--win-lo) var(--win-hi);
+      background:var(--win-face);
+      color:var(--win-text);
+      letter-spacing:0;
+      font-weight:bold;
+    }
+    .btn:active{
+      border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo);
+      transform:none;
+    }
+
+    .chip{
+      border-radius:0;
+      border:1px solid #00000040;
+      background:var(--panel2);
+    }
+
+    /* Theme hooks: only swap variables (base chrome stays) */
+    html[data-theme="yakult"]{
+      --bg:#fffaf4;
+      --panel:#fffefc;
+      --panel2:#f9efe4;
+      --text:#2a2a2a;
+      --muted:#8a8178;
+      --line:#f0d7c6;
+      --accent:#e46a5d;
+      --shadow:0 10px 24px rgba(0,0,0,.15);
+
+      --bar-top:#ff6f6a;
+      --bar-bot:#e0463d;
+      --bar-text:#ffffff;
+    }
+
+    html[data-theme="y2k"]{
+      --bg:#e9eef6;
+      --panel:#ffffff;
+      --panel2:#dfe7f3;
+      --text:#000000;
+      --muted:#333333;
+      --line:#000000;
+      --accent:#0a246a;
+      --shadow:none;
+
+      --bar-top:#0a246a;
+      --bar-bot:#3a6ea5;
+      --bar-text:#ffffff;
+    }
+
+    html[data-theme="punk"]{
+      --bg:#000000;
+      --panel:#0a0a0a;
+      --panel2:#050505;
+      --text:#e6e6e6;
+      --muted:#6b6b6b;
+      --line:#111111;
+      --accent:#00e5ff;
+      --shadow: inset 0 0 12px rgba(0,255,0,.15), 0 0 8px rgba(0,255,0,.25);
+
+      --bar-top:#001100;
+      --bar-bot:#003300;
+      --bar-text:#1aff00;
+    }
+
   </style>
 </head>
 
 <body>
   <div class="frame" id="app">
-    <div class="top">
-      <div class="brand">
-        <b>WordZ</b>
-        <span class="tag">yakult</span>
+    <div class="winTop" id="winTop">
+      <div class="winTitle">
+        <span class="winIcon" aria-hidden="true"></span>
+        <span class="winText"><span id="winTitleText">WordZ</span> :: <span id="winTagText">yakult</span></span>
       </div>
-      <div class="status" title="local-only">
-        <span class="dot"></span>
-        <span id="statusText">online</span>
+
+      <div class="winRight">
+        <div class="status" title="local-only">
+          <span class="dot"></span>
+          <span id="statusText">online</span>
+        </div>
+
+        <div class="winBtns" aria-label="window controls">
+          <button class="winBtn" id="btnMin" type="button" title="Minimize" aria-label="Minimize">_</button>
+          <button class="winBtn" id="btnMax" type="button" title="Maximize" aria-label="Maximize">&#9633;</button>
+          <button class="winBtn winBtnClose" id="btnClose" type="button" title="Close" aria-label="Close">&times;</button>
+        </div>
       </div>
     </div>
-
-    <div class="body">
+<div class="body">
       <!-- main -->
       <div class="card">
         <div class="cardHead">
@@ -391,6 +613,37 @@
   const sendBtn = $("send");
   const statusText = $("statusText");
   const modePill = $("modePill");
+
+  // ---------- window controls (Win98 chrome) ----------
+  const btnClose = $("btnClose");
+  const btnMin = $("btnMin");
+  const btnMax = $("btnMax");
+  const bodyWrap = document.querySelector(".body");
+  const frame = $("app");
+
+  btnClose?.addEventListener("click", () => {
+    // In a popup window, close. In a normal tab, just hide the app.
+    if (window.name === "wordz_popup") {
+      window.close();
+      return;
+    }
+    if (frame) frame.style.display = "none";
+    document.body.style.background = "var(--bg)";
+  });
+
+  btnMin?.addEventListener("click", () => {
+    if (!bodyWrap) return;
+    bodyWrap.style.display = (bodyWrap.style.display === "none") ? "" : "none";
+  });
+
+  btnMax?.addEventListener("click", () => {
+    const f = frame;
+    if (!f) return;
+    const isMax = f.dataset.max === "1";
+    f.dataset.max = isMax ? "0" : "1";
+    f.style.width = isMax ? "min(720px, 100%)" : "min(980px, 100%)";
+  });
+
 
   const CHAT_KEY = "wordz_yakult_chat_v1";
   const THEME_KEY = "wordz_theme_v1";
@@ -564,36 +817,17 @@
   };
 
   function setTheme(name){
-    const t = THEMES[name] || THEMES.yakult;
-    const r = document.documentElement.style;
-    r.setProperty("--bg", t.bg);
-    r.setProperty("--panel", t.panel);
-    r.setProperty("--panel2", t.panel2);
-    r.setProperty("--text", t.text);
-    r.setProperty("--muted", t.muted);
-    r.setProperty("--line", t.line);
-    r.setProperty("--accent", t.accent);
-    r.setProperty("--accent2", t.accent2);
-    r.setProperty("--shadow", t.shadow);
-    r.setProperty("--r", t.r);
+    const t = (THEMES[name] ? name : "yakult");
+    document.documentElement.setAttribute("data-theme", t);
+    try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
 
-    // minor theme-specific tweaks
-    if(name === "punk"){
-      document.body.style.fontFamily = `"Courier New", monospace`;
-      document.body.style.background =
-        `repeating-linear-gradient(to bottom, #000 0px, #000 2px, #020202 3px)`;
-      modePill.textContent = "local · punk";
-    } else if(name === "y2k"){
-      document.body.style.fontFamily = `Tahoma, Verdana, Arial, sans-serif`;
-      document.body.style.background = t.bg;
-      modePill.textContent = "local · y2k";
-    } else {
-      document.body.style.fontFamily = "";
-      document.body.style.background = "";
-      modePill.textContent = "local";
-    }
+    // Titlebar label follows theme tag (cosmetic)
+    const tag = document.getElementById("winTagText");
+    if(tag) tag.textContent = t;
 
-    try{ localStorage.setItem(THEME_KEY, name); }catch(e){}
+    if(t === "punk") modePill.textContent = "local · punk";
+    else if(t === "y2k") modePill.textContent = "local · y2k";
+    else modePill.textContent = "local";
   }
 
   document.querySelectorAll("[data-theme]").forEach(btn => {
