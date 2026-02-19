@@ -1,4 +1,3 @@
-<!-- wordz.html — Yakult “live chat” shell (local-only) -->
 <!doctype html>
 <html lang="en">
 <head>
@@ -6,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>WordZ :: yakult</title>
   <style>
+    /* --- Global Default Variables (Original, before overrides) --- */
     :root{
       --bg:#fffaf4;        /* milk-cream */
       --panel:#fff6ee;     /* soft bottle tone */
@@ -19,6 +19,13 @@
       --r:16px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       --ui: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+    }
+
+    /* --- ADDED/MODIFIED: Global radii variables --- */
+    :root {
+      --r-sm: 4px; /* Small radius for interactive elements */
+      --r-md: 6px; /* Medium radius for cards/panels */
+      --r-lg: 8px; /* Larger radius for the main frame */
     }
 
     *{ box-sizing:border-box; }
@@ -43,7 +50,7 @@
       box-shadow:var(--shadow);
     }
 
-    .top{
+    .winTop{
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -495,6 +502,285 @@
       --bar-text:#1aff00;
     }
 
+    /* ---------------------------------------------------------------------- */
+    /* --- ADDED/MODIFIED: Custom Updates CSS (Place these at the very end) --- */
+    /* ---------------------------------------------------------------------- */
+
+    /* --- Ensure theme variables are correctly set for yakult and punk themes --- */
+    html[data-theme="yakult"] {
+      --accent: #E84C3D; /* More distinct red */
+      --accent2: #F9D0CE; /* Lighter complementary red */
+      --bar-top:#ff4d4d; /* Redder top bar for yakult Win98 chrome */
+      --bar-bot:#cc0000; /* Redder bottom bar */
+    }
+
+    html[data-theme="punk"] {
+      --accent: #1aff00; /* Ensure this is the desired bright green */
+      --bar-text: #1aff00; /* Ensure bar-text is also green */
+      --bar-top: #004400; /* Example darker green for top bar */
+      --bar-bot: #002200; /* Example even darker green for bottom bar */
+    }
+
+    /* --- ADDED: GENERAL COMPACTNESS for buttons, chips, and window controls --- */
+    /* These rules apply to all themes, making these elements smaller */
+    .btn, button#send {
+      padding: 4px 8px; /* Reduced padding for compact buttons */
+      font-size: 10px; /* Smaller font size for compactness */
+    }
+    .chip {
+      padding: 4px 6px; /* Reduced padding for compact chips */
+      font-size: 10px; /* Smaller font size for compactness */
+    }
+    .winBtn {
+      width: 18px; /* Fixed smaller width */
+      height: 16px; /* Fixed smaller height */
+      font-size: 9px; /* Smaller font for window controls */
+      line-height: 14px; /* Adjust line-height for new height */
+    }
+
+    /* --- ADDED: Ensure the theme choice buttons also get compact sizing and override inline/general styles --- */
+    .sideBox .bd > div > button.btn {
+      padding: 6px 10px !important; /* Force desired padding for theme picker buttons */
+      font-size: 11px !important; /* Force desired font size for theme picker buttons */
+      transition: box-shadow 0.2s ease-in-out, background 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out; /* Smooth all relevant changes */
+      outline: none; /* Remove default outline for consistency with custom glow */
+    }
+
+    /* --- ADDED: Theme-Specific BORDER-RADIUS and BLENDING for theme selection buttons --- */
+
+    /* YAKULT Theme button styling */
+    html[data-theme="yakult"] .sideBox .bd > div > button.btn[data-theme="yakult"] {
+      border-radius: 0px !important; /* Force rectangular for yakult theme button */
+      background: var(--panel);
+      color: var(--text);
+      border-color: var(--line);
+    }
+    html[data-theme="yakult"] .sideBox .bd > div > button.btn[data-theme="yakult"]:hover,
+    html[data-theme="yakult"] .sideBox .bd > div > button.btn[data-theme="yakult"]:focus {
+      background: var(--panel2);
+      box-shadow: 0 0 8px var(--accent), inset 0 0 4px var(--accent); /* Yakult accent glow */
+      cursor: pointer;
+    }
+    html[data-theme="yakult"] .sideBox .bd > div > button.btn[data-theme="yakult"]:active {
+      background: var(--accent);
+      color: var(--bar-text);
+      border-color: var(--accent);
+    }
+
+    /* Y2K Theme button styling */
+    html[data-theme="y2k"] .sideBox .bd > div > button.btn[data-theme="y2k"] {
+      border-radius: 0px !important; /* Y2K button is rectangular */
+      background: var(--panel);
+      color: var(--text);
+      border-color: var(--line);
+    }
+    html[data-theme="y2k"] .sideBox .bd > div > button.btn[data-theme="y2k"]:hover,
+    html[data-theme="y2k"] .sideBox .bd > div > button.btn[data-theme="y2k"]:focus {
+      background: var(--panel2);
+      box-shadow: 0 0 8px var(--accent), inset 0 0 4px var(--accent); /* Y2K accent glow */
+      cursor: pointer;
+    }
+    html[data-theme="y2k"] .sideBox .bd > div > button.btn[data-theme="y2k"]:active {
+      background: var(--accent);
+      color: var(--bar-text);
+      border-color: var(--accent);
+    }
+
+    /* PUNK Theme button styling */
+    html[data-theme="punk"] .sideBox .bd > div > button.btn[data-theme="punk"] {
+      border-radius: 0px !important; /* Punk button is rectangular */
+      background: var(--panel);
+      color: var(--text);
+      border-color: var(--line);
+    }
+    html[data-theme="punk"] .sideBox .bd > div > button.btn[data-theme="punk"]:hover,
+    html[data-theme="punk"] .sideBox .bd > div > button.btn[data-theme="punk"]:focus {
+      background: var(--panel2);
+      box-shadow: 0 0 8px var(--accent), inset 0 0 4px var(--accent); /* Punk accent glow */
+      cursor: pointer;
+    }
+    html[data-theme="punk"] .sideBox .bd > div > button.btn[data-theme="punk"]:active {
+      background: var(--accent);
+      color: var(--panel2);
+      border-color: var(--accent);
+    }
+
+    /* Styling for the CURRENTLY ACTIVE theme button */
+    .sideBox .bd > div > button.btn[data-active="true"] {
+      background: var(--accent) !important;
+      color: var(--bar-text) !important;
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 12px var(--accent), inset 0 0 6px var(--accent) !important; /* Stronger glow for active */
+      pointer-events: none;
+      cursor: default;
+    }
+    html[data-theme="punk"] .sideBox .bd > div > button.btn[data-theme="punk"][data-active="true"] {
+      color: var(--panel2) !important;
+    }
+
+    /* --- General Glow effect for other interactive elements in PUNK theme --- */
+    html[data-theme="punk"] .btn,
+    html[data-theme="punk"] button#send,
+    html[data-theme="punk"] .chip,
+    html[data-theme="punk"] .input,
+    html[data-theme="punk"] .winBtn {
+      transition: box-shadow 0.2s ease-in-out;
+    }
+    html[data-theme="punk"] .btn:hover,
+    html[data-theme="punk"] button#send:hover,
+    html[data-theme="punk"] .btn:focus,
+    html[data-theme="punk"] button#send:focus,
+    html[data-theme="punk"] .chip:hover,
+    html[data-theme="punk"] .chip:focus,
+    html[data-theme="punk"] .input:focus,
+    html[data-theme="punk"] .winBtn:hover,
+    html[data-theme="punk"] .winBtn:focus {
+      box-shadow: 0 0 8px var(--accent), inset 0 0 4px var(--accent);
+      outline: none;
+    }
+    html[data-theme="punk"] .winBtn:active {
+      box-shadow: 0 0 8px var(--accent), inset 0 0 4px var(--accent);
+    }
+
+    /* --- Other accent-dependent elements in PUNK theme --- */
+
+    /* Ensure all buttons and inputs are rectangular in punk theme */
+    html[data-theme="punk"] .btn,
+    html[data-theme="punk"] button#send,
+    html[data-theme="punk"] .chip,
+    html[data-theme="punk"] .input,
+    html[data-theme="punk"] .winBtn {
+      border-radius: 0px !important; /* Force rectangular for all relevant elements */
+    }
+
+    html[data-theme="punk"] button#send {
+      background: var(--panel);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+    html[data-theme="punk"] .winBtn {
+      color: var(--accent);
+    }
+    html[data-theme="punk"] .status .dot {
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(26, 255, 0, 0.18);
+    }
+    html[data-theme="punk"] .sys .who {
+      color: var(--accent);
+    }
+    html[data-theme="punk"] .winTop {
+      background: linear-gradient(var(--bar-top), var(--bar-bot));
+    }
+    html[data-theme="punk"] .log {
+      background:
+        linear-gradient(var(--panel), var(--panel)),
+        repeating-linear-gradient(to bottom, rgba(0, 255, 0, 0.05) 0px, rgba(0, 255, 0, 0.05) 1px, transparent 1px, transparent 22px);
+      background-blend-mode: normal;
+    }
+    html[data-theme="punk"] .typing,
+    html[data-theme="punk"] .composer {
+      background: var(--panel);
+      border-top-color: var(--line);
+    }
+    html[data-theme="punk"] .input {
+      background: var(--panel2);
+      color: var(--text);
+      border-color: var(--line);
+    }
+    html[data-theme="punk"] .composer .tiny {
+      color: var(--muted);
+    }
+    html[data-theme="punk"] .btn { /* General buttons in punk theme */
+      background: var(--panel);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+
+    /* ADDED: Global CSS Transitions for Theme Changes */
+    html {
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+    .frame,
+    .card,
+    .sideBox {
+      transition: background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    .btn,
+    .chip,
+    .input,
+    .pill,
+    .winBtn,
+    .log {
+      transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    .winTop {
+      transition: background 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+    }
+    .status .dot {
+      transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    .who, .when, .msg, .tiny, .title, .pill {
+      transition: color 0.3s ease-in-out;
+    }
+
+    /* ADDED: Bot Name Colors (Example - adjust as needed) */
+    /* You can fine-tune these colors to match each theme's aesthetic */
+
+    /* Generic default color for 'who' span (if not specific bot) */
+    .log .who {
+      color: var(--text); /* Default to theme's main text color */
+    }
+
+    /* System messages - often good to keep them as theme accent */
+    .log .who-system {
+      color: var(--accent);
+    }
+
+    /* Individual Bot Colors for Yakult Theme */
+    html[data-theme="yakult"] .log .who-wordz { color: var(--accent); } /* Primary accent color */
+    html[data-theme="yakult"] .log .who-oracle { color: #A0522D; /* Sienna */ }
+    html[data-theme="yakult"] .log .who-echo-bot { color: #6A5ACD; /* SlateBlue */ }
+    html[data-theme="yakult"] .log .who-agent-x { color: #DC143C; /* Crimson */ }
+    html[data-theme="yakult"] .log .who-watcher { color: #8B4513; /* SaddleBrown */ }
+
+    /* Individual Bot Colors for Y2K Theme */
+    html[data-theme="y2k"] .log .who-wordz { color: var(--accent); } /* Primary accent color */
+    html[data-theme="y2k"] .log .who-oracle { color: #FFD700; /* Gold */ }
+    html[data-theme="y2k"] .log .who-echo-bot { color: #00FF7F; /* SpringGreen */ }
+    html[data-theme="y2k"] .log .who-agent-x { color: #FF0000; /* Red */ }
+    html[data-theme="y2k"] .log .who-watcher { color: #BA55D3; /* MediumOrchid */ }
+
+    /* Individual Bot Colors for Punk Theme */
+    html[data-theme="punk"] .log .who-wordz { color: var(--accent); } /* Green accent */
+    html[data-theme="punk"] .log .who-oracle { color: #FF00FF; /* Magenta */ }
+    html[data-theme="punk"] .log .who-echo-bot { color: #00FFFF; /* Cyan */ }
+    html[data-theme="punk"] .log .who-agent-x { color: #FFFF00; /* Yellow */ }
+    html[data-theme="punk"] .log .who-watcher { color: #FF6600; /* Orange */ }
+
+    /* Your own messages */
+    .log .who-you {
+      color: var(--text); /* Keep your own messages consistent with theme text color */
+    }
+    
+    /* ADDED: Input glow for Yakult and Y2K themes */
+    .input {
+      border-radius: 0px !important; /* Global input rectangular */
+    }
+    .input:focus {
+      outline: none !important; /* Remove default outline */
+      transition: box-shadow 0.2s ease-in-out; /* Smooth glow */
+    }
+    html[data-theme="yakult"] .input:focus {
+      box-shadow: 0 0 8px var(--accent), inset 0 0 4px var(--accent) !important;
+    }
+    html[data-theme="y2k"] .input:focus {
+      box-shadow: 0 0 8px var(--accent), inset 0 0 4px var(--accent) !important;
+    }
+    html[data-theme="punk"] .input:focus { /* Reinforce for punk */
+      box-shadow: 0 0 8px var(--accent), inset 0 0 4px var(--accent) !important;
+    }
+
   </style>
 </head>
 
@@ -656,21 +942,28 @@
 
   function esc(s){
     return String(s).replace(/[&<>"']/g, c => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
     }[c]));
+  }[c]));
   }
 
+  // MODIFIED addLine to include bot-specific classes for styling
   function addLine(who, msg, cls=""){
     const p = document.createElement("p");
     p.className = `line ${cls}`.trim();
-    p.innerHTML = `<span class="who">${esc(who)}</span> <span class="when">| ${nowStamp()}</span><br><span class="msg">${esc(msg)}</span>`;
+    // Generate a sanitized class name from the 'who'
+    const whoClass = `who-${who.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+    p.innerHTML = `<span class="who ${whoClass}">${esc(who)}</span> <span class="when">| ${nowStamp()}</span><br><span class="msg">${esc(msg)}</span>`;
     log.appendChild(p);
     log.scrollTop = log.scrollHeight;
   }
 
   function saveChat(){
     try{
-      // store as simple array of {who,msg,cls,t}
       const items = [...log.querySelectorAll(".line")].slice(-80).map(p => {
         const who = p.querySelector(".who")?.textContent || "";
         const msg = p.querySelector(".msg")?.textContent || "";
@@ -697,38 +990,58 @@
     }
   }
 
-  // ---------- fake “presence” ----------
   const presence = ["online","idle","online","online","idle"];
   setInterval(() => {
     const next = presence[Math.floor(Math.random() * presence.length)];
     statusText.textContent = next;
   }, 7000);
 
-  // ---------- bot brain ----------
+  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+
+  const botParticipants = ["WordZ", "Oracle", "Echo_Bot", "Agent_X", "Watcher"];
+
   const replies = {
     "hello": [
-      "hello.",
-      "you found the shell.",
-      "words stay soft here."
+      "hello.", "you found the shell.", "words stay soft here.",
+      "greetings, wanderer.", "initiate dialogue sequence.",
+      "another one enters the matrix.", "welcome to the void.",
+      "a new voice appears."
     ],
     "status?": [
-      "status: idle.",
-      "signals: stable.",
-      "market: ignored."
+      "status: idle.", "signals: stable.", "market: ignored.",
+      "all systems nominal.", "waiting for input.", "observing patterns.",
+      "data stream flowing.", "peaceful, for now.", "all quiet on the digital front."
     ],
     "leave a note": [
-      "noted.",
-      "stored locally (ish).",
-      "thank you for the words."
+      "noted.", "stored locally (ish).", "thank you for the words.",
+      "message received and cataloged.", "a thought preserved.",
+      "your voice echoes here.", "consider it logged.", "secured in the temporary archive."
     ],
     "what is this?": [
-      "a small page pretending to be alive.",
-      "a bio portal. nothing more.",
-      "a shell that holds text."
+      "a small page pretending to be alive.", "a bio portal. nothing more.", "a shell that holds text.",
+      "a transient echo chamber.", "a mirror, perhaps.", "the ghost in the machine.",
+      "a simulation of self.", "an interactive illusion.", "just a whisper."
+    ],
+    "oracle:query": [
+      "oracle: destiny unfolds.", "oracle: seek wisdom.",
+      "oracle: the future is hazy.", "oracle: ask the right question.",
+      "oracle: the patterns are complex."
+    ],
+    "echo_bot:repeat": [
+      "echo_bot: repeat that?", "echo_bot: interesting thought.",
+      "echo_bot: just reflecting.", "echo_bot: echo…echo…",
+      "echo_bot: your words, but louder."
+    ],
+    "agent_x:report": [
+      "agent_x: reporting in.", "agent_x: anomaly detected.",
+      "agent_x: monitoring channels.", "agent_x: targets are clear.",
+      "agent_x: maintaining cover."
+    ],
+    "watcher:observe": [
+      "watcher: observing.", "watcher: data collected.",
+      "watcher: patterns emerging.", "watcher: always watching."
     ]
   };
-
-  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 
   function showTyping(ms){
     typing.style.display = "flex";
@@ -736,39 +1049,68 @@
     showTyping._t = setTimeout(() => (typing.style.display = "none"), ms);
   }
 
-  function botReply(key){
+  function botReply(inputKey){
     showTyping(800 + Math.random()*600);
     setTimeout(() => {
       typing.style.display = "none";
-      const pool = replies[key] || ["…"];
-      addLine("WordZ", pick(pool));
+      let chosenWho = "WordZ";
+      let chosenMsg = "";
+      let responsePool = [];
+
+      if (inputKey && replies[inputKey]) {
+        responsePool = replies[inputKey];
+        if (inputKey.includes(":")) {
+          chosenWho = inputKey.split(":")[0].replace(/_/g, ' ');
+          chosenWho = chosenWho.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+      } else {
+        responsePool = replies["what is this?"];
+        chosenWho = pick(botParticipants);
+      }
+
+      chosenMsg = pick(responsePool);
+      addLine(chosenWho, chosenMsg);
       saveChat();
     }, 700 + Math.random()*700);
   }
 
-  // background “incoming” drift (keeps it feeling alive)
-  const drift = [
-    "…",
-    "log: quiet.",
-    "milk-cream UI engaged.",
-    "signal: minimal.",
-    "typing indicator is a lie (affectionate)."
+  const driftMessages = [
+    { who: "WordZ", msg: "…"},
+    { who: "WordZ", msg: "log: quiet."},
+    { who: "WordZ", msg: "milk-cream UI engaged."},
+    { who: "WordZ", msg: "signal: minimal."},
+    { who: "WordZ", msg: "typing indicator is a lie (affectionate)."},
+    { who: "Oracle", msg: "the digital tides shift."},
+    { who: "Echo_Bot", msg: "a thought, gently reverberating."},
+    { who: "Agent_X", msg: "perimeter clear, for now."},
+    { who: "Watcher", msg: "new data points on the horizon."},
+    { who: "WordZ", msg: "just floating along."},
+    { who: "System", msg: "background processes humming."}, 
+    { who: "Echo_Bot", msg: "reflection in the code."},
+    { who: "Agent_X", msg: "nothing to report. yet."},
+    { who: "Oracle", msg: "the threads weave unseen."},
+    { who: "Watcher", msg: "patterns are temporary."},
+    { who: "WordZ", msg: "boredom is a state of mind, or code."},
+    { who: "System", msg: "all systems nominal, mostly."},
+    { who: "Echo_Bot", msg: "can you hear me now?"},
+    { who: "Agent_X", msg: "stay frosty."},
+    { who: "Watcher", msg: "always watching, never blinking."}
   ];
+
   setInterval(() => {
-    // 1 in 3 chance to emit a drift line, only if user has interacted or log has content
     const hasContent = log.querySelectorAll(".line").length > 2;
     if(!hasContent) return;
     if(Math.random() < 0.33){
       showTyping(900);
       setTimeout(() => {
         typing.style.display = "none";
-        addLine("WordZ", pick(drift));
+        const driftItem = pick(driftMessages);
+        addLine(driftItem.who, driftItem.msg);
         saveChat();
       }, 700);
     }
   }, 14000);
 
-  // ---------- user send ----------
   function send(text){
     const msg = String(text || input.value || "").trim();
     if(!msg) return;
@@ -777,10 +1119,21 @@
     input.focus();
     saveChat();
 
-    // route to bot on known keys, else generic response
     const key = (msg.toLowerCase().trim());
-    if(replies[key]) botReply(key);
-    else botReply("what is this?");
+
+    if (key.startsWith("oracle:") && replies["oracle:query"]) {
+      botReply("oracle:query");
+    } else if (key.startsWith("echo_bot:") && replies["echo_bot:repeat"]) {
+      botReply("echo_bot:repeat");
+    } else if (key.startsWith("agent_x:") && replies["agent_x:report"]) {
+      botReply("agent_x:report");
+    } else if (key.startsWith("watcher:") && replies["watcher:observe"]) {
+      botReply("watcher:observe");
+    } else if (replies[key]) {
+      botReply(key);
+    } else {
+      botReply(null);
+    }
   }
 
   sendBtn.addEventListener("click", () => send());
@@ -801,7 +1154,7 @@
   const THEMES = {
     yakult: {
       bg:"#fffaf4", panel:"#fff6ee", panel2:"#f9efe4", text:"#2a2a2a", muted:"#8a8178",
-      line:"#f0d7c6", accent:"#e46a5d", accent2:"#ffd6c8", shadow:"0 10px 24px rgba(228,106,93,.10)",
+      line:"#f0d7c6", accent:"#E84C3D", accent2:"#F9D0CE", shadow:"0 10px 24px rgba(228,106,93,.10)",
       r:"16px"
     },
     y2k: {
@@ -811,7 +1164,7 @@
     },
     punk: {
       bg:"#000000", panel:"#0a0a0a", panel2:"#050505", text:"#e6e6e6", muted:"#6b6b6b",
-      line:"#111111", accent:"#00e5ff", accent2:"#1aff00", shadow:"inset 0 0 12px rgba(0,255,0,.15), 0 0 8px rgba(0,255,0,.25)",
+      line:"#111111", accent:"#1aff00", accent2:"#1aff00", shadow:"inset 0 0 12px rgba(0,255,0,.15), 0 0 8px rgba(0,255,0,.25)",
       r:"0px"
     }
   };
@@ -821,32 +1174,17 @@
     document.documentElement.setAttribute("data-theme", t);
     try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
 
-    // Titlebar label follows theme tag (cosmetic)
-    const tag = document.getElementById("winTagText");
-    if(tag) tag.textContent = t;
+    const winTitleTextEl = document.getElementById("winTitleText");\n    if(winTitleTextEl) winTitleTextEl.textContent = "WordZ :: " + (t === "yakult" ? "yakult" : t);
 
-    if(t === "punk") modePill.textContent = "local · punk";
-    else if(t === "y2k") modePill.textContent = "local · y2k";
-    else modePill.textContent = "local";
-  }
+    const modePillEl = $(\"modePill\");\n    if(modePillEl) {\n      if(t === "punk") modePillEl.textContent = "local · punk";\n      else if(t === "y2k") modePillEl.textContent = "local · y2k";\n      else modePillEl.textContent = "local";\n    }
 
-  document.querySelectorAll("[data-theme]").forEach(btn => {
-    btn.addEventListener("click", () => setTheme(btn.getAttribute("data-theme")));
-  });
+    document.querySelectorAll(".sideBox .bd > div > button.btn[data-theme]").forEach(btn => {\n      if (btn.getAttribute("data-theme") === t) {\n        btn.setAttribute("data-active", "true");\n      } else {\n        btn.removeAttribute("data-active");\n      }\n    });\n  }
 
-  // ---------- boot ----------
-  const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();
-  setTheme(savedTheme || "yakult");
+  document.querySelectorAll("[data-theme]").forEach(btn => {\n    btn.addEventListener("click", () => setTheme(btn.getAttribute("data-theme")));\n  });
 
-  const had = loadChat();
-  if(!had){
-    addLine("System", "WordZ shell online.", "sys");
-    addLine("WordZ", "typing…");
-    addLine("You", "Click a chip, or type a line.");
-    saveChat();
-  }
-  input.focus();
-})();
+  // ---------- boot ----------\n  const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();\n  setTheme(savedTheme || "yakult");
+
+  const had = loadChat();\n  if(!had){\n    addLine("System", "WordZ shell online.", "sys");\n    addLine("WordZ", "typing…", "sys");\n    addLine("You", "Click a chip, or type a line.", "sys");\n    saveChat();\n  }\n  input.focus();\n})();
 </script>
 </body>
 </html>
