@@ -168,15 +168,13 @@
     .sep{ color:var(--muted); }
 
 
-    /* GunZ color spans: add subtle contrast so light colors remain readable on light themes */
+    /* ===== NPC user list + per-name glow (theme-safe) ===== */
     :root{ --msgShadow: rgba(0,0,0,.35); }
     html[data-theme="punk"]{ --msgShadow: rgba(255,255,255,.22); }
-    .msg span{ text-shadow: 0 1px 0 var(--msgShadow); }
+    .msg span{ text-shadow: 0 1px 0 var(--msgShadow); } /* improves contrast on light themes */
 
-    /* NPC name glow (uses currentColor) */
     .whoGlow{ text-shadow: 0 0 6px currentColor, 0 0 14px currentColor; }
 
-    /* User list panel */
     .userList{
       list-style:none;
       margin:0;
@@ -968,16 +966,7 @@
           </div>
         </div>
 
-        
         <div class="sideBox">
-          <div class="hd">
-            <span>users</span>
-            <span class="pill" id="userCount">0</span>
-          </div>
-          <ul class="userList" id="userList" aria-label="user list"></ul>
-        </div>
-
-<div class="sideBox">
           <div class="hd">
             <span>controls</span>
             <span class="pill">quiet</span>
@@ -1012,7 +1001,16 @@
           </div>
         </div>
       </div>
-    </div>
+    
+        <div class="sideBox">
+          <div class="hd">
+            <span>users</span>
+            <span class="pill" id="userCount">0</span>
+          </div>
+          <ul class="userList" id="userList" aria-label="npc users"></ul>
+        </div>
+
+</div>
   </div>
 
 <script>
@@ -1118,6 +1116,145 @@
   }
 
 
+  // ===== NPC roster (local-only) =====
+  // NPCs appear in the user list and can chatter + reply to each other.
+  const NPC_ROSTER = [
+    { name: "YakultOps",   color: "#e46a5d", state: "online", topics: ["ops","relay","status"] },
+    { name: "ClanLog",     color: "#4080ff", state: "online", topics: ["clan","room","matches"] },
+    { name: "PatchNotes",  color: "#40ff40", state: "idle",   topics: ["patch","version","notes"] },
+    { name: "BlueLink",    color: "#0000ee", state: "online", topics: ["portal","links","ui"] },
+    { name: "RoomTemp",    color: "#ffff40", state: "idle",   topics: ["vibe","quiet","timing"] },
+    { name: "NullPointer", color: "#ff40ff", state: "online", topics: ["bugs","edges","inputs"] },
+    { name: "Archivist",   color: "#aaaaaa", state: "online", topics: ["notes","logs","memory"] },
+  ];
+
+  const NPC_CHANNELS = ["ROOM","CLAN","SYS"];
+
+  // "Gun topics" here = game/chat flavor only (matches/loadouts vibes), no real-world instructions.
+  const TOPIC_LINES = {
+    ops: ["^2ping ok.","^7relay quiet.","^3instance idle.","^7signals stable."],
+    relay: ["^7bus: clear.","^7packets: calm.","^5handoff clean."],
+    status: ["^2online.","^7idle.","^4watching."],
+    clan: ["^7[CLAN] chatter drifting.","^7someone joined the room.","^7someone left a note."],
+    room: ["^7room feels light today.","^7matchmaking: imaginary."],
+    matches: ["^3warmup only.","^7no ranked. just motion."],
+    patch: ["^7notes are incomplete.","^7build feels stable."],
+    version: ["^7v0.0.x energy.","^7shell-first, always."],
+    notes: ["^7log appended.","^7archived locally."],
+    portal: ["^3blue link looks real.","^7click-through confirmed."],
+    links: ["^3external jump armed.","^7confirm modal: expected."],
+    ui: ["^7bevels: correct.","^7angles: business."],
+    vibe: ["^7quiet window.","^7milk-cream palette."],
+    timing: ["^7slow loop. steady hand.","^7no rush."],
+    bugs: ["^6edge case spotted.","^6input sanitized."],
+    edges: ["^6corners squared.","^6borders held."],
+    inputs: ["^6user typed.","^6shell replied."],
+    logs: ["^7remember this frame.","^7the log holds."],
+    memory: ["^7localStorage: faithful.","^7state preserved."],
+  };
+
+  function npcByName(name){
+    return NPC_ROSTER.find(n => n.name === name) || null;
+  }
+  function chance(p){ return Math.random() < p; }
+
+  function renderUserList(){
+    const ul = document.getElementById("userList");
+    const pill = document.getElementById("userCount");
+    if (!ul || !pill) return;
+
+    ul.innerHTML = "";
+    for (const npc of NPC_ROSTER){
+      const li = document.createElement("li");
+      li.className = "userRow";
+
+      const dot = document.createElement("span");
+      dot.className = "uDot" + (npc.state === "idle" ? " idle" : "");
+
+      const name = document.createElement("span");
+      name.className = "uName whoGlow";
+      name.textContent = npc.name;
+      name.style.color = npc.color;
+
+      li.appendChild(dot);
+      li.appendChild(name);
+      ul.appendChild(li);
+    }
+
+    pill.textContent = String(NPC_ROSTER.length);
+  }
+
+  function styleWhoSpan(p, who){
+    const npc = npcByName(who);
+    if (!npc) return;
+    const whoEl = p.querySelector(".who");
+    if (!whoEl) return;
+    whoEl.style.color = npc.color;
+    whoEl.classList.add("whoGlow");
+  }
+
+  let lastNpc = null;
+  let lastTopic = "ops";
+
+  function randomTopicFor(npc){
+    const t = pick(npc.topics);
+    return TOPIC_LINES[t] ? t : "ops";
+  }
+
+  function npcSay(npc, text, channel){
+    const ch = channel || pick(NPC_CHANNELS);
+    showTyping(650 + Math.random()*600);
+    setTimeout(() => {
+      typing.style.display = "none";
+      addLine(npc.name, text, "", ch);
+      const p = log.lastElementChild;
+      if (p) styleWhoSpan(p, npc.name);
+      saveChat();
+    }, 550 + Math.random()*550);
+  }
+
+  function npcChatterTick(){
+    // Don’t start until there is some content
+    const lineCount = log.querySelectorAll(".line").length;
+    if (lineCount < 2) return;
+
+    // Quiet by default
+    if (!chance(0.30)) return;
+
+    // Pick speaker (sometimes respond to lastNpc)
+    let npc = null;
+    if (lastNpc && chance(0.35)){
+      const others = NPC_ROSTER.filter(n => n.name !== lastNpc);
+      npc = pick(others);
+    } else {
+      npc = pick(NPC_ROSTER);
+    }
+
+    // Pick topic (sometimes mirror last topic)
+    const topic = chance(0.45) ? lastTopic : randomTopicFor(npc);
+    const line = pick(TOPIC_LINES[topic] || TOPIC_LINES.ops);
+
+    const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
+    const chan = (topic === "ops" || topic === "relay" || topic === "status") ? "SYS"
+              : (topic === "clan") ? "CLAN" : "ROOM";
+
+    npcSay(npc, replyPrefix + line, chan);
+
+    lastNpc = npc.name;
+    lastTopic = topic;
+  }
+
+  function npcPresenceTick(){
+    for (const n of NPC_ROSTER){
+      if (Math.random() < 0.15){
+        n.state = (n.state === "online") ? "idle" : "online";
+      }
+    }
+    renderUserList();
+  }
+
+
+
   // MODIFIED addLine to include bot-specific classes for styling
   function addLine(who, msg, cls="", channel=null){
     const p = document.createElement("p");
@@ -1167,8 +1304,7 @@
       log.innerHTML = "";
       for(const it of items){
         addLine(it.who || "?", it.msg || "", it.cls || "", it.channel || null);
-      
-        const p = log.lastElementChild; if(p) styleWhoSpan(p, it.who || "?");
+        { const p = log.lastElementChild; if(p) styleWhoSpan(p, it.who || "?"); }
 }
       return items.length > 0;
     }catch(e){
@@ -1228,215 +1364,6 @@
       "watcher: patterns emerging.", "watcher: always watching."
     ]
   };
-
-  // ===== NPC Roster (RNG chatter + per-name glow colors) =====
-  // Business shell outside; riced chatter inside. Local-only.
-  const NPC_ROSTER = [
-    { name: "YakultOps",   color: "#e46a5d", state: "online", topics: ["ops","relay","status"] },
-    { name: "ClanLog",     color: "#4080ff", state: "online", topics: ["clan","room","matches"] },
-    { name: "PatchNotes",  color: "#40ff40", state: "idle",   topics: ["patch","version","notes"] },
-    { name: "BlueLink",    color: "#0000ee", state: "online", topics: ["portal","links","ui"] },
-    { name: "RoomTemp",    color: "#ffff40", state: "idle",   topics: ["vibe","quiet","timing"] },
-    { name: "NullPointer", color: "#ff40ff", state: "online", topics: ["bugs","edges","inputs"] },
-    { name: "Archivist",   color: "#aaaaaa", state: "online", topics: ["notes","logs","memory"] },
-  ];
-
-  // Channel flavor (GunZ-ish)
-  const NPC_CHANNELS = ["ROOM", "CLAN", "SYS"];
-
-  // “Gun topics” here are GAME / loadout / match chatter (no real-world instructions).
-  const TOPIC_LINES = {
-    ops: [
-      "^2ping ok.",
-      "^7relay quiet.",
-      "^3instance idle.",
-      "^7signals stable.",
-    ],
-    relay: [
-      "^7bus: clear.",
-      "^7packets: calm.",
-      "^5handoff clean.",
-    ],
-    status: [
-      "^2online.",
-      "^7idle.",
-      "^4watching.",
-    ],
-    clan: [
-      "^7[CLAN] chatter drifting.",
-      "^7someone joined the room.",
-      "^7someone left a note.",
-    ],
-    room: [
-      "^7room feels light today.",
-      "^7matchmaking: imaginary.",
-    ],
-    matches: [
-      "^3warmup only.",
-      "^7no ranked. just motion.",
-    ],
-    patch: [
-      "^7notes are incomplete.",
-      "^7build feels stable.",
-    ],
-    version: [
-      "^7v0.0.x energy.",
-      "^7shell-first, always.",
-    ],
-    notes: [
-      "^7log appended.",
-      "^7archived locally.",
-    ],
-    portal: [
-      "^3blue link looks real.",
-      "^7click-through confirmed.",
-    ],
-    links: [
-      "^3external jump armed.",
-      "^7confirm modal: expected.",
-    ],
-    ui: [
-      "^7bevels: correct.",
-      "^7angles: business.",
-    ],
-    vibe: [
-      "^7quiet window.",
-      "^7milk-cream palette.",
-    ],
-    timing: [
-      "^7slow loop. steady hand.",
-      "^7no rush.",
-    ],
-    bugs: [
-      "^6edge case spotted.",
-      "^6input sanitized.",
-    ],
-    edges: [
-      "^6corners squared.",
-      "^6borders held.",
-    ],
-    inputs: [
-      "^6user typed.",
-      "^6shell replied.",
-    ],
-    logs: [
-      "^7remember this frame.",
-      "^7the log holds.",
-    ],
-    memory: [
-      "^7localStorage: faithful.",
-      "^7state preserved.",
-    ],
-  };
-
-  function npcByName(name){
-    return NPC_ROSTER.find(n => n.name === name) || null;
-  }
-
-  function renderUserList(){
-    const ul = document.getElementById("userList");
-    const pill = document.getElementById("userCount");
-    if (!ul || !pill) return;
-
-    ul.innerHTML = "";
-    NPC_ROSTER.forEach(npc => {
-      const li = document.createElement("li");
-      li.className = "userRow";
-
-      const dot = document.createElement("span");
-      dot.className = "uDot" + (npc.state === "idle" ? " idle" : "");
-
-      const name = document.createElement("span");
-      name.className = "uName whoGlow";
-      name.textContent = npc.name;
-      name.style.color = npc.color;
-
-      li.appendChild(dot);
-      li.appendChild(name);
-      ul.appendChild(li);
-    });
-
-    pill.textContent = String(NPC_ROSTER.length);
-  }
-
-  // Make addLine color NPC names automatically (without changing themes)
-  function styleWhoSpan(p, who){
-    const npc = npcByName(who);
-    if (!npc) return;
-    const whoEl = p.querySelector(".who");
-    if (!whoEl) return;
-    whoEl.style.color = npc.color;
-    whoEl.classList.add("whoGlow");
-  }
-
-  // Cross-reply memory: last speaker + last topic
-  let lastNpc = null;
-  let lastTopic = "ops";
-
-  function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
-  function chance(p){ return Math.random() < p; }
-
-  function npcSay(npc, text, channel){
-    const ch = channel || pick(NPC_CHANNELS);
-    showTyping(650 + Math.random()*600);
-    setTimeout(() => {
-      typing.style.display = "none";
-      // Use channel-aware addLine if present (we pass channel as 4th arg when supported)
-      const pBefore = log.lastElementChild;
-      addLine(npc.name, text, "", ch);
-      // Style the who span on the last line
-      const p = log.lastElementChild;
-      if (p && p !== pBefore) styleWhoSpan(p, npc.name);
-      saveChat();
-    }, 550 + Math.random()*550);
-  }
-
-  function randomTopicFor(npc){
-    const t = pick(npc.topics);
-    return TOPIC_LINES[t] ? t : "ops";
-  }
-
-  function npcChatterTick(){
-    // only start after initial content exists
-    const lineCount = log.querySelectorAll(".line").length;
-    if (lineCount < 2) return;
-
-    // keep it quiet
-    if (!chance(0.32)) return;
-
-    // choose speaker (sometimes reply to last npc)
-    let npc = null;
-    if (lastNpc && chance(0.35)) {
-      const other = NPC_ROSTER.filter(n => n.name !== lastNpc);
-      npc = pick(other);
-    } else {
-      npc = pick(NPC_ROSTER);
-    }
-
-    // pick topic, sometimes mirror last topic (reply vibe)
-    let topic = chance(0.45) ? lastTopic : randomTopicFor(npc);
-    const lines = TOPIC_LINES[topic] || TOPIC_LINES.ops;
-    const line = pick(lines);
-
-    // tiny “reply” flavor (safe / game-ish)
-    const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
-    npcSay(npc, replyPrefix + line, topic === "ops" ? "SYS" : (topic === "clan" ? "CLAN" : "ROOM"));
-
-    lastNpc = npc.name;
-    lastTopic = topic;
-  }
-
-  // Lightly jitter online/idle states over time
-  function npcPresenceTick(){
-    NPC_ROSTER.forEach(n => {
-      if (Math.random() < 0.15){
-        n.state = (n.state === "online") ? "idle" : "online";
-      }
-    });
-    renderUserList();
-  }
-
-
 
   function showTyping(ms){
     typing.style.display = "flex";
@@ -1606,6 +1533,12 @@
     addLine("You", "^7Click a chip, or type a line.", "sys", "YOU");
     saveChat();
   }
+
+  // ===== NPC panel + ambient chatter =====
+  renderUserList();
+  setInterval(npcPresenceTick, 12000 + Math.floor(Math.random()*6000));
+  setInterval(npcChatterTick, 9000 + Math.floor(Math.random()*7000));
+
   input.focus();
 })();
 </script>
