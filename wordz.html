@@ -1328,15 +1328,19 @@ const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
       }
     }
     renderUserList();
+}
 
-  // WORDZ_USERLIST_PULSE (embed-safe)
-  try{ renderUserList(); }catch(e){}
-  setTimeout(() => { try{ renderUserList(); }catch(e){} }, 0);
-  setTimeout(() => { try{ renderUserList(); }catch(e){} }, 300);
-  setInterval(() => { try{ renderUserList(); }catch(e){} }, 2500);
+  
+
+  // WORDZ_USERLIST_PULSE_GLOBAL (embed-safe) — run ONCE
+  function startUserListPulse(){
+    try{ renderUserList(); }catch(e){}
+    setTimeout(() => { try{ renderUserList(); }catch(e){} }, 0);
+    setTimeout(() => { try{ renderUserList(); }catch(e){} }, 250);
+    setTimeout(() => { try{ renderUserList(); }catch(e){} }, 1200);
   }
 
-  // ===== Identity (local-only): user + key => token + unique glow color =====
+// ===== Identity (local-only): user + key => token + unique glow color =====
   const IDENT_KEY = "wordz_identity_v1";
 
   let IDENTITY = { user:"You", code:"0000000", color:null, glow:10 };
@@ -1834,6 +1838,7 @@ requestAnimationFrame(() => document.documentElement.classList.remove("preload")
 
   // ===== NPC panel + ambient chatter =====
   renderUserList();
+  startUserListPulse();
   setInterval(npcPresenceTick, 12000 + Math.floor(Math.random()*6000));
   setInterval(npcChatterTick, 3000 + Math.floor(Math.random()*3500));
 
