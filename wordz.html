@@ -1363,8 +1363,8 @@
     }catch(e){}
   }
 
-  function deriveToken(u, k,color, IDENTITY.color || \"\"){
-    const seed = (u||"You") + "|" + (k||"") + "|" + (color||"");
+  function deriveToken(u,k){
+    const seed = (u||"You") + "|" + (k||"");
     return (hash32(seed).toString(16).toUpperCase().slice(0,4)).padStart(4,"0");
   }
 
@@ -1380,11 +1380,11 @@
 
     // If no saved color, generate one from current seed.
     if (!IDENTITY.color){
-      const token = deriveToken(IDENTITY.user, "", IDENTITY.color || \"\");
+      const token = deriveToken(IDENTITY.user, "");
       IDENTITY.token = token;
       const seed = (IDENTITY.user||"You") + "|";
       IDENTITY.color = generateUniqueColor(seed);
-      /* glow set after token seed */
+      IDENTITY.glow = computeGlowFromSeed(seed);
       if (cEl) cEl.value = IDENTITY.color;
     }
 
@@ -1393,23 +1393,18 @@
     const applyFromInputs = (forceGenerateColor=false) => {
       const u = (uEl?.value || "You").trim() || "You";
       const k = (kEl?.value || "");
-      const seedBase = u + "|" + k;
+      const seed = u + "|" + k;
 
       IDENTITY.user = u;
-      /* token set after color selection */
-      /* glow set after token seed */
+      IDENTITY.token = deriveToken(u, k);
+      IDENTITY.glow = computeGlowFromSeed(seed);
 
       if (forceGenerateColor || !IDENTITY.color){
         IDENTITY.color = generateUniqueColor(seed);
         if (cEl) cEl.value = IDENTITY.color;
       }
 
-      
-      // token + glow are bound to (user|key|color) so a claimed color changes the token
-      const tokenSeed = u + "|" + k + "|" + (IDENTITY.color || "");
-      IDENTITY.token = deriveToken(u, k, IDENTITY.color || "", IDENTITY.color || \"\");
-      IDENTITY.glow  = computeGlowFromSeed(tokenSeed);
-applyIdentity();
+      applyIdentity();
       saveIdentity();
     };
 
@@ -1436,34 +1431,23 @@ applyIdentity();
 
     // Manual color pick: also ensures token is up to date and no collisions.
     cEl?.addEventListener("input", () => {
-      // make sure user/key are current (does NOT force regen)
+      // make sure token is current even if user never clicked login
       applyFromInputs(false);
 
       const used = usedColorsSet();
       const val = String(cEl.value || "").toLowerCase();
-
       if (used.has(val)){
         addLine("System", "^1color collision.^7 pick another.", "sys", "SYS");
-        // revert to generated unique for this user|key
-        const u = (uEl?.value || "You").trim() || "You";
-        const k = (kEl?.value || "");
-        IDENTITY.color = generateUniqueColor(u + "|" + k);
+        // revert to generated unique
+        IDENTITY.color = generateUniqueColor((IDENTITY.user||"You") + "|" + (kEl?.value||""));
         if (cEl) cEl.value = IDENTITY.color;
       } else {
-        // claim favorite color
         IDENTITY.color = cEl.value;
       }
-
-      // bind token/glow to claimed color
-      const u = (uEl?.value || "You").trim() || "You";
-      const k = (kEl?.value || "");
-      IDENTITY.token = deriveToken(u, k, IDENTITY.color || "", IDENTITY.color || \"\");
-      IDENTITY.glow  = computeGlowFromSeed(u + "|" + k + "|" + (IDENTITY.color || ""));
-
       applyIdentity();
       saveIdentity();
     });
-}
+  }
 
 
 
