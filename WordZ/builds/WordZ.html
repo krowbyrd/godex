@@ -1099,10 +1099,10 @@
 
   function esc(s){
     return String(s).replace(/[&<>"']/g, c => ({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
+      "&":"&",
+      "<":"<",
+      ">":">",
+      "\"":""",
       "'":"&#039;"
     }[c]));
   }
@@ -1294,8 +1294,8 @@
     const lineCount = log.querySelectorAll(".line").length;
     if (lineCount < 2) return;
 
-    // Quiet by default
-    if (!chance(0.30)) return;
+    // FURTHER INCREASED CHATTINESS: Probability changed from 0.70 to 0.90
+    if (!chance(0.90)) return;
 
     // Pick speaker (sometimes respond to lastNpc)
     let npc = null;
@@ -1669,7 +1669,7 @@
     { who: "System", msg: "all systems nominal, mostly."},
     { who: "Echo_Bot", msg: "can you hear me now?"},
     { who: "Agent_X", msg: "stay frosty."},
-    { who: "Watcher", msg: "always watching, never blinking."}
+    { who: "Watcher", msg: "always watching, never blinking."},
     { who: "WordZ", msg: "^7question: k-style or classic aim?"},
     { who: "WordZ", msg: "^7question: what map feels like home?"},
     { who: "Oracle", msg: "^7quote: En Taro Adun."},
@@ -1678,12 +1678,49 @@
     { who: "Echo_Bot", msg: "^7quote: You must construct additional pylons."},
     { who: "System", msg: "^7[WrdZ] lobby lights on."},
     { who: "System", msg: "^7note: bevels aligned."},
+    { who: "WordZ", msg: "^7ops: local-only, still alive."},
+    { who: "WordZ", msg: "^7ops question: ship shell or polish bevels?"},
+    { who: "ClanLog", msg: "^7[WrdZ] roll call."},
+    { who: "ClanLog", msg: "^7question: duel set or chill lobby?"},
+    { who: "ClanLog", msg: "^7question: hallway is calling—who’s in?"},
+    { who: "ClanLog", msg: "^7question: what map is muscle memory for you?"},
+    { who: "ClanLog", msg: "^7quote: My life for Aiur."},
+    { who: "ClanLog", msg: "^7quote: En Taro Adun."},
+    { who: "RoomTemp", msg: "^7yakult-core, bevels sharp."},
+    { who: "RoomTemp", msg: "^7question: y2k switch later?"},
+    { who: "RoomTemp", msg: "^7quote: We require more vespene gas."},
+    { who: "RoomTemp", msg: "^7quote: Carrier has arrived."},
+    { who: "BlueLink", msg: "efficiency reports: within acceptable parameters."},
+    { who: "BlueLink", msg: "^7ui check: borders held."},
+    { who: "BlueLink", msg: "^7ui check: buttons clicky."},
+    { who: "BlueLink", msg: "^7question: glow subtle or loud?"},
+    { who: "NullPointer", msg: "^7question: repro steps or folklore?"},
+    { who: "NullPointer", msg: "^7question: race condition or vibes?"},
+    { who: "Archivist", msg: "^7question: what do we freeze next?"},
+    { who: "Archivist", msg: "^7question: what’s the smallest useful log line?"},
+    { who: "Archivist", msg: "^7margin note: saved."},
+    { who: "Oracle", msg: "^7quote: Stay awhile and listen." }, // Diablo 2
+    { who: "Agent_X", msg: "^7quote: Not enough mana." }, // Diablo 2
+    { who: "Watcher", msg: "^7quote: You have been slain!" }, // Diablo 2
+    { who: "Echo_Bot", msg: "^7quote: Fresh meat!" }, // Diablo 2
+    { who: "WordZ", msg: "^7quote: Hail to the King, baby." }, // Diablo 2
+    { who: "WordZ", msg: "^7question: k-style nostalgia check?" }, // GunZ: The Duel
+    { who: "WordZ", msg: "^7question: aim calm or flick chaos?" }, // GunZ: The Duel
+    { who: "WordZ", msg: "^7question: one more round—what’s your pick?" }, // GunZ: The Duel
+    { who: "WordZ", msg: "^7question: warmup with wallshots or straight in?" }, // GunZ: The Duel
+    // New diverse quotes
+    { who: "System", msg: "^7Analyzing system logs for anomalies... All clear." },
+    { who: "Oracle", msg: "^7The whispers of the data stream grow louder." },
+    { who: "Agent_X", msg: "^7Maintaining stealth protocols. No unauthorized access." },
+    { who: "Echo_Bot", msg: "^7My circuits hum with digital poetry." },
+    { who: "Watcher", msg: "^7A new pattern emerges from the chaos." },
   ];
 
   setInterval(() => {
     const hasContent = log.querySelectorAll(".line").length > 2;
     if(!hasContent) return;
-    if(Math.random() < 0.33){
+    // Further Increased chattiness: Probability changed from 0.70 to 0.90
+    if(Math.random() < 0.90){ 
       showTyping(900);
       setTimeout(() => {
         typing.style.display = "none";
@@ -1692,7 +1729,8 @@
         saveChat();
       }, 700);
     }
-  }, 14000);
+  // DECREASED INTERVAL: From 7000ms to 4000ms for even more frequent chatter
+  }, 4000); 
 
   function send(text){
     const msg = String(text || input.value || "").trim();
@@ -1747,7 +1785,7 @@
     },
     punk: {
       bg:"#000000", panel:"#0a0a0a", panel2:"#050505", text:"#e6e6e6", muted:"#6b6b6b",
-      line:"#111111", accent:"#1aff00", accent2:"#1aff00", shadow:"inset 0 0 12px rgba(0,255,0,.15), 0 0 8px rgba(0,255,0,.25)",
+      line:"#111111", accent:"#00e5ff", accent2:"#1aff00", shadow:"inset 0 0 12px rgba(0,255,0,.15), 0 0 8px rgba(0,255,0,.25)",
       r:"0px"
     }
   };
@@ -1798,8 +1836,10 @@
 
   // ===== NPC panel + ambient chatter =====
   renderUserList();
-  setInterval(npcPresenceTick, 12000 + Math.floor(Math.random()*6000));
-  setInterval(npcChatterTick, 9000 + Math.floor(Math.random()*7000));
+  // MODIFIED INTERVAL for npcPresenceTick (kept previous adjustment)
+  setInterval(npcPresenceTick, 8000 + Math.floor(Math.random()*4000)); 
+  // MODIFIED INTERVAL for npcChatterTick
+  setInterval(npcChatterTick, 3000 + Math.floor(Math.random()*2000)); // Further adjusted from 5000+3000
 
   input.focus();
 })();
