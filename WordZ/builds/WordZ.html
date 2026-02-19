@@ -1371,6 +1371,108 @@
   /* Corner yum bottle: force transparent, no frame on all themes */
   #winIcon{ background:transparent !important; border:0 !important; box-shadow:none !important; }
 
+
+
+
+/* ===== Paper Sigil (orb) ===== */
+@keyframes paperBreath {
+  0%,100% { transform: scale(1); opacity: 0.72; box-shadow: 0 0 10px var(--sigilGlow); }
+  50% { transform: scale(1.52); opacity: 1; box-shadow: 0 0 30px var(--sigilGlow); }
+}
+@keyframes paperAck {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.8); }
+  100% { transform: scale(1); }
+}
+@keyframes sigilDrift {
+  0%,100% { transform: translate(0px, 0px); }
+  25% { transform: translate(-6px, -10px); }
+  50% { transform: translate(2px, -16px); }
+  75% { transform: translate(6px, -8px); }
+}
+@keyframes sigilWobbleB {
+  0%,100% { transform: translate(0px, 0px) scale(1); }
+  50% { transform: translate(-1px, -1px) scale(1.02); }
+}
+
+
+#cursorSigil{
+  position: fixed;
+  left: -9999px; top: -9999px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2147483647;
+
+  background: radial-gradient(circle,
+    var(--sigilCore, #CBB89A) 0%,
+    rgba(203,184,154,0.33) 40%,
+    rgba(203,184,154,0.06) 70%,
+    transparent 100%);
+
+  box-shadow: 0 0 18px var(--sigilGlow, rgba(203,184,154,0.28));
+  opacity: .96;
+
+  /* IMPORTANT: leave transform free for scale-only animation, no translate animations here */
+  animation: paperBreath 3.6s ease-in-out infinite;
+}
+html.sigilOn #cursorSigil{ opacity: .98; }
+
+@keyframes sigilOrbitA{
+  0%   { transform: translate(10px, -2px) scale(0.95); opacity: .70; }
+  50%  { transform: translate(-8px, 10px) scale(1.05); opacity: .95; }
+  100% { transform: translate(10px, -2px) scale(0.95); opacity: .70; }
+}
+@keyframes sigilOrbitB{
+  0%   { transform: translate(-9px, 7px) scale(0.90); opacity: .60; }
+  50%  { transform: translate(9px, -9px) scale(1.10); opacity: .92; }
+  100% { transform: translate(-9px, 7px) scale(0.90); opacity: .60; }
+}
+
+/* swarm satellites (pure CSS, no layout risk) */
+#cursorSigil::before,
+#cursorSigil::after{
+  content:"";
+  position:absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  margin-top: -3px;
+  border-radius: 50%;
+  pointer-events:none;
+  background: radial-gradient(circle,
+    rgba(255,255,255,.42) 0%,
+    var(--sigilCore, #CBB89A) 35%,
+    rgba(0,0,0,.15) 100%);
+  box-shadow: 0 0 10px var(--sigilGlow, rgba(203,184,154,0.28));
+  opacity: .0;
+}
+html.sigilOn #cursorSigil::before{ opacity:.85; animation: sigilOrbitA 2.8s ease-in-out infinite; }
+html.sigilOn #cursorSigil::after { opacity:.70; animation: sigilOrbitB 3.9s ease-in-out infinite; }
+
+
+
+
+
+/* ===== sigil aliveness (safe: CSS + existing animations only) ===== */
+@keyframes sigilShimmer{
+  0%,100% { filter: saturate(1.00) brightness(1.00); }
+  50% { filter: saturate(1.18) brightness(1.07); }
+}
+@keyframes sigilFlicker{
+  0%,100% { opacity: .90; }
+  18% { opacity: .98; }
+  33% { opacity: .92; }
+  55% { opacity: .99; }
+  77% { opacity: .94; }
+}
+@keyframes sigilHeartbeat{
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
 </style>
 </head>
 
@@ -1440,13 +1542,22 @@
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
               <span class="tiny" style="width:40px;">key</span>
-              <input class="input identInput" id="identKey" placeholder="••••" type="password" maxlength="32" style="padding:6px 8px; min-width:0; flex:1;">
+              <input class="input identInput" id="identKey" placeholder="••••" type="text" data-keyu="1" maxlength="32" style="padding:6px 8px; min-width:0; flex:1;">
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
               <span class="tiny" style="width:40px;">color</span>
               <input id="identColor" type="color" value="#e46a5d" style="width:44px; height:26px; padding:0; border:2px solid; border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo); background:var(--panel);">
               <span class="tiny" id="identGlowHint" style="margin-left:auto;">glow: --</span>
             </div>
+
+            <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+              <span class="tiny" style="width:40px;">tok</span>
+              <input class="input identInput" id="identTok4" placeholder="0000" inputmode="numeric" pattern="\d{4}" maxlength="4"
+                     style="padding:6px 8px; min-width:0; flex:0 0 64px; width:64px;" readonly>
+              <button class="btn" id="identCopyTok4" style="padding:6px 10px;">Copy</button>
+              <button class="btn" id="identRestoreTok4" style="padding:6px 10px;">Restore</button>
+            </div>
+
             <div style="display:flex; gap:8px;">
               <button class="btn" id="identReset" type="button">reset</button>
             </div>
@@ -1870,12 +1981,146 @@
     return (hash32(seed).toString(16).toUpperCase().slice(0,4)).padStart(4,"0");
   }
 
-  function wireIdentityUI(){
+  
+  // ===== Enker finalize ritual (keyu: enker + 7 digits) =====
+  function hashHue(str){
+    let h = 2166136261;
+    for (let i=0;i<str.length;i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return (h >>> 0) % 360;
+  }
+  function hslToHex(h, s, l){
+    // h:0-360, s/l:0-100
+    s/=100; l/=100;
+    const k = n => (n + h/30) % 12;
+    const a = s * Math.min(l, 1-l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n), 1)));
+    const toHex = x => Math.round(255*x).toString(16).padStart(2,'0');
+    return "#" + toHex(f(0)) + toHex(f(8)) + toHex(f(4));
+  }
+
+  let SIGIL_ON = false;
+  function enableSigil(colorHex, glow){
+    const el = document.getElementById("cursorSigil");
+    if (!el) return;
+
+    const core = (colorHex && String(colorHex).trim()) ? String(colorHex).trim() : "#CBB89A";
+    const g = (glow && String(glow).trim()) ? String(glow).trim() : "rgba(203,184,154,0.28)";
+
+    document.documentElement.style.setProperty("--sigilCore", core);
+    document.documentElement.style.setProperty("--sigilGlow", g);
+
+    document.documentElement.classList.add("sigilOn");
+    SIGIL_ON = true;
+  }
+  function disableSigil(){
+    const el = document.getElementById("cursorSigil");
+    document.documentElement.classList.remove("sigilOn");
+    SIGIL_ON = false;
+    // reset chase state
+    try{ sigilTX = sigilTY = sigilX = sigilY = -9999; }catch(e){}
+    if (el) { el.style.left="-9999px"; el.style.top="-9999px"; }
+  }
+
+  
+  function ackPulse(){
+    const el = document.getElementById("cursorSigil");
+    if (!el) return;
+    // brief pulse, then restore normal breathing
+    const prev = el.style.animation;
+    el.style.animation = "paperAck 220ms ease-out 1";
+    setTimeout(()=>{ if(el) el.style.animation = prev || ""; }, 240);
+  }
+
+
+  // Cursor-follow, with a slight "chase" lag (lerp)
+  let sigilTX = -9999, sigilTY = -9999;
+  let sigilX  = -9999, sigilY  = -9999;
+  let sigilRAF = 0;
+
+  function tickSigil(){
+    const el = document.getElementById("cursorSigil");
+    if (!SIGIL_ON || !el){
+      sigilRAF = 0;
+      return;
+    }
+    // ===== idle wander ("breathing, waiting") =====
+    const now = performance.now();
+    const idleMs = (now - (window.__sigilLastMove || 0));
+    const idle = idleMs > 900; // ms
+    if (idle && window.__sigilLastPX != null && window.__sigilLastPY != null){
+      const t = now * 0.001;
+
+      // radius grows a bit the longer you idle (up to a cap)
+      const grow = Math.min(idleMs / 1000, 6);   // seconds, capped
+      const r = 10 + grow * 7;                   // 10..52px
+
+      // gentle lissajous-like wander + slow drift ("breathing")
+      const wobA = 0.95 + Math.sin(t * 0.22) * 0.12;
+      const wobB = 1.35 + Math.cos(t * 0.18) * 0.10;
+
+      const dx = Math.cos(t * wobA) * r + Math.sin(t * 0.47) * (r * 0.22);
+      const dy = Math.sin(t * wobB) * (r * 0.72) + Math.cos(t * 0.39) * (r * 0.18);
+
+      // small hovering lift so it feels alive
+      const lift = -4 - Math.sin(t * 1.1) * (2.2 + grow * 0.35);
+
+      sigilTX = window.__sigilLastPX + dx;
+      sigilTY = window.__sigilLastPY + dy + lift;
+    }
+
+    // chase factor: lower = slower / more floaty
+    const f = 0.06;
+    sigilX += (sigilTX - sigilX) * f;
+    sigilY += (sigilTY - sigilY) * f;
+    el.style.left = sigilX + "px";
+    el.style.top  = sigilY + "px";
+    sigilRAF = requestAnimationFrame(tickSigil);
+  }
+
+  window.addEventListener("pointermove", (e)=>{
+    if(!SIGIL_ON) return;
+    // target slightly offset from cursor
+    sigilTX = e.clientX + 10;
+    sigilTY = e.clientY + 12;
+
+    // initialize on first move after enabling
+    if (sigilX < -9000 || sigilY < -9000){
+      sigilX = sigilTX;
+      sigilY = sigilTY;
+    }
+    if (!sigilRAF) sigilRAF = requestAnimationFrame(tickSigil);
+  }, {passive:true});
+
+
+
+  // ===== 4-digit TOK (deterministic from name|key|color) =====
+  function hash32(str){
+    str = String(str ?? "");
+    let h = 2166136261 >>> 0; // FNV-1a
+    for (let i=0;i<str.length;i++){
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+  function deriveTok4(u,k,c){
+    const seed = (u||"You") + "|" + (k||"") + "|" + (c||"");
+    const n = hash32(seed) % 10000; // 0..9999
+    return String(n).padStart(4,"0");
+  }
+
+function wireIdentityUI(){
     loadIdentity();
 
     const uEl = document.getElementById("identUser");
     const kEl = document.getElementById("identKey");
     const cEl = document.getElementById("identColor");
+    const t4El = document.getElementById("identTok4");
+    const copyTokBtn = document.getElementById("identCopyTok4");
+    const restoreTokBtn = document.getElementById("identRestoreTok4");
 
     if (uEl) uEl.value = IDENTITY.user || "You";
     if (cEl && IDENTITY.color) cEl.value = IDENTITY.color;
@@ -1892,6 +2137,18 @@
 
     applyIdentity();
 
+    // show 4-digit tok
+    if (t4El){
+      const u0 = (uEl?.value || IDENTITY.user || "You").trim() || "You";
+      const k0 = (kEl?.value || "");
+      const c0 = (cEl?.value || IDENTITY.color || "");
+      t4El.value = deriveTok4(u0, k0, c0);
+      try{
+        const last = localStorage.getItem("wordz_last_tok4");
+        if (last) t4El.value = last;
+      }catch(e){}
+    }
+
     const applyFromInputs = (forceGenerateColor=false) => {
       const u = (uEl?.value || "You").trim() || "You";
       const k = (kEl?.value || "");
@@ -1907,15 +2164,25 @@
       }
 
       applyIdentity();
+      // keep TOK display live
+      if (t4El){
+        const cNow = (cEl?.value || IDENTITY.color || "");
+        t4El.value = deriveTok4(IDENTITY.user, (kEl?.value||""), cNow);
+      }
       saveIdentity();
     };
 
     document.getElementById("identReset")?.addEventListener("click", () => {
+      disableSigil();
+
       IDENTITY = { user:"You", token:"----", color:null, glow:10 };
       try{ localStorage.removeItem(IDENT_KEY); }catch(e){}
       if (uEl) uEl.value = "You";
       if (kEl) kEl.value = "";
       if (cEl) cEl.value = "#e46a5d";
+      if (uEl) uEl.readOnly = false;
+      if (kEl) kEl.readOnly = false;
+      if (cEl) cEl.disabled = false;
       applyFromInputs(false);
       addLine("System", "^7identity reset.", "sys", "SYS");
       saveChat();
@@ -1924,6 +2191,54 @@
     // Live-update token/glow while typing (does NOT force color change)
     uEl?.addEventListener("input", () => applyFromInputs(false));
     kEl?.addEventListener("input", () => applyFromInputs(false));
+
+    // Sigil on Enter (any name; local-only)
+    const sigilFromCurrent = () => {
+      // update token/glow based on current fields, but DO NOT change color
+      applyFromInputs(false);
+
+      const core = String(cEl?.value || IDENTITY.color || "#CBB89A").trim() || "#CBB89A";
+      const hexToRgba = (hex, a=0.28) => {
+        const h = String(hex||"").replace("#","").trim();
+        if (h.length !== 6) return `rgba(203,184,154,${a})`;
+        const r = parseInt(h.slice(0,2),16);
+        const g = parseInt(h.slice(2,4),16);
+        const b = parseInt(h.slice(4,6),16);
+        return `rgba(${r},${g},${b},${a})`;
+      };
+      const glow = hexToRgba(core, 0.28);
+
+      enableSigil(core, glow);
+      ackPulse();
+
+      // lock identity fields (color stays as-is)
+      if (uEl) uEl.readOnly = true;
+      if (kEl){ kEl.readOnly = true; kEl.setAttribute("data-finalized","1"); }
+      if (cEl) cEl.disabled = true;
+
+      try{
+        if (t4El){
+          const tok = deriveTok4(IDENTITY.user, (kEl?.value||""), (cEl?.value||IDENTITY.color||""));
+          t4El.value = tok;
+          const snap = { user: (uEl?.value||IDENTITY.user||"You"), key: (kEl?.value||""), color: (cEl?.value||IDENTITY.color||"") };
+          localStorage.setItem("wordz_tok4:"+tok, JSON.stringify(snap));
+          localStorage.setItem("wordz_last_tok4", tok);
+        }
+      }catch(e){}
+      addLine("System", "^7sigil locked.", "sys", "SYS");
+      saveChat();
+    };
+
+    const enterHandler = (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      sigilFromCurrent();
+    };
+
+    uEl?.addEventListener("keydown", enterHandler);
+    kEl?.addEventListener("keydown", enterHandler);
+
+
 
     // Manual color pick: also ensures token is up to date and no collisions.
     cEl?.addEventListener("input", () => {
@@ -1941,6 +2256,11 @@
         IDENTITY.color = cEl.value;
       }
       applyIdentity();
+      // keep TOK display live
+      if (t4El){
+        const cNow = (cEl?.value || IDENTITY.color || "");
+        t4El.value = deriveTok4(IDENTITY.user, (kEl?.value||""), cNow);
+      }
       saveIdentity();
     });
   }
@@ -2599,5 +2919,6 @@
   input.focus();
 })();
 </script>
+  <div id="cursorSigil" aria-hidden="true"></div>
 </body>
 </html>
