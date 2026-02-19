@@ -901,30 +901,6 @@
     #identBox .btn{ padding:6px 10px; font-size:11px; }
     #identBox .identInput{ font-size:11px; }
 
-
-    /* ===== YUM mode (toggle) — theme-safe subtle overlay ===== */
-    body.yumMode .frame::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      pointer-events:none;
-      background:
-        radial-gradient(circle at 20% 10%, rgba(255,255,255,.22), rgba(255,255,255,0) 35%),
-        radial-gradient(circle at 80% 30%, rgba(255,255,255,.18), rgba(255,255,255,0) 40%),
-        linear-gradient(135deg, rgba(255,0,0,.06), rgba(255,255,255,0) 55%);
-      mix-blend-mode: soft-light;
-      opacity:.9;
-    }
-    body.yumMode .winTop::after{
-      content:"YUM";
-      margin-left:10px;
-      font-weight:800;
-      font-size:11px;
-      letter-spacing:.12em;
-      color: rgba(255,255,255,.85);
-      text-shadow: 0 1px 0 rgba(0,0,0,.25);
-    }
-
 </style>
 </head>
 
@@ -985,32 +961,23 @@
         <div class="sideBox" id="identBox">
           <div class="hd">
             <span>identity</span>
-            <span class="pill" id="tokenPill">id: ----</span>
+            <span class="pill" id="tokenPill">tkn: ----</span>
           </div>
           <div class="bd" style="display:flex; flex-direction:column; gap:8px;">
             <div style="display:flex; gap:8px; align-items:center;">
               <span class="tiny" style="width:40px;">user</span>
               <input class="input identInput" id="identUser" placeholder="You" maxlength="18" style="padding:6px 8px; min-width:0; flex:1;">
             </div>
-
             <div style="display:flex; gap:8px; align-items:center;">
-              <span class="tiny" style="width:40px;">code</span>
-              <input class="input identInput" id="identCode" readonly value="0000000" style="padding:6px 8px; min-width:0; flex:1; opacity:.85;">
+              <span class="tiny" style="width:40px;">key</span>
+              <input class="input identInput" id="identKey" placeholder="••••" type="password" maxlength="32" style="padding:6px 8px; min-width:0; flex:1;">
             </div>
-<div style="display:flex; gap:8px; align-items:center;">
+            <div style="display:flex; gap:8px; align-items:center;">
               <span class="tiny" style="width:40px;">color</span>
               <input id="identColor" type="color" value="#e46a5d" style="width:44px; height:26px; padding:0; border:2px solid; border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo); background:#fff;">
               <span class="tiny" id="identGlowHint" style="margin-left:auto;">glow: --</span>
             </div>
-            
-            <div style="display:flex; gap:8px; align-items:center;">
-              <span class="tiny" style="width:40px;">yum</span>
-              <label class="tiny" style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                <input type="checkbox" id="yumToggle">
-                <span>overlay</span>
-              </label>
-            </div>
-<div style="display:flex; gap:8px;">
+            <div style="display:flex; gap:8px;">
               <button class="btn" id="identLogin" type="button">login</button>
               <button class="btn" id="identReset" type="button">reset</button>
             </div>
@@ -1169,7 +1136,7 @@
   }
 
   function stripGunzCodes(text){
-    return String(text ?? "").replace(/^\^[0-79]/g, "");
+    return String(text ?? "").replace(/\^[0-7]/g, "");
   }
 
   function inferChannel(who, cls){
@@ -1192,32 +1159,56 @@
     { name: "RoomTemp",    color: "#ffff40", state: "idle",   topics: ["vibe","quiet","timing"] },
     { name: "NullPointer", color: "#ff40ff", state: "online", topics: ["bugs","edges","inputs"] },
     { name: "Archivist",   color: "#aaaaaa", state: "online", topics: ["notes","logs","memory"] },
+
+    { name: "NeonLobby",   color: "#00ffff", state: "online", topics: ["room","vibe","timing"] },
+    { name: "RazorWire",   color: "#ff9900", state: "online", topics: ["edges","bugs","inputs"] },
+    { name: "MilkCarton",  color: "#c060ff", state: "idle",   topics: ["vibe","notes","memory"] },
+    { name: "SysClock",    color: "#40ffff", state: "online", topics: ["status","timing","ops"] },
+    { name: "ForumBio",    color: "#00ccff", state: "online", topics: ["portal","links","ui"] },
+    { name: "BevelBoss",   color: "#ffcc40", state: "idle",   topics: ["ui","edges","notes"] },
+
+    // Golders (reserved slots for future NPC expansion)
+    // { name: "Golder_01", color: "#??????", state: "idle", topics: ["ops"] },
+    // { name: "Golder_02", color: "#??????", state: "idle", topics: ["clan"] },
   ];
 
   const NPC_CHANNELS = ["ROOM","CLAN","SYS"];
 
   // "Gun topics" here = game/chat flavor only (matches/loadouts vibes), no real-world instructions.
   const TOPIC_LINES = {
-    ops: ["^2ping ok.","^7relay quiet.","^3instance idle.","^7signals stable."],
+    ops: ["^2ping ok.","^7relay quiet.","^3instance idle.","^7signals stable.", "^7diag: green.", "^7uptime: imaginary.", "^2handshake clean."],
     relay: ["^7bus: clear.","^7packets: calm.","^5handoff clean."],
     status: ["^2online.","^7idle.","^4watching."],
-    clan: ["^7[CLAN] chatter drifting.","^7someone joined the room.","^7someone left a note."],
-    room: ["^7room feels light today.","^7matchmaking: imaginary."],
+    clan: ["^7[CLAN, "^7[CLAN] someone emoted.", "^7[CLAN] bio link posted.", "^7[CLAN] “gg” typed, then deleted."] chatter drifting.","^7someone joined the room.","^7someone left a note."],
+    room: ["^7room feels light today.","^7matchmaking: imaginary.", "^7room: liminal.", "^7spectators: 0.", "^7chat scrolls like rain."],
     matches: ["^3warmup only.","^7no ranked. just motion."],
     patch: ["^7notes are incomplete.","^7build feels stable."],
     version: ["^7v0.0.x energy.","^7shell-first, always."],
-    notes: ["^7log appended.","^7archived locally."],
+    notes: ["^7log appended.","^7archived locally.", "^7footnote added.", "^7bookmark placed.", "^7margin scribble saved."],
     portal: ["^3blue link looks real.","^7click-through confirmed."],
     links: ["^3external jump armed.","^7confirm modal: expected."],
-    ui: ["^7bevels: correct.","^7angles: business."],
+    ui: ["^7bevels: correct.","^7angles: business.", "^7titlebar: crisp.", "^7bevel check: passed.", "^7pixels: aligned."],
     vibe: ["^7quiet window.","^7milk-cream palette."],
     timing: ["^7slow loop. steady hand.","^7no rush."],
-    bugs: ["^6edge case spotted.","^6input sanitized."],
+    bugs: ["^6edge case spotted.","^6input sanitized.", "^6null dreams in hex.", "^6it works until it doesn’t.", "^6repro steps: vague."],
     edges: ["^6corners squared.","^6borders held."],
     inputs: ["^6user typed.","^6shell replied."],
     logs: ["^7remember this frame.","^7the log holds."],
     memory: ["^7localStorage: faithful.","^7state preserved."],
   };
+
+
+  const QUOTES = [
+    "^7“Desks clear. Notes aligned. Pages ready.”",
+    "^7“Information is enough.”",
+    "^7“Shell first. Reality later.”",
+    "^7“Angles: business. Soul: punk.”",
+    "^7“Local-only doesn’t mean small.”",
+    "^7“Be kind to the log; it remembers.”",
+    "^7“Milk-cream UI, razor edges.”",
+    "^7“Quiet systems still move.”"
+  ];
+
 
   function npcByName(name){
     return NPC_ROSTER.find(n => n.name === name) || null;
@@ -1230,7 +1221,24 @@
     if (!ul || !pill) return;
 
     ul.innerHTML = "";
-    for (const npc of NPC_ROSTER){
+
+    // self (identity) blended into list
+    const selfName = (window.WORDZ_USER_NAME || "You");
+    const selfColor = (window.WORDZ_USER_COLOR || "#2a2a2a");
+    if (selfName && selfName !== "You"){
+      const liSelf = document.createElement("li");
+      liSelf.className = "userRow";
+      const dotSelf = document.createElement("span");
+      dotSelf.className = "uDot";
+      const nameSelf = document.createElement("span");
+      nameSelf.className = "uName whoGlow";
+      nameSelf.textContent = selfName;
+      nameSelf.style.color = selfColor;
+      liSelf.appendChild(dotSelf);
+      liSelf.appendChild(nameSelf);
+      ul.appendChild(liSelf);
+    }
+for (const npc of NPC_ROSTER){
       const li = document.createElement("li");
       li.className = "userRow";
 
@@ -1285,7 +1293,7 @@
     if (lineCount < 2) return;
 
     // Quiet by default
-    if (!chance(0.30)) return;
+    if (!chance(0.45)) return;
 
     // Pick speaker (sometimes respond to lastNpc)
     let npc = null;
@@ -1298,9 +1306,11 @@
 
     // Pick topic (sometimes mirror last topic)
     const topic = chance(0.45) ? lastTopic : randomTopicFor(npc);
-    const line = pick(TOPIC_LINES[topic] || TOPIC_LINES.ops);
+    let line = pick(TOPIC_LINES[topic] || TOPIC_LINES.ops);
 
-    const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
+    // occasional quote drop
+    if (chance(0.18)) line = pick(QUOTES);
+const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
     const chan = (topic === "ops" || topic === "relay" || topic === "status") ? "SYS"
               : (topic === "clan") ? "CLAN" : "ROOM";
 
@@ -1322,7 +1332,7 @@
   // ===== Identity (local-only): user + key => token + unique glow color =====
   const IDENT_KEY = "wordz_identity_v1";
 
-  let IDENTITY = { user:"You", code:"0000000", color:null, glow:10 };
+  let IDENTITY = { user:"You", token:"----", color:null, glow:10 };
 
   function hash32(str){
     let h = 2166136261;
@@ -1377,14 +1387,15 @@
     window.WORDZ_USER_GLOW  = Number(IDENTITY.glow || 10);
 
     const pill = document.getElementById("tokenPill");
-    if (pill) pill.textContent = "id: " + (IDENTITY.code || "0000000");
-
-    const codeEl = document.getElementById("identCode");
-    if (codeEl) codeEl.value = (IDENTITY.code || "0000000");
+    if (pill) pill.textContent = "tkn: " + (IDENTITY.token || "----");
 
     const gh = document.getElementById("identGlowHint");
     if (gh) gh.textContent = "glow: " + String(window.WORDZ_USER_GLOW || 10);
+
+    // keep user list in sync with identity
+    try{ renderUserList(); }catch(e){}
   }
+
 
   function saveIdentity(){
     try{ localStorage.setItem(IDENT_KEY, JSON.stringify(IDENTITY)); }catch(e){}
@@ -1399,16 +1410,16 @@
     }catch(e){}
   }
 
-  function deriveCode7(name, color){
-    const seed = (String(name || "You").trim() + "|" + String(color || "#000000").trim().toLowerCase());
-    const num = hash32(seed) % 10000000; // 7 digits
-    return String(num).padStart(7, "0");
+  function deriveToken(u,k){
+    const seed = (u||"You") + "|" + (k||"");
+    return (hash32(seed).toString(16).toUpperCase().slice(0,4)).padStart(4,"0");
   }
 
-function wireIdentityUI(){
+  function wireIdentityUI(){
     loadIdentity();
 
     const uEl = document.getElementById("identUser");
+    const kEl = document.getElementById("identKey");
     const cEl = document.getElementById("identColor");
 
     if (uEl) uEl.value = IDENTITY.user || "You";
@@ -1416,56 +1427,29 @@ function wireIdentityUI(){
 
     // If no saved color, generate one from current seed.
     if (!IDENTITY.color){
-      const seed = (IDENTITY.user||"You") + "|" + (cEl?.value || "#000000");
+      const token = deriveToken(IDENTITY.user, "");
+      IDENTITY.token = token;
+      const seed = (IDENTITY.user||"You") + "|";
       IDENTITY.color = generateUniqueColor(seed);
+      IDENTITY.glow = computeGlowFromSeed(seed);
       if (cEl) cEl.value = IDENTITY.color;
-      IDENTITY.code = deriveCode7(IDENTITY.user, IDENTITY.color);
-      IDENTITY.glow = computeGlowFromSeed(String(IDENTITY.user)+"|"+String(IDENTITY.color).toLowerCase());
     }
 
-    
-
-  // ===== YUM toggle (local-only) =====
-  const YUM_KEY = "wordz_yum_v1";
-  function applyYum(on){
-    document.body.classList.toggle("yumMode", !!on);
-  }
-  function wireYumToggle(){
-    const t = document.getElementById("yumToggle");
-    if (!t) return;
-    let on = false;
-    try{ on = localStorage.getItem(YUM_KEY) === "1"; }catch(e){}
-    t.checked = on;
-    applyYum(on);
-    t.addEventListener("change", () => {
-      const v = t.checked ? "1" : "0";
-      try{ localStorage.setItem(YUM_KEY, v); }catch(e){}
-      applyYum(t.checked);
-      addLine("System", t.checked ? "^7yum overlay: ^2on" : "^7yum overlay: ^7off", "sys", "SYS");
-      saveChat();
-    });
-  }
-
-applyIdentity();
+    applyIdentity();
 
     const applyFromInputs = (forceGenerateColor=false) => {
       const u = (uEl?.value || "You").trim() || "You";
+      const k = (kEl?.value || "");
+      const seed = u + "|" + k;
+
       IDENTITY.user = u;
+      IDENTITY.token = deriveToken(u, k);
+      IDENTITY.glow = computeGlowFromSeed(seed);
 
-      // color: generate on login/reset, otherwise keep current picker value
-      let color = (cEl?.value || IDENTITY.color || "#000000");
       if (forceGenerateColor || !IDENTITY.color){
-        const seed0 = u + "|" + String(color).toLowerCase();
-        IDENTITY.color = generateUniqueColor(seed0);
-        color = IDENTITY.color;
+        IDENTITY.color = generateUniqueColor(seed);
         if (cEl) cEl.value = IDENTITY.color;
-      } else {
-        IDENTITY.color = color;
       }
-
-      // 7-digit code + glow derived from (name + color)
-      IDENTITY.code = deriveCode7(IDENTITY.user, IDENTITY.color);
-      IDENTITY.glow = computeGlowFromSeed(String(IDENTITY.user) + "|" + String(IDENTITY.color).toLowerCase());
 
       applyIdentity();
       saveIdentity();
@@ -1473,12 +1457,12 @@ applyIdentity();
 
     document.getElementById("identLogin")?.addEventListener("click", () => {
       applyFromInputs(true);
-      addLine("System", `^7identity set: ^2${IDENTITY.user} ^7(id ^3${IDENTITY.code}^7)`, "sys", "SYS");
+      addLine("System", `^7identity set: ^2${IDENTITY.user} ^7(tkn ^3${IDENTITY.token}^7)`, "sys", "SYS");
       saveChat();
     });
 
     document.getElementById("identReset")?.addEventListener("click", () => {
-      IDENTITY = { user:"You", code:"0000000", color:null, glow:10 };
+      IDENTITY = { user:"You", token:"----", color:null, glow:10 };
       try{ localStorage.removeItem(IDENT_KEY); }catch(e){}
       if (uEl) uEl.value = "You";
       if (kEl) kEl.value = "";
@@ -1798,8 +1782,7 @@ applyIdentity();
   const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();
   setTheme(savedTheme || "yakult");
   wireIdentityUI();
-    wireYumToggle();
-requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
+  requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
 
   const had = loadChat();
   if(!had){
