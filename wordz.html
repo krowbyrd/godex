@@ -1241,22 +1241,6 @@
     if (!ul || !pill) return;
 
     ul.innerHTML = "";
-
-    // self (identity) blended into list (top)
-    const selfName = (window.WORDZ_USER_NAME || "You");
-    const selfColor = (window.WORDZ_USER_COLOR || "#2a2a2a");
-    const liSelf = document.createElement("li");
-    liSelf.className = "userRow";
-    const dotSelf = document.createElement("span");
-    dotSelf.className = "uDot";
-    const nameSelf = document.createElement("span");
-    nameSelf.className = "uName whoGlow";
-    nameSelf.textContent = selfName;
-    nameSelf.style.color = selfColor;
-    liSelf.appendChild(dotSelf);
-    liSelf.appendChild(nameSelf);
-    ul.appendChild(liSelf);
-
     for (const npc of NPC_ROSTER){
       const li = document.createElement("li");
       li.className = "userRow";
@@ -1273,9 +1257,6 @@
       li.appendChild(name);
       ul.appendChild(li);
     }
-
-    pill.textContent = String(NPC_ROSTER.length + 1);
-  }
 
     pill.textContent = String(NPC_ROSTER.length);
   }
@@ -1315,7 +1296,7 @@
     if (lineCount < 2) return;
 
     // Quiet by default
-    if (!chance(0.55)) return;
+    if (!chance(0.50)) return;
 
     // Pick speaker (sometimes respond to lastNpc)
     let npc = null;
@@ -1329,8 +1310,6 @@
     // Pick topic (sometimes mirror last topic)
     const topic = chance(0.45) ? lastTopic : randomTopicFor(npc);
     let line = pick(TOPIC_LINES[topic] || TOPIC_LINES.ops);
-
-    // occasional quote drop
     if (chance(0.22)) line = pick(QUOTES);
 const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
     const chan = (topic === "ops" || topic === "relay" || topic === "status") ? "SYS"
@@ -1415,10 +1394,6 @@ const replyPrefix = (lastNpc && chance(0.22)) ? `^7@${lastNpc}: ` : "";
 
     const gh = document.getElementById("identGlowHint");
     if (gh) gh.textContent = "glow: " + String(window.WORDZ_USER_GLOW || 10);
-
-    // keep user list synced
-    try{ renderUserList(); }catch(e){}
-
   }
 
   function saveIdentity(){
@@ -1451,14 +1426,15 @@ const cEl = document.getElementById("identColor");
 
     // If no saved color, generate one from current seed.
     if (!IDENTITY.color){
-      const seed0 = (IDENTITY.user||"You") + "|" + (cEl?.value || "#000000");
-      IDENTITY.color = generateUniqueColor(seed0);
+      const token = deriveCode7(IDENTITY.user, "");
+      IDENTITY.code = token;
+      const seed = (IDENTITY.user||"You") + "|";
+      IDENTITY.color = generateUniqueColor(seed);
+      IDENTITY.glow = computeGlowFromSeed(seed);
       if (cEl) cEl.value = IDENTITY.color;
-      IDENTITY.code = deriveCode7(IDENTITY.user, IDENTITY.color);
-      IDENTITY.glow = computeGlowFromSeed(String(IDENTITY.user)+"|"+String(IDENTITY.color).toLowerCase());
     }
 
-
+    
 
   // ===== YUM toggle (local-only) =====
   const YUM_KEY = "wordz_yum_v1";
@@ -1845,7 +1821,7 @@ requestAnimationFrame(() => document.documentElement.classList.remove("preload")
   // ===== NPC panel + ambient chatter =====
   renderUserList();
   setInterval(npcPresenceTick, 12000 + Math.floor(Math.random()*6000));
-  setInterval(npcChatterTick, 5500 + Math.floor(Math.random()*5000));
+  setInterval(npcChatterTick, 6000 + Math.floor(Math.random()*5000));
 
   input.focus();
 })();
