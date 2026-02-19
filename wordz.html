@@ -781,6 +781,71 @@
       box-shadow: 0 0 8px var(--accent), inset 0 0 4px var(--accent) !important;
     }
 
+  
+    /* ===== Theme transitions + active-glow (added) ===== */
+    :root{ --theme-ease: 180ms ease; --glow: rgba(228,106,93,.35); }
+
+    html.preload *{ transition: none !important; }
+
+    body,
+    .frame,
+    .winTop,
+    .card,
+    .sideBox,
+    .log,
+    .composer,
+    .typing,
+    .input,
+    .btn,
+    .chip,
+    .pill,
+    .winBtn{
+      transition:
+        background-color var(--theme-ease),
+        color var(--theme-ease),
+        border-color var(--theme-ease),
+        box-shadow var(--theme-ease),
+        filter var(--theme-ease);
+    }
+    .winTop{
+      transition:
+        background var(--theme-ease),
+        color var(--theme-ease),
+        border-color var(--theme-ease),
+        box-shadow var(--theme-ease);
+    }
+
+    /* Theme button base (rectangular + Win98-ish bevel) */
+    .themeBtn{
+      border-radius:0 !important;
+      border:2px solid;
+      border-color: var(--win-hi) var(--win-lo) var(--win-lo) var(--win-hi);
+      background: var(--win-face);
+      color: var(--win-text);
+      padding: 6px 10px !important;
+      font-size: 11px !important;
+      cursor: pointer;
+      outline: none;
+    }
+    .themeBtn:active{
+      border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo);
+    }
+
+    /* Active theme button glow */
+    .themeBtn[data-active="1"]{
+      pointer-events:none;
+      cursor: default;
+      box-shadow:
+        0 0 0 2px rgba(0,0,0,.25),
+        0 0 10px var(--glow),
+        inset 0 0 0 1px rgba(255,255,255,.45);
+    }
+
+    /* Glow color follows theme */
+    html[data-theme="yakult"]{ --glow: rgba(232,76,61,.35); }
+    html[data-theme="y2k"]{ --glow: rgba(10,36,106,.35); }
+    html[data-theme="punk"]{ --glow: rgba(26,255,0,.35); }
+
   </style>
 </head>
 
@@ -859,9 +924,9 @@
           <div class="bd">
             <div class="tiny">Theme:</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
-              <button class="btn" style="padding:8px 10px; border-radius:999px;" data-theme="yakult" type="button">yakult</button>
-              <button class="btn" style="padding:8px 10px; border-radius:999px;" data-theme="y2k" type="button">y2k</button>
-              <button class="btn" style="padding:8px 10px; border-radius:999px;" data-theme="punk" type="button">punk</button>
+              <button class="btn themeBtn" data-theme="yakult" type="button">yakult</button>
+              <button class="btn themeBtn" data-theme="y2k" type="button">y2k</button>
+              <button class="btn themeBtn" data-theme="punk" type="button">punk</button>
             </div>
             <div style="margin-top:10px" class="tiny">
               Stored in <code>localStorage</code>.
@@ -1168,22 +1233,50 @@
     }
   };
 
+  function syncThemeButtons(active){
+    document.querySelectorAll(".themeBtn[data-theme]").forEach(btn => {
+      btn.dataset.active = (btn.getAttribute("data-theme") === active) ? "1" : "0";
+    });
+  }
+
   function setTheme(name){
     const t = (THEMES[name] ? name : "yakult");
     document.documentElement.setAttribute("data-theme", t);
     try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
 
-    const winTitleTextEl = document.getElementById("winTitleText");\n    if(winTitleTextEl) winTitleTextEl.textContent = "WordZ :: " + (t === "yakult" ? "yakult" : t);
+    // Title + mode pill
+    const winTitleTextEl = document.getElementById("winTitleText");
+    const winTagTextEl = document.getElementById("winTagText");
+    if(winTitleTextEl) winTitleTextEl.textContent = "WordZ";
+    if(winTagTextEl) winTagTextEl.textContent = t;
 
-    const modePillEl = $(\"modePill\");\n    if(modePillEl) {\n      if(t === "punk") modePillEl.textContent = "local · punk";\n      else if(t === "y2k") modePillEl.textContent = "local · y2k";\n      else modePillEl.textContent = "local";\n    }
+    if(modePill){
+      modePill.textContent = (t === "punk") ? "local · punk" : (t === "y2k") ? "local · y2k" : "local";
+    }
 
-    document.querySelectorAll(".sideBox .bd > div > button.btn[data-theme]").forEach(btn => {\n      if (btn.getAttribute("data-theme") === t) {\n        btn.setAttribute("data-active", "true");\n      } else {\n        btn.removeAttribute("data-active");\n      }\n    });\n  }
+    syncThemeButtons(t);
+  }
 
-  document.querySelectorAll("[data-theme]").forEach(btn => {\n    btn.addEventListener("click", () => setTheme(btn.getAttribute("data-theme")));\n  });
+  // Theme button clicks
+  document.querySelectorAll(".themeBtn[data-theme]").forEach(btn => {
+    btn.addEventListener("click", () => setTheme(btn.getAttribute("data-theme")));
+  });
 
-  // ---------- boot ----------\n  const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();\n  setTheme(savedTheme || "yakult");
+  // ---------- boot ----------
+  document.documentElement.classList.add("preload");
+  const savedTheme = (() => { try { return localStorage.getItem(THEME_KEY); } catch(e){ return null; } })();
+  setTheme(savedTheme || "yakult");
+  requestAnimationFrame(() => document.documentElement.classList.remove("preload"));
 
-  const had = loadChat();\n  if(!had){\n    addLine("System", "WordZ shell online.", "sys");\n    addLine("WordZ", "typing…", "sys");\n    addLine("You", "Click a chip, or type a line.", "sys");\n    saveChat();\n  }\n  input.focus();\n})();
+  const had = loadChat();
+  if(!had){
+    addLine("System", "WordZ shell online.", "sys");
+    addLine("WordZ", "typing…", "sys");
+    addLine("You", "Click a chip, or type a line.", "sys");
+    saveChat();
+  }
+  input.focus();
+})();
 </script>
 </body>
 </html>
