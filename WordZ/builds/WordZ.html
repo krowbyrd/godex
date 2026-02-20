@@ -59,7 +59,7 @@
       align-items:center;
       justify-content:space-between;
       padding:14px 16px;
-      background:linear-gradient(#ffe9de, var(--accent2));
+      background: linear-gradient(var(--bar-top, #ffe9de), var(--bar-bot, var(--accent2)));
       border-bottom:1px solid var(--spine);
     }
 
@@ -1598,6 +1598,177 @@ body{
   overflow: auto;
 }
 
+
+
+/* ===== Added theme palettes (dark) ===== */
+[data-theme="plum"]{
+  --bg:#0b0410;
+  --panel:#14081f;
+  --panel2:#1d0c2b;
+  --text:#f6e9ff;
+  --muted:#b58ac7;
+  --line:#2c1440;
+  --accent:#d14bff;
+  --accent2:#2a0e3a;
+  --shadow: inset 0 0 18px rgba(0,0,0,.45), 0 10px 24px rgba(0,0,0,.55);
+
+  --bar-top:#c227ff;
+  --bar-bot:#5a137a;
+  --bar-text:#f6e9ff;
+
+  --glow: rgba(209,75,255,.34);
+  /* chrome */
+  --win-face:#1a1023;
+  --win-hi:#3b2452;
+  --win-lo:#09040e;
+  --win-text:#f6e9ff;
+  --spine: rgba(209,75,255,.28);
+
+
+}
+
+[data-theme="ember"]{
+  --bg:#120404;
+  --panel:#1c0808;
+  --panel2:#2a0d0d;
+  --text:#ffe8e8;
+  --muted:#c27d7d;
+  --line:#3a1414;
+  --accent:#ff3b3b;
+  --accent2:#3a0f0f;
+  --shadow: inset 0 0 18px rgba(0,0,0,.45), 0 10px 24px rgba(0,0,0,.55);
+
+  --bar-top:#ff5a5a;
+  --bar-bot:#8f1717;
+  --bar-text:#fff2f2;
+
+  --glow: rgba(255,59,59,.34);
+  /* chrome */
+  --win-face:#1d0b0b;
+  --win-hi:#4a1b1b;
+  --win-lo:#070202;
+  --win-text:#ffe8e8;
+  --spine: rgba(255,59,59,.26);
+
+
+}
+
+[data-theme="abyss"]{
+  --bg:#020b12;
+  --panel:#041522;
+  --panel2:#062033;
+  --text:#e7fbff;
+  --muted:#7db4c2;
+  --line:#123447;
+  --accent:#00f5d4;
+  --accent2:#062033;
+  --shadow: inset 0 0 18px rgba(0,0,0,.45), 0 10px 24px rgba(0,0,0,.55);
+
+  --bar-top:#35ffe4;
+  --bar-bot:#0a6b61;
+  --bar-text:#00110e;
+
+  --glow: rgba(0,245,212,.30);
+  /* chrome */
+  --win-face:#051826;
+  --win-hi:#0b3c4a;
+  --win-lo:#01070c;
+  --win-text:#e7fbff;
+  --spine: rgba(0,245,212,.22);
+
+
+}
+
+/* ===== Theme button previews + hover glows ===== */
+.themeBtn[data-theme="plum"]{
+  --p-bar: linear-gradient(#d14bff, #6a1a8a);
+  --p-panel: linear-gradient(#1d0c2b, #14081f);
+  --p-text:#f6e9ff;
+  --btnGlow: rgba(209,75,255,.34);
+}
+.themeBtn[data-theme="ember"]{
+  --p-bar: linear-gradient(#ff3b3b, #8f1717);
+  --p-panel: linear-gradient(#2a0d0d, #1c0808);
+  --p-text:#ffe8e8;
+  --btnGlow: rgba(255,59,59,.34);
+}
+.themeBtn[data-theme="abyss"]{
+  --p-bar: linear-gradient(#00f5d4, #0a6b61);
+  --p-panel: linear-gradient(#062033, #041522);
+  --p-text:#e7fbff;
+  --btnGlow: rgba(0,245,212,.30);
+}
+
+
+
+/* ===== Dark-theme chrome polish for new palettes ===== */
+[data-theme="plum"] .winBtn,
+[data-theme="ember"] .winBtn,
+[data-theme="abyss"] .winBtn{
+  background: var(--win-face);
+  color: var(--win-text);
+}
+
+
+
+/* ===== Chat log tint: remove harsh white across all themes ===== */
+:root{
+  /* default: inherit theme panel tone */
+  --chat-bg: var(--panel2);
+  /* grid lines: subtle, theme-agnostic */
+  --chat-grid: rgba(255,255,255,0.045);
+}
+/* light themes: use darker grid so it stays visible */
+[data-theme="yakult"],
+[data-theme="wood"],
+[data-theme="paper"]{
+  --chat-grid: rgba(0,0,0,0.06);
+}
+/* cobalt/amber: slightly stronger grid */
+[data-theme="cobalt"],
+[data-theme="amber"]{
+  --chat-grid: rgba(255,255,255,0.06);
+}
+
+
+
+/* ===== SWF panel (Ruffle) ===== */
+.swfRow{ margin-top: 6px; }
+.swfHost{
+  margin-top: 10px;
+  height: 240px;
+  width: 100%;
+  background:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--panel2) 92%, #000),
+      color-mix(in srgb, var(--panel) 92%, #000));
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+}
+.swfHost > *{
+  width: 100% !important;
+  height: 100% !important;
+  display:block;
+}
+
+
+
+/* ===== SWF vs Signal: keep signal from blocking SWF panel ===== */
+.swfRow{
+  padding-right: 244px; /* signal width (220) + margins */
+}
+@media (max-width: 760px){
+  .swfRow{ padding-right: 0; }
+  /* on narrow screens, let signal sit in normal flow so it can't cover content */
+  .signalBox{
+    position: static !important;
+    width: auto !important;
+    margin-top: 10px;
+  }
+}
+
 </style>
 </head>
 
@@ -1658,6 +1829,9 @@ body{
               <button class="btn themeBtn" data-theme="concrete" type="button"><span>concrete</span></button>
               <button class="btn themeBtn" data-theme="library" type="button"><span>library</span></button>
               <button class="btn themeBtn" data-theme="circuit" type="button"><span>circuit</span></button>
+              <button class="btn themeBtn" data-theme="plum" type="button"><span>plum</span></button>
+              <button class="btn themeBtn" data-theme="ember" type="button"><span>ember</span></button>
+              <button class="btn themeBtn" data-theme="abyss" type="button"><span>abyss</span></button>
 </div>
             <div style="margin-top:10px" class="tiny">
               Stored in <code>localStorage</code>.
@@ -1665,6 +1839,34 @@ body{
           </div>
         </div>
       </div>
+
+      <div class="swfRow">
+        <div class="sideBox swfBox">
+          <div class="hd">
+            <span>swf</span>
+            <span class="tiny" id="swfStatus" style="opacity:.8;">idle</span>
+          </div>
+          <div class="bd">
+            <div class="row" style="gap:8px; align-items:center;">
+              <input id="swfUrl" class="input" placeholder="SWF URL (or path)..." style="flex:1 1 auto; min-width:0;">
+              <button id="swfLoad" class="btn" type="button" style="min-width:76px;">load</button>
+              <button id="swfUnload" class="btn" type="button" style="min-width:76px;">clear</button>
+              <select id="swfSize" class="input" style="width:92px;">
+                <option value="180">sm</option>
+                <option value="240" selected>md</option>
+                <option value="320">lg</option>
+                <option value="420">xl</option>
+              </select>
+            </div>
+            <div id="swfHost" class="swfHost" aria-label="swf player host"></div>
+            <div class="tiny" style="opacity:.75; margin-top:6px;">
+              Ruffle (Flash emulator). Some SWFs may not fully run.
+            </div>
+          </div>
+        </div>
+      </div>
+
+
 
       <div class="bottomRow">
 <!-- main -->
@@ -1790,7 +1992,94 @@ body{
 </div>
   </div>
 
-<script>
+<script src="https://unpkg.com/@ruffle-rs/ruffle/ruffle.js" defer>
+
+  // ===== SWF panel (Ruffle) =====
+  function initSwfPanel(){
+    const host = document.getElementById("swfHost");
+    const urlEl = document.getElementById("swfUrl");
+    const loadBtn = document.getElementById("swfLoad");
+    const unloadBtn = document.getElementById("swfUnload");
+    const sizeSel = document.getElementById("swfSize");
+    const status = document.getElementById("swfStatus");
+    if(!host || !urlEl || !loadBtn || !unloadBtn || !sizeSel) return;
+
+    let player = null;
+
+    function setStatus(t){ if(status) status.textContent = t; }
+
+    function setHeight(){
+      const h = parseInt(sizeSel.value || "240", 10) || 240;
+      host.style.height = h + "px";
+      try{ localStorage.setItem("swf_h", String(h)); }catch(e){}
+    }
+
+    function unload(){
+      try{ host.innerHTML = ""; }catch(e){}
+      player = null;
+      setStatus("idle");
+    }
+
+    function load(){
+      const url = (urlEl.value || "").trim();
+      if(!url){ setStatus("no url"); return; }
+      unload();
+
+      let RP = window.RufflePlayer;
+      if(!RP || !RP.newest){
+        setStatus("loading ruffle…");
+        // poll for up to ~6s (covers slow CDN or late init)
+        let tries = 0;
+        const iv = setInterval(()=>{
+          tries++;
+          RP = window.RufflePlayer;
+          if(RP && RP.newest){
+            clearInterval(iv);
+            load(); // retry now that ruffle exists
+          }else if(tries >= 24){
+            clearInterval(iv);
+            setStatus("ruffle unavailable");
+          }
+        }, 250);
+        return;
+      }
+
+      try{
+        const r = RP.newest();
+        player = r.createPlayer();
+        player.style.width = "100%";
+        player.style.height = "100%";
+        host.appendChild(player);
+        player.load(url);
+        setStatus("loading…");
+        setTimeout(()=>{ if(player) setStatus("running"); }, 700);
+        try{ localStorage.setItem("swf_url", url); }catch(e){}
+      }catch(e){
+        setStatus("load failed");
+        try{ console.warn("[SWF] load failed", e); }catch(_){}
+      }
+    }
+
+    // restore
+    try{
+      const h0 = localStorage.getItem("swf_h");
+      if(h0) sizeSel.value = h0;
+      setHeight();
+      const u0 = localStorage.getItem("swf_url");
+      if(u0) urlEl.value = u0;
+    }catch(e){}
+
+    sizeSel.addEventListener("change", setHeight, {passive:true});
+    loadBtn.addEventListener("click", load);
+    unloadBtn.addEventListener("click", unload);
+
+    urlEl.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter"){ e.preventDefault(); load(); }
+    });
+  }
+
+</script>
+  <script>
 (() => {
   // ---------- tiny utilities ----------
   const $ = (id) => document.getElementById(id);
@@ -2705,7 +2994,25 @@ function wireIdentityUI(){
       bg:"#021012", panel:"#041a1e", panel2:"#0e3a3f", text:"#e9fff7", muted:"#8ad6c3",
       line:"#0e3a3f", accent:"#ffc600", accent2:"#0b2a2d", shadow:"inset 0 0 14px rgba(255,198,0,.08), 0 10px 24px rgba(0,0,0,.55)",
       r:"0px"
+    },
+
+
+    plum: {
+      bg:"#0b0410", panel:"#14081f", panel2:"#1d0c2b", text:"#f6e9ff", muted:"#b58ac7",
+      line:"#2c1440", accent:"#d14bff", accent2:"#2a0e3a", shadow:"inset 0 0 14px rgba(209,75,255,.10), 0 10px 24px rgba(0,0,0,.55)",
+      r:"0px"
+    },
+    ember: {
+      bg:"#120404", panel:"#1c0808", panel2:"#2a0d0d", text:"#ffe8e8", muted:"#c27d7d",
+      line:"#3a1414", accent:"#ff3b3b", accent2:"#3a0f0f", shadow:"inset 0 0 14px rgba(255,59,59,.10), 0 10px 24px rgba(0,0,0,.55)",
+      r:"0px"
+    },
+    abyss: {
+      bg:"#020b12", panel:"#041522", panel2:"#062033", text:"#e7fbff", muted:"#7db4c2",
+      line:"#123447", accent:"#00f5d4", accent2:"#062033", shadow:"inset 0 0 14px rgba(0,245,212,.10), 0 10px 24px rgba(0,0,0,.55)",
+      r:"0px"
     }
+
   };
 
   function syncThemeButtons(active){
