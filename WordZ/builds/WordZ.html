@@ -1473,6 +1473,131 @@ html.sigilOn #cursorSigil::after { opacity:.70; animation: sigilOrbitB 3.9s ease
   50% { transform: scale(1.04); }
 }
 
+
+
+/* ===== Patch A: sigil aliveness tuning (CSS-only; tok4 + audio untouched) ===== */
+@keyframes paperBreath{
+  0%,100% { transform: scale(1); opacity: 0.70; box-shadow: 0 0 22px var(--sigilGlow, rgba(203,184,154,0.28)); }
+  50% { transform: scale(1.62); opacity: 1; box-shadow: 0 0 42px var(--sigilGlow, rgba(203,184,154,0.28)); }
+}
+
+/* heavier core glow */
+#cursorSigil{
+  box-shadow:
+    0 0 22px var(--sigilGlow, rgba(203,184,154,0.28)),
+    0 0 34px var(--sigilGlow, rgba(203,184,154,0.28));
+}
+
+/* satellites: more present */
+html.sigilOn #cursorSigil::before{
+  opacity: .95 !important;
+  box-shadow:
+    0 0 16px var(--sigilGlow, rgba(203,184,154,0.28)),
+    0 0 26px var(--sigilGlow, rgba(203,184,154,0.28)) !important;
+}
+html.sigilOn #cursorSigil::after{
+  opacity: .86 !important;
+  box-shadow:
+    0 0 16px var(--sigilGlow, rgba(203,184,154,0.28)),
+    0 0 26px var(--sigilGlow, rgba(203,184,154,0.28)) !important;
+}
+
+
+
+/* ===== Viewport snug + title bar pinned (layout-only) ===== */
+html, body{
+  height: 100%;
+}
+body{
+  /* keep centered horizontally, but pin to top and fit viewport */
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding: clamp(10px, 2vh, 18px) !important;
+  overflow: hidden; /* internal scroll lives inside the frame */
+}
+
+/* frame becomes a viewport-snug column layout */
+.frame{
+  width: min(720px, calc(100vw - 2*clamp(10px, 2vh, 18px))) !important;
+  height: calc(100vh - 2*clamp(10px, 2vh, 18px)) !important;
+  max-height: calc(100vh - 2*clamp(10px, 2vh, 18px)) !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* title bar stays at top even when body scrolls internally */
+.winTop{
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 9999 !important;
+  flex: 0 0 auto !important;
+}
+
+/* main content scrolls, not the page */
+.body{
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow: auto !important;
+}
+
+
+
+/* ===== Chat vertical offset (snug frame, centered feel) ===== */
+.body{
+  padding-top: clamp(22px, 6vh, 72px) !important;
+}
+
+
+
+/* ===== Layout restructure: themes above, bio + side at bottom ===== */
+.body{
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: auto 1fr !important;
+  gap: 12px !important;
+  padding: 14px !important;
+  min-height: 0 !important;
+  background: linear-gradient(var(--bg), color-mix(in srgb, var(--bg) 75%, #000)) !important;
+}
+
+.topRow{
+  grid-row: 1;
+}
+
+/* bottom row: chat + npc/controls */
+.bottomRow{
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 12px;
+  min-height: 0;
+}
+
+.bottomRow .card,
+.bottomRow .side{
+  min-height: 0;
+}
+
+
+
+/* ===== signal box pinned bottom-right (inside frame) ===== */
+.frame{ position: relative !important; }
+
+/* the signal panel floats; does not affect layout */
+.signalBox{
+  position: absolute !important;
+  right: 12px !important;
+  bottom: 12px !important;
+  width: 220px !important;
+  z-index: 9998 !important;
+}
+
+/* keep it compact */
+.signalBox .bd{
+  max-height: 120px;
+  overflow: auto;
+}
+
 </style>
 </head>
 
@@ -1498,74 +1623,9 @@ html.sigilOn #cursorSigil::after { opacity:.70; animation: sigilOrbitB 3.9s ease
       </div>
     </div>
 <div class="body">
-      <!-- main -->
-      <div class="card">
-        <div class="cardHead">
-          <div class="title"># bio · live shell</div>
-          <div class="pill" id="modePill">local</div>
-        </div>
-
-        <div class="log" id="log" aria-label="chat log"></div>
-
-        <div class="typing" id="typing" style="display:none;">
-          <span class="who">WordZ</span>
-          <span class="when">typing</span>
-          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
-        </div>
-
-        <div class="composer">
-          <input class="input" id="input" placeholder="Type (local-only) …" maxlength="240" />
-          <button class="btn" id="send">Send</button>
-          <span class="tiny">No accounts. No server. Just the illusion.</span>
-        </div>
-
-        <div class="chips" id="chips">
-          <div class="chip" data-say="hello">hello</div>
-          <div class="chip" data-say="status?">status?</div>
-          <div class="chip" data-say="leave a note">leave a note</div>
-          <div class="chip" data-say="what is this?">what is this?</div>
-        </div>
-      </div>
-
-      <!-- side -->
-      <div class="side">
-        
-        <div class="sideBox" id="identBox">
-          <div class="hd">
-            <span>identity</span>
-            <span class="pill" id="tokenPill">tkn: ----</span>
-          </div>
-          <div class="bd" style="display:flex; flex-direction:column; gap:8px;">
-            <div style="display:flex; gap:8px; align-items:center;">
-              <span class="tiny" style="width:40px;">user</span>
-              <input class="input identInput" id="identUser" placeholder="You" maxlength="18" style="padding:6px 8px; min-width:0; flex:1;">
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <span class="tiny" style="width:40px;">key</span>
-              <input class="input identInput" id="identKey" placeholder="••••" type="text" data-keyu="1" maxlength="32" style="padding:6px 8px; min-width:0; flex:1;">
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <span class="tiny" style="width:40px;">color</span>
-              <input id="identColor" type="color" value="#e46a5d" style="width:44px; height:26px; padding:0; border:2px solid; border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo); background:var(--panel);">
-              <span class="tiny" id="identGlowHint" style="margin-left:auto;">glow: --</span>
-            </div>
-
-            <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
-              <span class="tiny" style="width:40px;">tok</span>
-              <input class="input identInput" id="identTok4" placeholder="0000" inputmode="numeric" pattern="\d{4}" maxlength="4"
-                     style="padding:6px 8px; min-width:0; flex:0 0 64px; width:64px;" readonly>
-              <button class="btn" id="identCopyTok4" style="padding:6px 10px;">Copy</button>
-              <button class="btn" id="identRestoreTok4" style="padding:6px 10px;">Restore</button>
-            </div>
-
-            <div style="display:flex; gap:8px;">
-              <button class="btn" id="identReset" type="button">reset</button>
-            </div>
-            <div class="tiny">Local-only. Sets name + token glow.</div>
-          </div>
-        </div>
-
-<div class="sideBox">
+      
+      <div class="topRow">
+        <div class="sideBox signalBox">
           <div class="hd">
             <span>signal</span>
             <span class="pill">soft</span>
@@ -1602,6 +1662,75 @@ html.sigilOn #cursorSigil::after { opacity:.70; animation: sigilOrbitB 3.9s ease
             <div style="margin-top:10px" class="tiny">
               Stored in <code>localStorage</code>.
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottomRow">
+<!-- main -->
+      <div class="card">
+        <div class="cardHead">
+          <div class="title"># bio · live shell</div>
+          <div class="pill" id="modePill">local</div>
+        </div>
+
+        <div class="log" id="log" aria-label="chat log"></div>
+
+        <div class="typing" id="typing" style="display:none;">
+          <span class="who">WordZ</span>
+          <span class="when">typing</span>
+          <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        </div>
+
+        <div class="composer">
+          <input class="input" id="input" placeholder="Type (local-only) …" maxlength="240" />
+          <button class="btn" id="send">Send</button>
+          <span class="tiny">No accounts. No server. Just the illusion.</span>
+        </div>
+
+        <div class="chips" id="chips">
+          <div class="chip" data-say="hello">hello</div>
+          <div class="chip" data-say="status?">status?</div>
+          <div class="chip" data-say="leave a note">leave a note</div>
+          <div class="chip" data-say="what is this?">what is this?</div>
+        </div>
+      </div>
+
+      
+        <!-- side -->
+        <div class="side">
+<div class="sideBox" id="identBox">
+          <div class="hd">
+            <span>identity</span>
+            <span class="pill" id="tokenPill">tkn: ----</span>
+          </div>
+          <div class="bd" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="tiny" style="width:40px;">user</span>
+              <input class="input identInput" id="identUser" placeholder="You" maxlength="18" style="padding:6px 8px; min-width:0; flex:1;">
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="tiny" style="width:40px;">key</span>
+              <input class="input identInput" id="identKey" placeholder="••••" type="text" data-keyu="1" maxlength="32" style="padding:6px 8px; min-width:0; flex:1;">
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="tiny" style="width:40px;">color</span>
+              <input id="identColor" type="color" value="#e46a5d" style="width:44px; height:26px; padding:0; border:2px solid; border-color: var(--win-lo) var(--win-hi) var(--win-hi) var(--win-lo); background:var(--panel);">
+              <span class="tiny" id="identGlowHint" style="margin-left:auto;">glow: --</span>
+            </div>
+
+            <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+              <span class="tiny" style="width:40px;">tok</span>
+              <input class="input identInput" id="identTok4" placeholder="0000" inputmode="numeric" pattern="\d{4}" maxlength="4"
+                     style="padding:6px 8px; min-width:0; flex:0 0 64px; width:64px;" readonly>
+              <button class="btn" id="identCopyTok4" style="padding:6px 10px;">Copy</button>
+              <button class="btn" id="identRestoreTok4" style="padding:6px 10px;">Restore</button>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+              <button class="btn" id="identReset" type="button">reset</button>
+            </div>
+            <div class="tiny">Local-only. Sets name + token glow.</div>
           </div>
         </div>
 
@@ -1655,6 +1784,8 @@ html.sigilOn #cursorSigil::after { opacity:.70; animation: sigilOrbitB 3.9s ease
           </div>
           <ul class="userList" id="userList" aria-label="npc users"></ul>
         </div>
+      </div>
+
       </div>
 </div>
   </div>
@@ -2025,7 +2156,22 @@ html.sigilOn #cursorSigil::after { opacity:.70; animation: sigilOrbitB 3.9s ease
   }
 
   
-  function ackPulse(){
+  
+  // ===== r/a/dio sensitivity (event-only; no WebAudio) =====
+  function pulseBump(amount){
+    try{
+      const el = document.getElementById("cursorSigil");
+      if(!el) return;
+      el.__pulse = Math.min(2.2, (el.__pulse || 0) + amount);
+    }catch(e){}
+  }
+  function pulseSoft(){ pulseBump(0.10); }
+  function pulseMed(){  pulseBump(0.28); }
+  function pulseHard(){ pulseBump(0.55); }
+
+function ackPulse(){
+    pulseHard();
+
     const el = document.getElementById("cursorSigil");
     if (!el) return;
     // brief pulse, then restore normal breathing
@@ -2918,6 +3064,38 @@ function wireIdentityUI(){
 
   input.focus();
 })();
+
+
+  // sigilRadioHooks: lightweight pulses tied to the r/a/dio element (no analyser)
+  (function(){
+    const a = (typeof streamAudio !== "undefined" && streamAudio) ? streamAudio : (typeof audio !== "undefined" ? audio : null);
+    if(!a) return;
+
+    // big pulses on state changes
+    a.addEventListener("play",  ()=>{ pulseHard(); }, {passive:true});
+    a.addEventListener("pause", ()=>{ pulseMed(); },  {passive:true});
+    a.addEventListener("ended", ()=>{ pulseMed(); },  {passive:true});
+    a.addEventListener("waiting", ()=>{ pulseSoft(); }, {passive:true});
+    a.addEventListener("canplay", ()=>{ pulseSoft(); }, {passive:true});
+    a.addEventListener("loadedmetadata", ()=>{ pulseSoft(); }, {passive:true});
+    a.addEventListener("volumechange", ()=>{ pulseSoft(); }, {passive:true});
+
+    // gentle "heartbeat" while playing: throttled timeupdate
+    let last = 0;
+    a.addEventListener("timeupdate", ()=>{
+      if(a.paused) return;
+      const now = performance.now();
+      if(now - last < 550) return;
+      last = now;
+      // scale with glow rating a bit
+      try{
+        const g = (IDENTITY?.glow ?? 10);
+        const power = Math.max(0, Math.min(1, (g - 6) / 10));
+        pulseBump(0.10 + power * 0.10);
+      }catch(e){ pulseSoft(); }
+    }, {passive:true});
+  })();
+
 </script>
   <div id="cursorSigil" aria-hidden="true"></div>
 </body>
