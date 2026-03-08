@@ -1,4 +1,4 @@
-Paper
+The Paper Codex
 This repo hosts the Master Codex HTML and supporting assets.
 Site URL:
 https://krowbyrd.github.io/godex/
