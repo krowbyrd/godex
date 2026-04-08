@@ -72,5 +72,16 @@
     "hex": "#CBB89A",
     "glow": "rgba(203,184,154,0.28)",
     "sigil": "⎔"
+  },
+  {
+    "name": "Lume",
+    "tag": "lume-keep-light",
+    "id": "lume-keep-light",
+    "hook": "window.vault.lume",
+    "hotkey": "Alt+U",
+    "color": "Aurora Green",
+    "hex": "#50fa7b",
+    "glow": "rgba(80,250,123,0.28)",
+    "sigil": "✦"
   }
 ]
