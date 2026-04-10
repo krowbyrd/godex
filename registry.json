@@ -89,7 +89,7 @@
     "tag": "luxia-carry-light",
     "id": "luxia-carry-light",
     "hook": "window.vault.luxia",
-	"hotkey": "Ctrl+Shift+L",
+	"hotkey": "Alt+G",
 	"color": "Amber Gold",
    	"hex": "#FFB347", 
     "glow": "rgba(255,179,71,0.14)",
