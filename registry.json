@@ -84,15 +84,4 @@
     "glow": "rgba(80,250,123,0.28)",
     "sigil": "✦"
   }
-  {
-	"name": "Luxia",
-    "tag": "luxia-carry-light",
-    "id": "luxia-carry-light",
-    "hook": "window.vault.luxia",
-	"hotkey": "Ctrl+Shift+L",
-	"color": "Amber Gold",
-   	"hex": "#FFB347", 
-    "glow": "rgba(255,179,71,0.14)",
-	"sigil": "🜂",
-  }
 ]
