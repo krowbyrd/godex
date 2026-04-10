@@ -83,7 +83,7 @@
     "hex": "#50fa7b",
     "glow": "rgba(80,250,123,0.28)",
     "sigil": "✦"
-  }
+  },
   {
 	"name": "Luxia",
     "tag": "luxia-carry-light",
@@ -94,5 +94,5 @@
    	"hex": "#FFB347", 
     "glow": "rgba(255,179,71,0.14)",
 	"sigil": "🜂",
-  }  
+  },  
 ]
