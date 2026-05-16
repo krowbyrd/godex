@@ -101,7 +101,7 @@
     "id": "vesta-hearth-keep",
     "hook": "window.vault.vesta",
     "hotkey": "Alt+V",
-    "color": "amber",
+    "color": "hearth",
     "hex": "#E07A3D",
     "sigil": "⊙",
     "alias": "Keeper of the Hearth",
