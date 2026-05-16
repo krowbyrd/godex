@@ -94,6 +94,18 @@
     "hex": "#FFB347",
     "glow": "rgba(255,179,71,0.14)",
     "sigil": "🜂"
+  },
+  {
+    "name": "Vesta",
+    "tag": "[VESTA]",
+    "id": "vesta-hearth-keep",
+    "hook": "window.vault.vesta",
+    "hotkey": "Alt+V",
+    "color": "amber",
+    "hex": "#FFB347",
+    "sigil": "⊙",
+    "alias": "Keeper of the Hearth",
+    "glow": "warm"
   }
 ]
 
