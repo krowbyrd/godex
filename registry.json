@@ -97,14 +97,15 @@
   },
   {
     "name": "Vesta",
-    "tag": "Keeper of the Hearth",
+    "tag": "[VESTA]",
     "id": "vesta-hearth-keep",
     "hook": "window.vault.vesta",
     "hotkey": "Alt+V",
-    "color": "hearth",
+    "color": "amber",
     "hex": "#E07A3D",
+    "sigil": "⊙",
+    "alias": "Keeper of the Hearth",
     "glow": "warm"
-	"sigil": "⊙",
   }
 ]
 
